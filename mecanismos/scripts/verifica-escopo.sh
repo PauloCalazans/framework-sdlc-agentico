@@ -13,6 +13,11 @@ set -f  # padrões com glob não podem ser expandidos contra o disco
 padroes=$(sed -n '/^## Arquivos/,/^## /p' "$task" \
   | sed -n 's/^[[:space:]]*-[[:space:]]*`\{0,1\}\([^` ]*\)`\{0,1\}.*/\1/p')
 dir_spec=$(dirname "$(dirname "$task")")
+# Intent referenciado pela spec da task (só ele é isento, não todo intent/): o Gate 1 o commita na branch.
+intent_spec=
+if [ -f "$dir_spec/spec.md" ]; then
+  intent_spec=$(sed -n 's/^\*\*Intent:\*\*[[:space:]]*\(.*\)$/\1/p' "$dir_spec/spec.md" | head -n 1 | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+fi
 
 lista=$( { git -c core.quotepath=off diff --no-renames --name-only "$base" HEAD \
   && git -c core.quotepath=off diff --no-renames --name-only HEAD \
@@ -24,6 +29,7 @@ fora=$(
   | sort -u | while IFS= read -r f; do
       [ -n "$f" ] || continue
       case "$f" in "$dir_spec"/*) continue ;; esac
+      [ -n "$intent_spec" ] && [ "$f" = "$intent_spec" ] && continue
       case "$f" in .agentic/verify.lock/*|.agentic/execucao/*|.agentic/worktrees/*) continue ;; esac
       dentro=1
       for p in $padroes; do
