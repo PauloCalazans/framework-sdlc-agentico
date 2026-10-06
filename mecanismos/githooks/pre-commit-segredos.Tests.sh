@@ -45,4 +45,13 @@ echo ok > "$r/h.txt"; git -C "$r" add h.txt
 tl_espera 1 "fail-closed quando o gitleaks não está instalado" git -C "$r" commit -q -m "x"
 tl_contem "gitleaks" "mensagem orienta a instalar o gitleaks"
 
+# Camada 2 fail-closed: se 'git diff --cached' falhar (índice corrompido), bloqueia.
+r=$(novo_repo)
+mkdir -p "$r/.agentic"; echo 'GITLEAKS_BIN="true"' > "$r/.agentic/config"
+echo lixo > "$r/indice-corrompido"
+tl_espera 1 "bloqueia quando git diff --cached falha" \
+  sh -c "cd '$r' && GIT_INDEX_FILE='$r/indice-corrompido' sh '$dir/pre-commit'"
+tl_contem "git diff --cached falhou" "explica a falha da camada 2"
+tl_espera 0 "camada 2 com índice válido e sem achados passa (controle)" sh -c "cd '$r' && sh '$dir/pre-commit'"
+
 tl_fim
