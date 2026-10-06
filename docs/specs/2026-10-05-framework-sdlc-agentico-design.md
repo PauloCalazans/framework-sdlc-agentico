@@ -127,7 +127,7 @@ Revisões que devolvem achados Crítico ou Importante voltam ao papel autor; ach
 
 ### Escalonamento N3
 
-Gatilhos que interrompem a execução fora dos gates e exigem humano. Genéricos do framework: mudança de contrato público, segurança/autenticação/autorização, migração destrutiva de dados, dependência nova, edição de caminho protegido. O bootstrap acrescenta gatilhos da stack. `Verificado por: revisão` (não há mecanismo que impeça o agente de seguir sem escalar; declarado honestamente).
+Gatilhos que interrompem a execução fora dos gates e exigem humano. Genéricos do framework: mudança de contrato público, segurança/autenticação/autorização, migração destrutiva de dados, dependência nova, edição de caminho protegido. O bootstrap acrescenta gatilhos da stack. `Verificado por: revisão` (não há mecanismo que impeça o agente de seguir sem escalar; declarado honestamente). Itens N3 já visíveis no design são listados em `design.md` e aprovados um a um no Gate 1; a task cita os que usa e só N3 novo (fora da lista) interrompe a execução.
 
 ### Regras de fluxo
 
@@ -164,8 +164,8 @@ O orquestrador pode usar modelo **leve** em tasks de transcrição (brief traz o
 
 - **`intent.md`:** Autor, Sponsor, Data, `Status: draft|em-revisão|aprovado|rejeitado`, Origem; Problema (quantificado quando possível); Resultado proposto; Usuários e sistemas afetados; Restrições e não-escopo; Critérios de aceite de negócio; Questões abertas.
 - **`spec.md`:** `Status:`; Regras (cada uma com `Fonte:` e estado); Critérios de aceite verificáveis; Invariantes (o que não muda); Fora de escopo; Questionário de decisão; Questões em aberto; Divergências.
-- **`design.md`:** `Status:`; Decisões numeradas; Contrato executável (o que é, como se valida); Como isso se prova; O que não muda; O desconfortável, declarado.
-- **`task.md`:** `Status:`; Objetivo; `Arquivos:` (escopo); Interfaces Produz/Consome; Critérios de pronto; Questões em aberto.
+- **`design.md`:** `Status:`; Decisões numeradas; Contrato executável (o que é, como se valida); Itens N3 (aprovação no Gate 1); Como isso se prova; O que não muda; O desconfortável, declarado.
+- **`task.md`:** `Status:`; Objetivo; `Arquivos:` (escopo); Interfaces Produz/Consome; N3 aprovados no Gate 1; Critérios de pronto; Questões em aberto.
 - **`decisoes.md`:** entradas `D<n>` com Decisão · Por quê · Consequência · `Verificado por:`; seção "Decisões revogadas" (nunca apagar, marcar superação).
 - **`AGENTS.md`:** Visão geral; Comandos (instalar, build, lint, teste, arquitetura, `verify`); Regras invioláveis; Estrutura do repositório; Onde estão intents/specs/decisões; "Leia `docs/agentic/ciclo.md`".
 - **`pr.md`:** Intent/task de origem; Evidência RED/GREEN (hashes); saída do `verify`; Arquivos, linhas e caminhos sensíveis tocados; Parecer do revisor; O que ficou desconfortável.

@@ -16,6 +16,11 @@
 - Produz: <símbolos, assinaturas, rotas que outras tasks usam>
 - Consome: <o que vem de tasks anteriores>
 
+## N3 aprovados no Gate 1
+<!-- Itens da seção "Itens N3 (aprovação no Gate 1)" do design que esta task usa. Mudança N3 fora desta lista exige parar e chamar o humano. -->
+- N3-<n> (design): <item>
+<!-- ou: - Nenhum. -->
+
 ## Critérios de pronto
 - <critério de aceite da spec coberto por esta task>
 - `sh scripts/agentic/verify.sh` verde

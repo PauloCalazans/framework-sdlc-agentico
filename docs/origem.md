@@ -44,3 +44,4 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas das referênci
 | Baseline de legado (`entrevista.md`, `.agentic/baseline-skips`) | [RG] baseline do legado, bloquear só violações novas |
 | Interfaces incidente→intent e release (`ciclo.md`) | [CI] Maintain; [FC] G5 |
 | Registro do Gate 1 como 1º commit da branch (`ciclo.md`) | validação v1 (ciclo real na trilha padrão; principal protegida) |
+| Itens N3 pré-aprovados no Gate 1 (design.md, task.md, ciclo.md) | prática: projeto de referência controlado (D8: paradas N3 no meio da task vinham de itens visíveis no design) |

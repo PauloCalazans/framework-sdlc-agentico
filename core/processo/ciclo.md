@@ -17,7 +17,7 @@ Na dúvida, trilha padrão.
 | 0 | Intenção | humano + `dominio` | `intent/NNN-<nome>.md` | — |
 | 1 | Especificação | `dominio` | `docs/specs/<nome>/spec.md` + questionário de decisão | `revisor` modo `spec` |
 | 2 | Design | `arquiteto` | `design.md` + contrato executável + `tasks/NNN-<nome>.md` | `revisor` modo `design` |
-| G1 | **Gate 1** | humano | aprova intent + spec + design; responde o questionário | — |
+| G1 | **Gate 1** | humano | aprova intent + spec + design; responde o questionário; aprova os itens N3 do design um a um | — |
 | 3 | RED | `testes` | testes falhando, sem código de produção (o documento da task pode ser atualizado no mesmo commit); commit `test(red): …` | `verifica-red.sh` |
 | 4 | GREEN + REFACTOR | `dev` | commits `feat(green): …` e `refactor: …` | `verify.sh` |
 | 5 | Revisão | `revisor` modo `diff` | parecer com achados Crítico / Importante / Menor | — |
@@ -50,7 +50,9 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 - caminho protegido;
 - qualquer gatilho adicional listado em `AGENTS.md` (seção "Gatilhos de escalonamento").
 
-`Verificado por:` revisão. Nenhum mecanismo impede o agente de seguir sem escalar — esta é uma limitação declarada.
+**Itens N3 previstos no design:** o `arquiteto` lista em `design.md` ("Itens N3 (aprovação no Gate 1)") todo gatilho N3 já visível no desenho, e o humano aprova cada item explicitamente no Gate 1. A task cita em "N3 aprovados no Gate 1" os itens que usa. Item previsto no design e aprovado no Gate 1 não exige nova parada; só N3 novo (fora da lista) interrompe a execução.
+
+`Verificado por:` revisão (o `revisor` em modo `design` confere que todo gatilho N3 visível está na lista; em modo `diff`, que toda mudança N3 do diff está em "N3 aprovados no Gate 1" da task). Nenhum mecanismo impede o agente de seguir sem escalar — esta é uma limitação declarada.
 
 ## Regras de fluxo
 
