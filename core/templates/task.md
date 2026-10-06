@@ -2,6 +2,7 @@
 
 **Spec:** docs/specs/<nome>/spec.md
 **Status:** pendente
+<!-- pendente | em-andamento | em-revisão | publicada | integrada -->
 **Branch:** <spec>/<NNN>-<nome>
 
 ## Objetivo
