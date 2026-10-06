@@ -27,6 +27,19 @@ tl_espera 0 "instala com arquivo pré-existente" sh "$dir/instalar.sh" "$r"
 tl_espera 0 "preserva o CLAUDE.md existente" grep -qx "meu claude" "$r/CLAUDE.md"
 tl_espera 0 "registra o conflito" grep -qx "CLAUDE.md" "$r/.agentic/conflitos-instalacao.txt"
 
+r=$(tl_repo); printf 'node_modules/' > "$r/.gitignore"; printf '*.png binary' > "$r/.gitattributes"
+tl_espera 0 "instala com .gitignore/.gitattributes sem quebra final" sh "$dir/instalar.sh" "$r"
+tl_espera 0 ".gitignore preserva linha original" grep -qxF "node_modules/" "$r/.gitignore"
+tl_espera 0 ".gitignore: nova linha isolada" grep -qxF ".agentic/execucao/" "$r/.gitignore"
+tl_espera 0 ".gitattributes preserva linha original" grep -qxF "*.png binary" "$r/.gitattributes"
+tl_espera 0 ".gitattributes: nova linha isolada" grep -qxF "*.sh text eol=lf" "$r/.gitattributes"
+sh "$dir/instalar.sh" "$r" >/dev/null
+tl_espera 0 "reinstalação sem duplicar" sh -c "[ \$(wc -l < '$r/.gitignore') -eq 3 ] && [ \$(wc -l < '$r/.gitattributes') -eq 3 ]"
+
+r=$(tl_repo); mkdir -p "$r/.agentic"; echo "velho" > "$r/.agentic/conflitos-instalacao.txt"
+tl_espera 0 "instala com conflitos-instalacao.txt obsoleto" sh "$dir/instalar.sh" "$r"
+tl_espera 1 "remove arquivo de conflitos obsoleto" test -f "$r/.agentic/conflitos-instalacao.txt"
+
 tl_espera 2 "recusa alvo que não é git" sh "$dir/instalar.sh" "$(mktemp -d)"
 tl_espera 2 "recusa sem argumento" sh "$dir/instalar.sh"
 

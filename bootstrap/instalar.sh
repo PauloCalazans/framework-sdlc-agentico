@@ -7,6 +7,7 @@ alvo=${1:-}
 { [ -n "$alvo" ] && [ -d "$alvo" ]; } || { echo "uso: instalar.sh <projeto-alvo>" >&2; exit 2; }
 git -C "$alvo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "o alvo não é um repositório git: $alvo" >&2; exit 2; }
 alvo=$(cd "$alvo" && pwd)
+rm -f "$alvo/.agentic/conflitos-instalacao.txt" # o arquivo reflete só a execução atual
 conflitos=$(mktemp)
 
 copia() { # copia <origem> <destino relativo ao alvo>
@@ -23,7 +24,12 @@ copia_dir() { # copia_dir <diretório origem> <diretório destino relativo>
   done
 }
 acrescenta() { # acrescenta <arquivo relativo> <linha> — sem duplicar
-  grep -qxF "$2" "$alvo/$1" 2>/dev/null || printf '%s\n' "$2" >> "$alvo/$1"
+  grep -qxF "$2" "$alvo/$1" 2>/dev/null && return 0
+  # arquivo existente sem quebra de linha final: fecha a última linha antes de acrescentar
+  if [ -s "$alvo/$1" ] && [ -n "$(tail -c 1 "$alvo/$1" | tr -d '\n')" ]; then
+    printf '\n' >> "$alvo/$1"
+  fi
+  printf '%s\n' "$2" >> "$alvo/$1"
 }
 
 copia "$fw/core/principios.md" docs/agentic/principios.md
