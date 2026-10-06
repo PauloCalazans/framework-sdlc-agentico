@@ -7,14 +7,20 @@ task=${1:-}
 [ -n "$task" ] && [ -f "$task" ] || { echo "uso: verifica-escopo.sh <task.md relativo à raiz> [base]" >&2; exit 2; }
 base=${2:-$(agentic_base)}
 [ -n "$base" ] || agentic_falha "sem base de comparação (a branch principal '$BRANCH_PRINCIPAL' existe?)"
+git rev-parse --verify -q "$base^{commit}" >/dev/null || agentic_falha "base inválida: $base"
 
-set -f   # padrões com glob não podem ser expandidos contra o disco
+set -f  # padrões com glob não podem ser expandidos contra o disco
 padroes=$(sed -n '/^## Arquivos/,/^## /p' "$task" \
   | sed -n 's/^[[:space:]]*-[[:space:]]*`\{0,1\}\([^` ]*\)`\{0,1\}.*/\1/p')
 dir_spec=$(dirname "$(dirname "$task")")
 
+lista=$( { git -c core.quotepath=off diff --no-renames --name-only "$base" HEAD \
+  && git -c core.quotepath=off diff --no-renames --name-only HEAD \
+  && git -c core.quotepath=off ls-files --others --exclude-standard; } ) \
+  || agentic_falha "falha ao listar arquivos alterados"
+
 fora=$(
-  { git diff --name-only "$base" HEAD; git diff --name-only HEAD; git ls-files --others --exclude-standard; } \
+  printf '%s\n' "$lista" \
   | sort -u | while IFS= read -r f; do
       [ -n "$f" ] || continue
       case "$f" in "$dir_spec"/*) continue ;; esac
