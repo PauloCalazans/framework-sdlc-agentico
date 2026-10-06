@@ -5,7 +5,7 @@ Task: $ARGUMENTS
 
 Trilha enxuta: o /mudanca já criou a branch, o worktree e o commit docs(mudanca): — pule os passos 1 e 2 e continue no worktree existente.
 
-1. Confira que a spec e o design da task estão com `**Status:** aprovado`. Se o documento tem `**Trilha:** enxuta`, confira em vez disso que o commit `docs(mudanca):` existe na branch (registro do Gate 1). Se não, pare e diga o que falta.
+1. Trilha padrão: confira que o commit `docs(spec): <nome> aprovada (Gate 1)` existe, na branch da task ou já integrado na principal (`git log --grep` na branch/principal), e que spec e design estão com `**Status:** aprovado` nele; `**Status:**` só na árvore de trabalho não basta. Se o documento tem `**Trilha:** enxuta`, confira em vez disso que o commit `docs(mudanca):` existe na branch (registro do Gate 1). Se não, pare e diga o que falta.
 2. Leia o `**Branch:**` da task e crie o worktree dentro do repositório: `git worktree add .agentic/worktrees/<nome> -b <branch>`, com `<nome>` = branch com `/` trocado por `-`.
 3. Marque a task `**Status:** em-andamento` e crie `.agentic/execucao/<AAAA-MM-DD>-<nome>/progress.md` com a task, o SHA base e o próximo passo.
 4. Conduza as fases 3 a 6 de `docs/agentic/ciclo.md` como orquestrador: despache `testes`, depois `dev`, depois `revisor` (modo `diff`), sempre com caminhos absolutos do worktree no brief. Registre brief, relatório e Rulings no diretório de execução.
