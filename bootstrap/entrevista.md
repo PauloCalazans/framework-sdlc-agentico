@@ -30,7 +30,7 @@ Grave `docs/bootstrap.md` com todas as respostas, cada uma marcada `confirmado` 
 
 ## Passo 4 — Instanciação
 1. `.agentic/config`: substitua todos os `{{...}}` (valores vazios são permitidos onde o comentário diz "degradado"). Se a stack exigir combinar etapas, `CMD_VERIFY_STACK` pode encadear comandos com `&&`.
-2. `AGENTS.md`: preencha todos os `{{...}}`. Em `{{REGRAS_INVIOLAVEIS}}` e `{{GATILHOS_N3_STACK}}` use listas Markdown; sem itens, escreva `- Nenhum além dos genéricos.`
+2. `AGENTS.md`: preencha todos os `{{...}}`. Em `{{PLATAFORMA_PR}}` escreva o nome da plataforma (GitHub, GitLab, Azure…) ou `nenhuma` (integração local por fast-forward). Em `{{REGRAS_INVIOLAVEIS}}` e `{{GATILHOS_N3_STACK}}` use listas Markdown; sem itens, escreva `- Nenhum além dos genéricos.`
 3. `docs/agentic/papeis/{dominio,arquiteto,testes,dev,revisor}.md`: substitua `{{CONTEXTO_STACK}}` por um bloco **específico daquele papel**: comandos que ele usa, convenções da stack relevantes para o trabalho dele, ferramentas. Curto — o contrato já diz o que fazer.
 4. Para cada fonte externa: copie `docs/agentic/papeis/_oraculo.md` para `docs/agentic/papeis/oraculo-<nome>.md` e `.claude/agents/_oraculo.md` para `.claude/agents/oraculo-<nome>.md`, preenchendo `{{NOME_ORACULO}}`, `{{FONTE_ORACULO}}`, `{{ACESSO_ORACULO}}`. Liste-os em `{{ORACULOS}}` do `AGENTS.md` (sem oráculos: `- Nenhum.`).
 5. `docs/decisoes.md` a partir de `docs/agentic/templates/decisoes.md`, com `D1 — Stack e comandos de verificação` (Verificado por: `verify.sh`) e uma decisão por ferramenta de arquitetura com o mecanismo de baseline dela.

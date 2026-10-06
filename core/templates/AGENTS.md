@@ -8,6 +8,10 @@ Guia para qualquer agente de IA trabalhando neste repositório. Mapa e regras �
 ## Processo
 Todo trabalho segue `docs/agentic/ciclo.md`. Princípios em `docs/agentic/principios.md`. Papéis em `docs/agentic/papeis/`.
 
+## Integração
+- Plataforma de PR: {{PLATAFORMA_PR}}
+- Sem plataforma de PR (`nenhuma`), o Gate 2 é local: a branch fica rebaseada na principal e o humano integra com `git merge --ff-only <branch>` (veja `docs/agentic/ciclo.md`).
+
 ## Comandos
 | Ação | Comando |
 |---|---|
