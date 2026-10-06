@@ -48,7 +48,9 @@ Para cada arquivo em `.agentic/conflitos-instalacao.txt`, mostre ao humano a dif
 Rode `sh scripts/agentic/verify.sh`. Deve terminar com `VERIFY: OK`; se não, registre o motivo em `docs/bootstrap.md` (seção "Pendências") — não esconda.
 
 ## Passo 8 — Entrega
-1. Commit `chore: instancia o framework de SDLC agêntico` na branch `agentic/bootstrap`.
+1. Stageie tudo e marque os hooks e scripts como executáveis no índice (no Windows o bit não vem do disco; sem ele, num clone Unix o git ignora os hooks em silêncio):
+   `git add -A && git add --chmod=+x .githooks/pre-commit .githooks/pre-merge-commit .githooks/pre-push scripts/agentic/*.sh .claude/hooks/*.sh`
+   Confira com `git ls-files -s .githooks` (modo `100755`) e faça o commit `chore: instancia o framework de SDLC agêntico` na branch `agentic/bootstrap`.
 2. Peça ao humano, nesta ordem:
    - ativar as proteções: `sh scripts/agentic/ativar-protecoes.sh` (ação humana — permissões são do humano);
    - integrar a branch (`git merge --ff-only agentic/bootstrap` na principal, ou via PR);

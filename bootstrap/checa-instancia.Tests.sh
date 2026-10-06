@@ -27,7 +27,16 @@ EOF
 printf '# Bootstrap\n' > "$r/docs/bootstrap.md"
 printf '# Registro de decisões\n' > "$r/docs/decisoes.md"
 ( cd "$r" && sh scripts/agentic/ativar-protecoes.sh >/dev/null )
+# Passo 8.1 da entrevista: stageia o kit com os hooks executáveis no índice.
+git -C "$r" add -A
+git -C "$r" add --chmod=+x .githooks/pre-commit .githooks/pre-merge-commit .githooks/pre-push
 tl_espera 0 "instância completa passa" sh "$dir/checa-instancia.sh" "$r"
+
+git -C "$r" update-index --chmod=-x .githooks/pre-push
+tl_espera 1 "detecta hook 100644 no índice" sh "$dir/checa-instancia.sh" "$r"
+tl_contem ".githooks/pre-push" "aponta o hook sem bit executável"
+git -C "$r" update-index --chmod=+x .githooks/pre-push
+tl_espera 0 "hooks 100755 no índice passam" sh "$dir/checa-instancia.sh" "$r"
 
 git -C "$r" config core.hooksPath .outro
 tl_espera 1 "detecta hooksPath errado" sh "$dir/checa-instancia.sh" "$r"

@@ -21,6 +21,12 @@ restantes=$(grep -rl '{{' AGENTS.md CLAUDE.md docs/agentic/papeis .claude/agents
 
 [ "$(git config core.hooksPath)" = ".githooks" ] || problema "core.hooksPath não aponta para .githooks"
 
+# Hooks precisam estar no índice como executáveis (100755); senão, num clone Unix, o git os ignora em silêncio.
+for h in .githooks/pre-commit .githooks/pre-merge-commit .githooks/pre-push; do
+  modo=$(git ls-files -s -- "$h" 2>/dev/null | cut -d' ' -f1)
+  [ "$modo" = "100755" ] || problema "hook $h não está no índice como 100755 (modo: ${modo:-ausente}); rode: git add --chmod=+x $h"
+done
+
 if [ -f .agentic/config ]; then
   ( . ./.agentic/config; [ -n "$CMD_VERIFY_STACK" ] && [ -n "$CMD_TESTE" ] ) || problema "CMD_VERIFY_STACK/CMD_TESTE vazios em .agentic/config"
 fi
