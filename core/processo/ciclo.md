@@ -47,6 +47,7 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 - **Divergência spec × código:** pare, registre em "Questões em aberto" da spec e corrija via commit `docs(spec): …` no mesmo PR.
 - **Verificação:** `sh scripts/agentic/verify.sh` é o ponto único. Ninguém afirma sucesso sem ter visto a saída.
 - **Commits:** `test(red):`, `feat(green):`, `refactor:`, `fix:`, `docs(spec):`, `docs(task):`, `chore:`. Um commit por passo do ciclo.
+- **Status dos artefatos** (`**Status:**`, lido por `status-projeto.sh`): no Gate 1 o humano aprova e intent, spec e design passam de `draft` a `aprovado`; `/nova-task` põe a task em `em-andamento`; com a revisão aprovada, o orquestrador a põe em `em-revisão` e, ao publicar (fase 6), em `publicada`; depois de integrar, o humano a marca `integrada`.
 - **Modo automático:** se `.agentic/auto-mode` contém `enabled: true`, o orquestrador encadeia tasks e publica PRs sem pedir confirmação. Nunca faz merge.
 
 ## Orquestração
