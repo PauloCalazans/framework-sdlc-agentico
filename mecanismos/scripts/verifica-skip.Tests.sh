@@ -27,6 +27,32 @@ tl_contem "desabilitado" "explica o motivo"
 git -C "$r" add -A; git -C "$r" commit -q -m "skip commitado"
 tl_espera 1 "falha com marcador em commit da branch" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 
+# A varredura de marcador só olha os diretórios de teste (DIRS_TESTE; padrão "tests/ test/").
+r=$(prepara); junit "$r" ""; mkdir -p "$r/docs" "$r/scripts"
+printf 'Exemplo: @unittest.skip("x")\n' > "$r/docs/x.md"
+tl_espera 0 "marcador em arquivo novo fora de DIRS_TESTE não bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+printf 'grep -E "\\.skip\\(" a\n' > "$r/scripts/kit.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "docs e kit"
+tl_espera 0 "marcador commitado fora de DIRS_TESTE não bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+printf '@unittest.skip("x")\ndef test_c(): pass\n' > "$r/tests/test_c.py"
+git -C "$r" add -A; git -C "$r" commit -q -m "skip em teste"
+tl_espera 1 "marcador commitado dentro de DIRS_TESTE bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+
+r=$(prepara); junit "$r" ""
+printf '@unittest.skip("x")\ndef test_d(): pass\n' > "$r/tests/test_ação.py"
+tl_espera 1 "marcador em arquivo novo com acento em DIRS_TESTE bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+
+r=$(prepara); junit "$r" ""; echo 'DIRS_TESTE=""' >> "$r/.agentic/config"
+tl_espera 1 "marcador configurado com DIRS_TESTE vazio bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+tl_contem "DIRS_TESTE" "explica DIRS_TESTE vazio"
+
+r=$(prepara)
+printf '<testsuite><testcase name="b"><skipped/></testcase></testsuite>\n' > "$r/relatorio/junit a.xml"
+tl_espera 1 "relatório com espaço no nome é lido (skip acima do baseline bloqueia)" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+tl_contem "1 teste(s) pulado(s)" "conta o skip do relatório com espaço"
+printf '<testsuite><testcase name="b"/></testsuite>\n' > "$r/relatorio/junit a.xml"
+tl_espera 0 "relatório com espaço no nome e sem skip passa" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+
 r=$(prepara); junit "$r" '<testcase name="b"><skipped/></testcase>'
 tl_espera 1 "falha com skip no relatório acima do baseline" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 
