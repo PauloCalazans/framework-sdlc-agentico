@@ -43,3 +43,4 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas do notebook (`
 | Questionário de bootstrap (`entrevista.md`) | proposta nossa — nenhuma fonte propõe; derivado de [AG], [CI], [RG] |
 | Baseline de legado (`entrevista.md`, `.agentic/baseline-skips`) | [RG] baseline do legado, bloquear só violações novas |
 | Interfaces incidente→intent e release (`ciclo.md`) | [CI] Maintain; [FC] G5 |
+| Registro do Gate 1 como 1º commit da branch (`ciclo.md`) | validação v1 (ciclo real na trilha padrão; principal protegida) |
