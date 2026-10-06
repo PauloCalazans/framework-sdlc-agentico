@@ -59,4 +59,8 @@ git -C "$r" mv src/legado.py src/pedidos/legado.py; git -C "$r" commit -q -m mv
 tl_espera 1 "rename de fora do escopo para dentro lista o caminho antigo" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md HEAD~1"
 tl_contem "src/legado.py" "lista o caminho antigo"
 
+r=$(prepara)
+echo x > "$r/src/pedidos/criar.py"; git -C "$r" add -A; git -C "$r" commit -q -m "impl"
+mkdir -p "$r/.agentic/worktrees/pedidos-002/src"; echo y > "$r/.agentic/worktrees/pedidos-002/src/outro.py"
+tl_espera 0 "ignora worktrees aninhados em .agentic/worktrees/ mesmo sem .gitignore" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
 tl_fim

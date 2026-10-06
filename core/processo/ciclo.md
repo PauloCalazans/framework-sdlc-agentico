@@ -41,7 +41,7 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 
 ## Regras de fluxo
 
-- **Isolamento:** um worktree por sessão/trilha (`git worktree add ../<repo>-<branch> -b <branch>`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree.
+- **Isolamento:** um worktree por sessão/trilha, dentro do repositório: `git worktree add .agentic/worktrees/<nome> -b <branch>`, onde `<nome>` é a branch com `/` trocado por `-` (ex.: `pedidos/001-criar` → `.agentic/worktrees/pedidos-001-criar`). O diretório é ignorado pelo `.gitignore` e as regras `deny` valem nele (variantes `**/`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree.
 - **Escopo:** cada task declara `## Arquivos`. `verify.sh` falha se a branch tocar arquivo fora da lista. Ampliar o escopo exige atualizar a lista num commit `docs(task): …` — visível na revisão e no Gate 2.
 - **Divergência spec × código:** pare, registre em "Questões em aberto" da spec e corrija via commit `docs(spec): …` no mesmo PR.
 - **Verificação:** `sh scripts/agentic/verify.sh` é o ponto único. Ninguém afirma sucesso sem ter visto a saída.

@@ -26,6 +26,13 @@ if command -v node >/dev/null 2>&1; then
 fi
 tl_espera 0 "configura core.hooksPath" sh -c "[ \"\$(git -C '$r' config core.hooksPath)\" = .githooks ]"
 tl_espera 0 ".gitignore ignora execucao" grep -qxF ".agentic/execucao/" "$r/.gitignore"
+set -f
+for p in .claude/settings.json .claude/settings.local.json .claude/hooks/** .agentic/config .agentic/auto-mode .githooks/** \
+         scripts/agentic/** .agentic/baseline-skips .gitleaksignore; do
+  tl_espera 0 "settings pendente nega Edit/Write em **/$p (worktree aninhado)" sh -c "grep -qF '\"Edit(**/$p)\"' '$r/.agentic/settings.pendente.json' && grep -qF '\"Write(**/$p)\"' '$r/.agentic/settings.pendente.json'"
+done
+set +f
+tl_espera 0 ".gitignore ignora worktrees aninhados" grep -qxF ".agentic/worktrees/" "$r/.gitignore"
 tl_espera 0 ".gitattributes força LF em sh (Review Focus 1)" grep -qF "*.sh text eol=lf" "$r/.gitattributes"
 tl_espera 0 ".gitattributes força LF nos githooks" grep -qF ".githooks/* text eol=lf" "$r/.gitattributes"
 
@@ -45,7 +52,7 @@ tl_espera 0 ".gitignore: nova linha isolada" grep -qxF ".agentic/execucao/" "$r/
 tl_espera 0 ".gitattributes preserva linha original" grep -qxF "*.png binary" "$r/.gitattributes"
 tl_espera 0 ".gitattributes: nova linha isolada" grep -qxF "*.sh text eol=lf" "$r/.gitattributes"
 sh "$dir/instalar.sh" "$r" >/dev/null
-tl_espera 0 "reinstalação sem duplicar" sh -c "[ \$(wc -l < '$r/.gitignore') -eq 3 ] && [ \$(wc -l < '$r/.gitattributes') -eq 3 ]"
+tl_espera 0 "reinstalação sem duplicar" sh -c "[ \$(wc -l < '$r/.gitignore') -eq 4 ] && [ \$(wc -l < '$r/.gitattributes') -eq 3 ]"
 
 r=$(tl_repo); mkdir -p "$r/.agentic"; echo "velho" > "$r/.agentic/conflitos-instalacao.txt"
 tl_espera 0 "instala com conflitos-instalacao.txt obsoleto" sh "$dir/instalar.sh" "$r"
