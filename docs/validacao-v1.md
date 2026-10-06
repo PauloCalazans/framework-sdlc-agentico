@@ -35,7 +35,7 @@ O núcleo (`docs/agentic/principios.md`, `ciclo.md`, contratos de papéis, templ
 
 ## 5. Ciclo real
 
-**Concluído pelo humano no `validacao-node`, sem travamentos.** O ciclo completo (`/intent` → spec → tasks → TDD → verify → revisão → integração) rodou em sessão interativa. Commits na ordem: `docs(spec)` → `test(red)` → `feat(green)` → `docs(spec)` (revisão) → integração por `git merge --ff-only`. Os artefatos somaram **326 linhas** de documentação para uma única mudança (uma faixa de desconto). Ficou um worktree remanescente após a integração (origem do ajuste de remoção do worktree no Gate 2).
+Relatado pelo humano: ciclo concluído no `validacao-node`, sem travamentos. Medido no git: commits na ordem `docs(spec)` → `test(red)` → `feat(green)` → `docs(spec)` (revisão) → integração por `git merge --ff-only`; os artefatos somam 326 linhas de documentação para uma mudança (uma faixa de desconto). Relatado pelo humano: um worktree ficou após a integração.
 
 ## 6. Teste de fogo (avitech)
 
@@ -71,7 +71,7 @@ Limitação: o agente não conseguiu ler as versões do kit; o lado "kit" foi in
 ## 7. O que ficou desconfortável
 
 - **N3 e independência do revisor continuam só por revisão:** nada mecânico impede o mesmo contexto de implementar e aprovar; a independência do revisor depende de disciplina e de revisão humana.
-- **Custo da trilha padrão para mudança pequena:** 326 linhas de artefatos para uma faixa de desconto; a cerimônia superou o código. Origem da trilha enxuta (`/mudanca`).
+- **Custo da trilha padrão para mudança pequena:** 326 linhas de artefatos para uma faixa de desconto (seção 5). Motivou a trilha enxuta (`/mudanca`).
 - **Os deny são contornáveis:** a posição de flags num comando Bash e redirecionamentos (`>`) escapam das regras de deny por padrão. Os githooks são o controle real; os deny são uma camada auxiliar.
 - **Bootstrap headless exige bypass em diretório descartável:** com permissões de projeto ativas (ou `bypassPermissions` desabilitado) ele não consegue escrever.
 - **Projeto existente exige consolidação conduzida por humano:** hooks, agentes, comandos, auto-mode e registro de decisões próprios competem com os do kit; o framework propõe, mas não consolida sozinho. Sem `**Branch:**` nas tasks, a verificação de escopo não roda.
