@@ -19,7 +19,8 @@ copia() { # copia <origem> <destino relativo ao alvo>
   cp "$1" "$alvo/$2"
 }
 copia_dir() { # copia_dir <diretório origem> <diretório destino relativo>
-  ( cd "$1" && find . -type f | sed 's|^\./||' ) | while IFS= read -r f; do
+  # As suítes *.Tests.sh e o testlib.sh são do framework: não vão para a instância.
+  ( cd "$1" && find . -type f ! -name '*.Tests.sh' ! -name 'testlib.sh' | sed 's|^\./||' ) | while IFS= read -r f; do
     copia "$1/$f" "$2/$f"
   done
 }
