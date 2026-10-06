@@ -66,6 +66,7 @@ tl_espera 0 "ignora worktrees aninhados em .agentic/worktrees/ mesmo sem .gitign
 r=$(prepara)
 printf '# Spec\r\n**Intent:** intent/001-pedidos.md \r\n' > "$r/docs/specs/pedidos/spec.md"
 mkdir -p "$r/intent"; echo i > "$r/intent/001-pedidos.md"
+git -C "$r" add -A; git -C "$r" commit -q -m "docs(spec): pedidos aprovada (Gate 1)"
 tl_espera 0 "isenta o intent referenciado pela spec da task" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
 
 echo i > "$r/intent/002-outro.md"
@@ -75,4 +76,22 @@ tl_contem "intent/002-outro.md" "lista o intent não referenciado"
 r=$(prepara)
 mkdir -p "$r/intent"; echo i > "$r/intent/001-pedidos.md"
 tl_espera 1 "sem spec.md não há isenção de intent" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+r=$(prepara)
+printf '# Spec\n**Intent:** src/pedidos/x.py\n' > "$r/docs/specs/pedidos/spec.md"
+mkdir -p "$r/src/pedidos"; echo i > "$r/src/pedidos/x.py"
+tl_espera 0 "intent fora de intent/ não ganha isenção (mas aqui o arquivo está no escopo)" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+printf '# Spec\n**Intent:** src/fora/x.py\n' > "$r/docs/specs/pedidos/spec.md"
+mkdir -p "$r/src/fora"; echo i > "$r/src/fora/x.py"
+tl_espera 1 "spec apontando Intent para fora de intent/ não isenta o arquivo" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+
+r=$(prepara)
+printf '# Spec\n**Intent:** intent/../src/x.js\n' > "$r/docs/specs/pedidos/spec.md"
+mkdir -p "$r/src"; echo i > "$r/src/x.js"
+tl_espera 1 "Intent com .. não isenta" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+
+r=$(prepara)
+printf '# Spec\n**Intent:** `intent/001-pedidos.md`\n' > "$r/docs/specs/pedidos/spec.md"
+mkdir -p "$r/intent"; echo i > "$r/intent/001-pedidos.md"
+tl_espera 0 "Intent entre crases é isento" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+
 tl_fim

@@ -17,6 +17,8 @@ dir_spec=$(dirname "$(dirname "$task")")
 intent_spec=
 if [ -f "$dir_spec/spec.md" ]; then
   intent_spec=$(sed -n 's/^\*\*Intent:\*\*[[:space:]]*\(.*\)$/\1/p' "$dir_spec/spec.md" | head -n 1 | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  intent_spec=$(printf '%s' "$intent_spec" | sed 's/^`//;s/`$//;s|^\./||')
+  case "$intent_spec" in *..*) intent_spec= ;; intent/*) ;; *) intent_spec= ;; esac
 fi
 
 lista=$( { git -c core.quotepath=off diff --no-renames --name-only "$base" HEAD \
