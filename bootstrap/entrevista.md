@@ -58,4 +58,4 @@ Rode `sh scripts/agentic/verify.sh`. Deve terminar com `VERIFY: OK`; se não, re
 3. Rode a checagem estrutural se o framework estiver acessível: `sh <framework>/bootstrap/checa-instancia.sh .`
 4. Sugira o primeiro intent: `/intent <ideia>`.
 
-Observação: os arquivos `*.Tests.sh` copiados para `.githooks/` e `scripts/agentic/` documentam o comportamento esperado dos mecanismos; a suíte oficial roda no repositório do framework.
+Observação: as suítes `*.Tests.sh` e o `testlib.sh` dos mecanismos não são copiados para o projeto; elas rodam no repositório do framework (`sh scripts/verify.sh` de lá).

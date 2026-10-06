@@ -13,6 +13,8 @@ for f in AGENTS.md CLAUDE.md docs/agentic/ciclo.md docs/agentic/principios.md do
   tl_espera 0 "copiou $f" test -f "$r/$f"
 done
 tl_espera 1 "não instala settings.json direto (ação humana)" test -f "$r/.claude/settings.json"
+tl_espera 1 "não copia suítes *.Tests.sh do kit" sh -c "find '$r' -name '*.Tests.sh' | grep -q ."
+tl_espera 1 "não copia testlib.sh" sh -c "find '$r' -name 'testlib.sh' | grep -q ."
 tl_espera 0 "configura core.hooksPath" sh -c "[ \"\$(git -C '$r' config core.hooksPath)\" = .githooks ]"
 tl_espera 0 ".gitignore ignora execucao" grep -qxF ".agentic/execucao/" "$r/.gitignore"
 tl_espera 0 ".gitattributes força LF em sh (Review Focus 1)" grep -qF "*.sh text eol=lf" "$r/.gitattributes"
