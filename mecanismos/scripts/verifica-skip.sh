@@ -30,7 +30,13 @@ if [ -n "$RELATORIO_TESTES" ]; then
     status=1
   else
     pulados=$(cat $arquivos | grep -o '<skipped' | wc -l | tr -d ' ')
-    limite=$(cat .agentic/baseline-skips 2>/dev/null || echo 0)
+    if [ -f .agentic/baseline-skips ]; then
+      limite=$(tr -d '\r[:space:]' < .agentic/baseline-skips)
+    else
+      limite=0
+    fi
+    case $limite in ''|*[!0-9]*) agentic_falha "baseline-skips inválido: '$limite'";; esac
+    case $pulados in ''|*[!0-9]*) agentic_falha "contagem de skips inválida: '$pulados'";; esac
     if [ "$pulados" -gt "$limite" ]; then
       echo "agentic: BLOQUEADO — $pulados teste(s) pulado(s) no relatório; baseline é $limite."
       status=1
