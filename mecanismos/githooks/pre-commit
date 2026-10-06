@@ -12,54 +12,23 @@ if [ -n "$branch" ] && agentic_branch_protegida "$branch"; then
   agentic_falha "commit direto em '$branch' (branch protegida). Trabalhe numa branch e integre via PR."
 fi
 
-# --- Segredos: camada 2, palavras-chave com valor literal (o gitleaks não pega senha genérica).
-agentic_padrao='(senha|password|passwd|secret|segredo|api[_-]?key|token)[A-Za-z0-9_]*["'\'']?[[:space:]]*[:=][[:space:]]*["'\''][^"'\'']{8,}["'\'']'
-agentic_achados=$(git diff --cached -U0 --no-color | grep '^+' | grep -v '^+++' \
-  | grep -iE "$agentic_padrao" | grep -vc 'agentic:permitir-segredo')
-if [ "$agentic_achados" -gt 0 ]; then
-  agentic_falha "possível segredo literal em $agentic_achados linha(s) staged. Veja 'git diff --cached'. Se for falso positivo, marque a linha com 'agentic:permitir-segredo' e justifique no PR."
-fi
-
 # --- Segredos: camada 1, gitleaks sobre o conteúdo staged.
 command -v "$GITLEAKS_BIN" >/dev/null 2>&1 || \
   agentic_falha "gitleaks não encontrado ('$GITLEAKS_BIN'). Instale: https://github.com/gitleaks/gitleaks (fail-closed)."
-
-# Only run gitleaks if there are no unmarked keyword patterns found in layer 2
-agentic_json=$(mktemp)
-"$GITLEAKS_BIN" git --pre-commit --staged --report-format json --report-path "$agentic_json" --no-banner --exit-code 3 "$agentic_raiz" >/dev/null 2>&1
+"$GITLEAKS_BIN" git --pre-commit --staged --redact --no-banner --exit-code 3 "$agentic_raiz" >/dev/null 2>&1
 agentic_rc=$?
-
 if [ "$agentic_rc" -eq 3 ]; then
-  # Gitleaks found potential secrets. Check if they're all marked as allowed.
-  agentic_all_marked=true
-
-  # Extract the matches from JSON and check if each appears in diff with marker
-  if [ -s "$agentic_json" ]; then
-    # Parse JSON file to find matches (basic parsing without jq)
-    agentic_matches=$(grep -o '"Match":"[^"]*"' "$agentic_json" | cut -d'"' -f4)
-    while IFS= read -r agentic_match; do
-      if [ -n "$agentic_match" ]; then
-        # Check if this exact match appears in the diff with the marker
-        if ! git diff --cached -U0 --no-color | grep -F "^+$agentic_match" | grep -q 'agentic:permitir-segredo'; then
-          agentic_all_marked=false
-          break
-        fi
-      fi
-    done <<EOF
-$agentic_matches
-EOF
-  fi
-
-  if [ "$agentic_all_marked" != true ]; then
-    agentic_falha "gitleaks encontrou segredo no conteúdo staged. Rode: $GITLEAKS_BIN git --pre-commit --staged --redact -v"
-  fi
-elif [ "$agentic_rc" -ne 0 ] && [ "$agentic_rc" -ne 0 ]; then
-  # Only fail for non-zero, non-3 exit codes (3 means leaks found, which we handled above)
-  if [ "$agentic_rc" -ne 0 ] && [ "$agentic_rc" -ne 3 ]; then
-    agentic_falha "gitleaks falhou ao executar (código $agentic_rc) — fail-closed."
-  fi
+  agentic_falha "gitleaks encontrou segredo no conteúdo staged. Rode: $GITLEAKS_BIN git --pre-commit --staged --redact -v"
+elif [ "$agentic_rc" -ne 0 ]; then
+  agentic_falha "gitleaks falhou ao executar (código $agentic_rc) — fail-closed."
 fi
 
-rm -f "$agentic_json"
+# --- Segredos: camada 2, palavras-chave com valor literal (o gitleaks não pega senha genérica).
+agentic_padrao="(senha|password|passwd|secret|segredo|api[_-]?key|token)[A-Za-z0-9_]*[\"']?[[:space:]]*[:=][[:space:]]*[\"'][^\"']{8,}[\"']"
+agentic_achados=$(git diff --cached -U0 --no-color | grep '^+' | grep -v '^+++' | \
+  grep -iE "$agentic_padrao" | grep -vc 'agentic:permitir-segredo')
+if [ "$agentic_achados" -gt 0 ]; then
+  agentic_falha "possível segredo literal em $agentic_achados linha(s) staged. Veja 'git diff --cached'. Se for falso positivo, marque a linha com 'agentic:permitir-segredo' e justifique no PR."
+fi
 
 exit 0
