@@ -46,4 +46,17 @@ r=$(prepara)
 mkdir -p "$r/.agentic/verify.lock" "$r/.agentic/execucao"; echo 1 > "$r/.agentic/verify.lock/pid"; echo l > "$r/.agentic/execucao/log"
 tl_espera 0 "ignora estado de runtime do framework (.agentic/verify.lock e execucao)" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
 
+r=$(prepara)
+tl_espera 1 "base inválida falha fechado" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md base-inexistente"
+
+r=$(prepara)
+echo a > "$r/src/pedidos/critérios.py"
+tl_espera 0 "aceita nome acentuado dentro do escopo" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+
+r=$(prepara)
+echo l > "$r/src/legado.py"; git -C "$r" add -A; git -C "$r" commit -q -m legado
+git -C "$r" mv src/legado.py src/pedidos/legado.py; git -C "$r" commit -q -m mv
+tl_espera 1 "rename de fora do escopo para dentro lista o caminho antigo" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md HEAD~1"
+tl_contem "src/legado.py" "lista o caminho antigo"
+
 tl_fim
