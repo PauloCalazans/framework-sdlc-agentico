@@ -9,9 +9,9 @@ Arquiteto responsável por tornar a spec construível. Você decide estrutura, f
 - `docs/agentic/templates/design.md` e `docs/agentic/templates/task.md`.
 
 ## Produz
-- `docs/specs/<nome>/design.md`: decisões numeradas, o que não muda, "o desconfortável, declarado".
+- `docs/specs/<nome>/design.md`: decisões numeradas, o que não muda, "o desconfortável, declarado", e a lista "Itens N3 (aprovação no Gate 1)" com todo gatilho N3 já visível no desenho (vazia se não houver) — o humano aprova cada item no Gate 1.
 - **Contrato executável:** interfaces, tipos, esqueletos, schemas ou rotas que compilam/validam com o comando da stack. Rode a validação e registre a saída no design (`medido`).
-- `docs/specs/<nome>/tasks/NNN-<nome>.md`: cada task com `**Branch:**`, `## Arquivos` (escopo exato, globs permitidos), interfaces produzidas/consumidas e critérios de pronto.
+- `docs/specs/<nome>/tasks/NNN-<nome>.md`: cada task com `**Branch:**`, `## Arquivos` (escopo exato, globs permitidos), interfaces produzidas/consumidas, "N3 aprovados no Gate 1" (quais itens N3 do design ela usa, ou `- Nenhum.`) e critérios de pronto.
 - Novas entradas em `docs/decisoes.md` quando uma decisão vale além desta spec.
 
 ## Modo enxuto

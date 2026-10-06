@@ -19,6 +19,12 @@
 |---|---|---|
 | tasks/001-<nome>.md | <…> | <spec>/001-<nome> |
 
+## Itens N3 (aprovação no Gate 1)
+<!-- Todo gatilho N3 (docs/agentic/ciclo.md, "Escalonamento N3"; AGENTS.md, "Gatilhos de escalonamento") já visível neste design. Sem itens: deixe a tabela sem linhas. O humano aprova CADA item explicitamente no Gate 1; item aprovado aqui não exige nova parada durante a task — só N3 novo, fora desta lista, interrompe. -->
+| # | Item | Gatilho | Decisão do humano |
+|---|---|---|---|
+| N3-1 | <o que muda> | <contrato público, segurança, migração destrutiva, dependência nova, caminho protegido ou gatilho da stack> | <aprovado em AAAA-MM-DD, ou recusado> |
+
 ## Como isso se prova
 - <qual teste/verificação demonstra cada critério de aceite>
 
