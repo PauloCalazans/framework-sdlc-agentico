@@ -38,13 +38,14 @@ if [ -f .agentic/config ]; then
 fi
 
 if [ "$problemas" -eq 0 ]; then
-  if sh scripts/agentic/verify.sh >/tmp/checa-verify.$$ 2>&1; then
+  saida_verify=$(mktemp) || { echo "PROBLEMA: mktemp falhou"; exit 1; }
+  if sh scripts/agentic/verify.sh >"$saida_verify" 2>&1; then
     echo "verify.sh: OK"
   else
     problema "verify.sh falhou (saída abaixo)"
-    sed 's/^/  | /' /tmp/checa-verify.$$
+    sed 's/^/  | /' "$saida_verify"
   fi
-  rm -f /tmp/checa-verify.$$
+  rm -f "$saida_verify"
 fi
 
 if [ "$problemas" -eq 0 ]; then echo "INSTÂNCIA: OK"; else echo "INSTÂNCIA: $problemas problema(s)"; exit 1; fi
