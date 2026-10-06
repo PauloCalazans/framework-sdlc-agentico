@@ -32,12 +32,16 @@ printf 'token_count = "abc"\n' > "$r/d.py"; git -C "$r" add d.py
 tl_espera 0 "não bloqueia valor curto em nome parecido" git -C "$r" commit -q -m "x"
 
 r=$(novo_repo)
-printf '%s = "ValorDeFixture99"  # agentic:permitir-segredo\n' "$pw" > "$r/e.py"; git -C "$r" add e.py
+printf '%s = "abcdefgh"  # agentic:permitir-segredo\n' "$pw" > "$r/e.py"; git -C "$r" add e.py
 tl_espera 0 "linha marcada como permitida passa" git -C "$r" commit -q -m "x"
 
 r=$(novo_repo)
+printf '%s\n' "$pat" > "$r/g.txt"; git -C "$r" add g.txt
+tl_espera 1 "bloqueia token nú (sem keyword) — testa camada 1" git -C "$r" commit -q -m "x"
+
+r=$(novo_repo)
 mkdir -p "$r/.agentic"; echo 'GITLEAKS_BIN="/nao/existe/gitleaks"' > "$r/.agentic/config"
-echo ok > "$r/f.txt"; git -C "$r" add f.txt
+echo ok > "$r/h.txt"; git -C "$r" add h.txt
 tl_espera 1 "fail-closed quando o gitleaks não está instalado" git -C "$r" commit -q -m "x"
 tl_contem "gitleaks" "mensagem orienta a instalar o gitleaks"
 
