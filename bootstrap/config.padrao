@@ -1,0 +1,19 @@
+# .agentic/config — configuração dos mecanismos do framework. Preenchida no /bootstrap.
+# Superfície de política: depois de ativadas as proteções, o agente não edita este arquivo.
+BRANCH_PRINCIPAL="main"
+BRANCHES_PROTEGIDAS="main master"
+# Comando que roda build + lint + testes + arquitetura da stack (usado pelo verify.sh).
+CMD_VERIFY_STACK="{{CMD_VERIFY_STACK}}"
+# Comando que roda só os testes (usado pelo verifica-red.sh no commit RED).
+CMD_TESTE="{{CMD_TESTE}}"
+# Preparação necessária num worktree limpo antes de testar (ex.: npm ci). Vazio se não houver.
+CMD_PREPARAR_TESTE="{{CMD_PREPARAR_TESTE}}"
+# Diretórios de teste, separados por espaço, com barra final.
+DIRS_TESTE="{{DIRS_TESTE}}"
+# Regex (ERE) que identifica teste desabilitado na stack. Vazio = verificação degradada.
+MARCADOR_DESABILITADO="{{MARCADOR_DESABILITADO}}"
+# Regex (ERE) que identifica uma asserção nos testes.
+MARCADOR_ASSERCAO="{{MARCADOR_ASSERCAO}}"
+# Glob dos relatórios JUnit XML gerados pelo CMD_VERIFY_STACK. Vazio = verificação degradada.
+RELATORIO_TESTES="{{RELATORIO_TESTES}}"
+GITLEAKS_BIN="gitleaks"

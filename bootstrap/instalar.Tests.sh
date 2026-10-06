@@ -1,0 +1,33 @@
+#!/bin/sh
+# Testes do instalar.sh.
+dir=$(cd "$(dirname "$0")" && pwd)
+. "$dir/../mecanismos/scripts/testlib.sh"
+
+r=$(tl_repo)
+tl_espera 0 "instala num repositório git" sh "$dir/instalar.sh" "$r"
+for f in AGENTS.md CLAUDE.md docs/agentic/ciclo.md docs/agentic/principios.md docs/agentic/entrevista.md \
+         docs/agentic/papeis/dev.md docs/agentic/templates/task.md .githooks/pre-commit .githooks/pre-push \
+         scripts/agentic/verify.sh scripts/agentic/lib-agentic.sh .claude/agents/revisor.md \
+         .claude/commands/bootstrap.md .claude/hooks/pre-tool-use.sh .agentic/config .agentic/auto-mode \
+         .agentic/settings.pendente.json; do
+  tl_espera 0 "copiou $f" test -f "$r/$f"
+done
+tl_espera 1 "não instala settings.json direto (ação humana)" test -f "$r/.claude/settings.json"
+tl_espera 0 "configura core.hooksPath" sh -c "[ \"\$(git -C '$r' config core.hooksPath)\" = .githooks ]"
+tl_espera 0 ".gitignore ignora execucao" grep -qxF ".agentic/execucao/" "$r/.gitignore"
+tl_espera 0 ".gitattributes força LF em sh (Review Focus 1)" grep -qF "*.sh text eol=lf" "$r/.gitattributes"
+tl_espera 0 ".gitattributes força LF nos githooks" grep -qF ".githooks/* text eol=lf" "$r/.gitattributes"
+
+tl_espera 0 "reinstalar é idempotente" sh "$dir/instalar.sh" "$r"
+tl_espera 1 "sem conflitos na reinstalação" test -f "$r/.agentic/conflitos-instalacao.txt"
+tl_espera 0 ".gitignore sem linhas duplicadas" sh -c "[ \$(grep -cxF '.agentic/execucao/' '$r/.gitignore') -eq 1 ]"
+
+r=$(tl_repo); echo "meu claude" > "$r/CLAUDE.md"
+tl_espera 0 "instala com arquivo pré-existente" sh "$dir/instalar.sh" "$r"
+tl_espera 0 "preserva o CLAUDE.md existente" grep -qx "meu claude" "$r/CLAUDE.md"
+tl_espera 0 "registra o conflito" grep -qx "CLAUDE.md" "$r/.agentic/conflitos-instalacao.txt"
+
+tl_espera 2 "recusa alvo que não é git" sh "$dir/instalar.sh" "$(mktemp -d)"
+tl_espera 2 "recusa sem argumento" sh "$dir/instalar.sh"
+
+tl_fim
