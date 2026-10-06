@@ -62,4 +62,44 @@ r=$(prepara)
 tl_espera 1 "base explícita inválida sai 1" sh -c "cd '$r' && sh '$dir/verifica-red.sh' naoexiste"
 tl_contem "base inválida" "informa base inválida"
 
+# Nomes de arquivo com acento e espaço no RED: lidos por linha e sem aspas do quotepath.
+r=$(prepara); teste_red "$r"
+echo 'dado' > "$r/tests/cenário de preço.txt"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma com acento"
+echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): soma"
+tl_espera 0 "aceita RED com arquivo de teste com acento e espaço" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+
+# CMD_TESTE inexistente (127) ou não executável (126) não é evidência de RED.
+r=$(prepara); teste_red "$r"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+echo 'CMD_TESTE="comando-que-nao-existe-xyz"' >> "$r/.agentic/config"
+tl_espera 1 "CMD_TESTE inexistente bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_contem "comando de teste não encontrado" "explica o comando ausente"
+
+r=$(prepara); teste_red "$r"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+echo 'CMD_TESTE="./tests"' >> "$r/.agentic/config" # diretório: exit 126 em qualquer plataforma
+tl_espera 1 "CMD_TESTE não executável (126) bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_contem "não encontrado/não executável" "explica o comando não executável"
+
+# Contagem de asserções fail-closed.
+r=$(prepara); teste_red "$r"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+echo 'MARCADOR_ASSERCAO="assert_igual("' >> "$r/.agentic/config"
+tl_espera 1 "git grep com erro (regex inválida) bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_contem "asserções" "explica a falha na contagem"
+
+r=$(prepara); teste_red "$r"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+echo 'MARCADOR_ASSERCAO=""' >> "$r/.agentic/config"
+tl_espera 1 "MARCADOR_ASSERCAO vazio com RED bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_contem "MARCADOR_ASSERCAO" "aponta o marcador vazio"
+
+r=$(prepara); teste_red "$r"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+echo 'DIRS_TESTE=""' >> "$r/.agentic/config"
+tl_espera 1 "DIRS_TESTE vazio com RED bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_contem "DIRS_TESTE" "aponta DIRS_TESTE vazio"
+
 tl_fim
