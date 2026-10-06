@@ -11,4 +11,6 @@ if [ -f .claude/settings.json ]; then
 fi
 mkdir -p .claude
 cp .agentic/settings.pendente.json .claude/settings.json
-echo "Proteções ativadas em .claude/settings.json. Reinicie a sessão do Claude Code."
+echo "Proteções ativadas em .claude/settings.json."
+echo "Commite agora (ação humana): git add .claude/settings.json && git commit -m 'chore: ativa proteções do agente'"
+echo "Depois integre a branch e reinicie a sessão do Claude Code."
