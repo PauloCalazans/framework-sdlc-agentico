@@ -37,6 +37,16 @@ O núcleo (`docs/agentic/principios.md`, `ciclo.md`, contratos de papéis, templ
 
 Relatado pelo humano: ciclo concluído no `validacao-node`, sem travamentos. Medido no git: commits na ordem `docs(spec)` → `test(red)` → `feat(green)` → `docs(spec)` (revisão) → integração por `git merge --ff-only`; os artefatos somam 326 linhas de documentação para uma mudança (uma faixa de desconto). Relatado pelo humano: um worktree ficou após a integração.
 
+### 5.2 Trilha enxuta (comparação)
+
+Medido no git em C:/Workspace/IA/validacao-node-enxuta (instância nova com o kit atual):
+
+**Primeira tentativa:** `/mudanca desconto de 15% a partir de 500 unidades` foi RECUSADA pela trilha enxuta porque "mudança em regra de desconto" é gatilho N3 da stack nesse projeto (AGENTS.md); seguiu a trilha padrão — comportamento correto. Documentação gerada: 309 linhas em 4 arquivos (intent, spec, design, task). A trilha padrão não definia onde registrar o Gate 1 (principal protegida); o agente improvisou → corrigido no kit: Gate 1 = 1º commit da branch; verifica-escopo isenta o intent referenciado pela spec (restrito a intent/, sem "..").
+
+**Segunda:** `/mudanca formatar preço em reais (R$ 10,00) para exibição` na trilha enxuta: documento único de 58 linhas (`**Trilha:** enxuta`); commits: docs(mudanca) aprovada (Gate 1) → docs(task) em-andamento → test(red) → feat(green) → fix (espaço sem quebra NBSP, achado do revisor) → docs(mudanca) → docs(task) publicada; integrado por ff; worktree removido (só main restante); 84 linhas de código+teste.
+
+**Conclusão:** ~80% menos documentação que a trilha padrão, mantendo RED provado, revisor independente (que achou defeito real), escopo e os dois gates.
+
 ## 6. Teste de fogo (avitech)
 
 Alvo: **clone local** do avitech (Java 25 / Spring Boot / Modulith, 65 tasks, hooks, agentes, comandos e `.claude/settings.json` próprios). Não foi usado worktree: **zero escrita no repositório original**.
