@@ -15,6 +15,15 @@ done
 tl_espera 1 "não instala settings.json direto (ação humana)" test -f "$r/.claude/settings.json"
 tl_espera 1 "não copia suítes *.Tests.sh do kit" sh -c "find '$r' -name '*.Tests.sh' | grep -q ."
 tl_espera 1 "não copia testlib.sh" sh -c "find '$r' -name 'testlib.sh' | grep -q ."
+set -f # os padrões abaixo são literais
+for p in .claude/settings.json .claude/hooks/** .agentic/config .agentic/auto-mode .githooks/** \
+         scripts/agentic/** .agentic/baseline-skips .gitleaksignore; do
+  tl_espera 0 "settings pendente nega Edit/Write em $p" sh -c "grep -qF '\"Edit($p)\"' '$r/.agentic/settings.pendente.json' && grep -qF '\"Write($p)\"' '$r/.agentic/settings.pendente.json'"
+done
+set +f
+if command -v node >/dev/null 2>&1; then
+  tl_espera 0 "settings pendente é JSON válido" node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$r/.agentic/settings.pendente.json"
+fi
 tl_espera 0 "configura core.hooksPath" sh -c "[ \"\$(git -C '$r' config core.hooksPath)\" = .githooks ]"
 tl_espera 0 ".gitignore ignora execucao" grep -qxF ".agentic/execucao/" "$r/.gitignore"
 tl_espera 0 ".gitattributes força LF em sh (Review Focus 1)" grep -qF "*.sh text eol=lf" "$r/.gitattributes"
