@@ -18,7 +18,7 @@ tl_espera 1 "não copia testlib.sh" sh -c "find '$r' -name 'testlib.sh' | grep -
 set -f # os padrões abaixo são literais
 for p in .claude/settings.json .claude/hooks/** .agentic/config .agentic/auto-mode .githooks/** \
          scripts/agentic/** .agentic/baseline-skips .gitleaksignore; do
-  tl_espera 0 "settings pendente nega Edit/Write em $p" sh -c "grep -qF '\"Edit($p)\"' '$r/.agentic/settings.pendente.json' && grep -qF '\"Write($p)\"' '$r/.agentic/settings.pendente.json'"
+  tl_espera 0 "settings pendente nega Edit (cobre escrita) em $p" sh -c "grep -qF '\"Edit($p)\"' '$r/.agentic/settings.pendente.json'"
 done
 set +f
 for c in "git add" "git commit" "git checkout" "git rebase"; do
@@ -32,7 +32,7 @@ tl_espera 0 ".gitignore ignora execucao" grep -qxF ".agentic/execucao/" "$r/.git
 set -f
 for p in .claude/settings.json .claude/settings.local.json .claude/hooks/** .agentic/config .agentic/auto-mode .githooks/** \
          scripts/agentic/** .agentic/baseline-skips .gitleaksignore; do
-  tl_espera 0 "settings pendente nega Edit/Write em **/$p (worktree aninhado)" sh -c "grep -qF '\"Edit(**/$p)\"' '$r/.agentic/settings.pendente.json' && grep -qF '\"Write(**/$p)\"' '$r/.agentic/settings.pendente.json'"
+  tl_espera 0 "settings pendente nega Edit (cobre escrita) em **/$p (worktree aninhado)" sh -c "grep -qF '\"Edit(**/$p)\"' '$r/.agentic/settings.pendente.json'"
 done
 set +f
 tl_espera 0 ".gitignore ignora worktrees aninhados" grep -qxF ".agentic/worktrees/" "$r/.gitignore"
