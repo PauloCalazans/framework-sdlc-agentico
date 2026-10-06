@@ -2,7 +2,7 @@
 # Testes do scripts/montar-exemplo.sh.
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/../mecanismos/scripts/testlib.sh"
-montar="$dir/../scripts/montar-exemplo.sh"
+montar="$dir/montar-exemplo.sh"
 
 dest=$(mktemp -d); rmdir "$dest"
 tl_espera 0 "monta o exemplo python" sh "$montar" python-cli-novo "$dest"
