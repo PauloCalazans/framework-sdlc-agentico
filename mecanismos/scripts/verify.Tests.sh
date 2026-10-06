@@ -55,6 +55,10 @@ tl_contem "escopo: OK (docs/specs/desc/tasks/001-desc.md)" "trilha enxuta: escop
 echo z > "$r/fora.txt"
 tl_espera 1 "trilha enxuta: arquivo fora de ## Arquivos é bloqueado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 tl_contem "fora.txt" "trilha enxuta: nomeia o arquivo fora do escopo"
+rm "$r/fora.txt"
+git -C "$r" checkout -q -b desc/002-sem-doc main
+tl_espera 0 "trilha enxuta: documento ausente da branch não quebra o verify" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "aviso: nenhuma task com **Branch:** desc/002-sem-doc" "trilha enxuta: sem documento na branch, avisa que o escopo não foi verificado"
 
 r=$(tl_repo)
 tl_espera 1 "falha se CMD_VERIFY_STACK não está configurado" sh -c "cd '$r' && sh '$dir/verify.sh'"

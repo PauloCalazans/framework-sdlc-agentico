@@ -1,7 +1,7 @@
 # Mudança: <nome>
 
 **Status:** pendente
-<!-- pendente | em-andamento | em-revisão | publicada | integrada -->
+<!-- pendente | em-andamento | em-revisão | publicada  (integrada não é escrito: deriva do git) -->
 **Branch:** <nome>/001-<nome>
 **Trilha:** enxuta
 

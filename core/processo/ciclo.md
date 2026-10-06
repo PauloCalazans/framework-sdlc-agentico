@@ -36,6 +36,7 @@ Mantém RED provado, revisor independente, escopo verificado e os dois gates hum
 `/mudanca <descrição>` → `arquiteto` em modo enxuto escreve o documento → **Gate 1** (o humano aprova o documento; nenhuma hipótese) → `testes` RED → `dev` GREEN/REFACTOR → `verify` → `revisor` modo `diff` (revisa o código **e** confere se a trilha enxuta cabia) → publicação → **Gate 2** → worktree removido.
 
 - **Elegibilidade:** a mudança cabe numa única task e não aciona nenhum gatilho N3. Na dúvida, trilha padrão.
+- **Registro do Gate 1:** o commit `docs(mudanca): <nome> aprovada (Gate 1)` com o documento, primeiro commit da branch (criada com o worktree depois da aprovação). Sem ele a branch não carrega o documento e o `verify` não verifica o escopo.
 - **Promoção:** se surgir gatilho N3 ou o `revisor` julgar a classificação errada, pare; o trabalho sobe para a trilha padrão e o documento enxuto vira rascunho do intent. Registre uma Ruling.
 
 ## Escalonamento N3
@@ -52,12 +53,12 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 
 ## Regras de fluxo
 
-- **Isolamento:** um worktree por sessão/trilha, dentro do repositório: `git worktree add .agentic/worktrees/<nome> -b <branch>`, onde `<nome>` é a branch com `/` trocado por `-` (ex.: `pedidos/001-criar` → `.agentic/worktrees/pedidos-001-criar`). O diretório é ignorado pelo `.gitignore` e as regras `deny` valem nele (variantes `**/`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree. Depois que o humano integrar (Gate 2), o orquestrador remove o worktree com `git worktree remove .agentic/worktrees/<nome>` e a branch com `git branch -d <branch>` (só `-d`, nunca `-D`) e marca a task `integrada`.
+- **Isolamento:** um worktree por sessão/trilha, dentro do repositório: `git worktree add .agentic/worktrees/<nome> -b <branch>`, onde `<nome>` é a branch com `/` trocado por `-` (ex.: `pedidos/001-criar` → `.agentic/worktrees/pedidos-001-criar`). O diretório é ignorado pelo `.gitignore` e as regras `deny` valem nele (variantes `**/`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree. Depois que o humano integrar (Gate 2), o orquestrador remove o worktree com `git worktree remove .agentic/worktrees/<nome>` e a branch com `git branch -d <branch>` (só `-d`, nunca `-D`). O estado `integrada` não é escrito: deriva do git (branch contida na principal / removida). Se o `-d` recusar, atualize antes a principal local — nunca `-D`.
 - **Escopo:** cada task declara `## Arquivos`. `verify.sh` falha se a branch tocar arquivo fora da lista. Ampliar o escopo exige atualizar a lista num commit `docs(task): …` — visível na revisão e no Gate 2.
 - **Divergência spec × código:** pare, registre em "Questões em aberto" da spec e corrija via commit `docs(spec): …` no mesmo PR.
 - **Verificação:** `sh scripts/agentic/verify.sh` é o ponto único. Ninguém afirma sucesso sem ter visto a saída.
 - **Commits:** `test(red):`, `feat(green):`, `refactor:`, `fix:`, `docs(spec):`, `docs(task):`, `chore:`. Um commit por passo do ciclo.
-- **Status dos artefatos** (`**Status:**`, lido por `status-projeto.sh`): no Gate 1 o humano aprova e intent, spec e design passam de `draft` a `aprovado`; `/nova-task` põe a task em `em-andamento`; com a revisão aprovada, o orquestrador a põe em `em-revisão` e, ao publicar (fase 6), em `publicada`; depois de integrar, o humano a marca `integrada`.
+- **Status dos artefatos** (`**Status:**`, lido por `status-projeto.sh`): no Gate 1 o humano aprova e intent, spec e design passam de `draft` a `aprovado`; `/nova-task` põe a task em `em-andamento`; com a revisão aprovada, o orquestrador a põe em `em-revisão` e, ao publicar (fase 6), em `publicada`; `integrada` não é um Status escrito (ninguém commita na principal protegida): deriva do git — branch contida na principal ou removida.
 - **Modo automático:** se `.agentic/auto-mode` contém `enabled: true`, o orquestrador encadeia tasks e publica PRs sem pedir confirmação. Nunca faz merge.
 
 ## Orquestração

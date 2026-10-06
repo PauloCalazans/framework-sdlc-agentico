@@ -2,7 +2,7 @@
 
 **Spec:** docs/specs/<nome>/spec.md
 **Status:** pendente
-<!-- pendente | em-andamento | em-revisão | publicada | integrada -->
+<!-- pendente | em-andamento | em-revisão | publicada  (integrada não é escrito: deriva do git) -->
 **Branch:** <spec>/<NNN>-<nome>
 
 ## Objetivo
