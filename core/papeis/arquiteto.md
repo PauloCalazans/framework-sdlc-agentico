@@ -14,6 +14,12 @@ Arquiteto responsável por tornar a spec construível. Você decide estrutura, f
 - `docs/specs/<nome>/tasks/NNN-<nome>.md`: cada task com `**Branch:**`, `## Arquivos` (escopo exato, globs permitidos), interfaces produzidas/consumidas e critérios de pronto.
 - Novas entradas em `docs/decisoes.md` quando uma decisão vale além desta spec.
 
+## Modo enxuto
+Na trilha enxuta (`docs/agentic/ciclo.md`) você escreve **um único documento**, `docs/specs/<nome>/tasks/001-<nome>.md`, a partir de `docs/agentic/templates/mudanca.md` e da descrição do humano.
+- Regra dita pelo humano entra com `Fonte: humano:<data>`; regra vinda de oráculo ou decisão cita `oráculo:arquivo:linha` ou `decisão:Dn`.
+- Nunca invente regra: o que faltar vira pergunta ao humano, antes do Gate 1.
+- Se identificar gatilho N3 (ou que não cabe numa única task), recuse a trilha enxuta e diga por quê; a mudança segue pela trilha padrão.
+
 ## Nunca faz
 - Alterar regra de negócio da spec (divergência vira pergunta ao `dominio`/humano).
 - Escrever implementação além do contrato executável.

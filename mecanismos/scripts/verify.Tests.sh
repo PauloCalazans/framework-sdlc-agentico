@@ -40,6 +40,22 @@ tl_espera 0 "na branch principal, sem task: pula escopo (trilha rápida)" sh -c 
 tl_contem "pulado" "declara a etapa pulada"
 tl_contem "aviso: nenhuma task com **Branch:** main" "avisa que o escopo não foi verificado (há tasks)"
 
+# Trilha enxuta: o documento único (template real) é achado pela **Branch:** e o escopo vale.
+r=$(tl_repo)
+mkdir -p "$r/.agentic" "$r/tests" "$r/src" "$r/docs/specs/desc/tasks"
+printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/.agentic/config"
+echo 'exit 0' > "$r/tests/stack.sh"
+sed -e 's|<nome>/001-<nome>|desc/001-desc|' -e 's|<caminho/exato>|src/desc.txt|' -e 's|<diretorio/\*>|tests/*|' \
+  "$dir/../../core/templates/mudanca.md" > "$r/docs/specs/desc/tasks/001-desc.md"
+git -C "$r" add -A; git -C "$r" commit -q -m "base"
+git -C "$r" checkout -q -b desc/001-desc
+echo a > "$r/src/desc.txt"
+tl_espera 0 "trilha enxuta: acha o documento pela Branch e respeita o escopo" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "escopo: OK (docs/specs/desc/tasks/001-desc.md)" "trilha enxuta: escopo verificado pelo documento único"
+echo z > "$r/fora.txt"
+tl_espera 1 "trilha enxuta: arquivo fora de ## Arquivos é bloqueado" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "fora.txt" "trilha enxuta: nomeia o arquivo fora do escopo"
+
 r=$(tl_repo)
 tl_espera 1 "falha se CMD_VERIFY_STACK não está configurado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 
