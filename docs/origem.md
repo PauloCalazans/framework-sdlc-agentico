@@ -24,7 +24,7 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas das referênci
 | Trilha rápida (`ciclo.md`) | prática: projeto de referência controlado (ciclo do agente) |
 | Trilha enxuta (`ciclo.md`, `templates/mudanca.md`, `/mudanca`) | validação v1 (ciclo real: 326 linhas de docs para uma faixa de desconto); prática: projeto de referência controlado (reestruturação: cerimônia > código). Proposta nossa, validada parcialmente |
 | Escopo de arquivos declarado e verificado (`verifica-escopo.sh`) | [RG] expansão de escopo plausível; [RR] escopo delimitado; decisão desta spec (sem limite de linhas) |
-| Commit `test(red):` provado em worktree; asserções comparadas (`verifica-red.sh`) | prática: projeto de referência controlado (script de verificação do RED); [FC]/[RR] test tampering |
+| Commit `test(red):` provado em worktree; asserções comparadas (`verifica-red.sh`) | prática: projeto de referência controlado (script de verificação do RED); [FC]/[RR] test tampering. Isenção de `docs/` e `intent/` no RED: projeto de referência controlado (32 dos últimos 40 commits RED também editam o documento da task) |
 | Skips lidos do relatório real (`verifica-skip.sh`) | prática: projeto de referência controlado (verificação de skips) |
 | `verify` ponto único, só reporta, com lock (`verify.sh`, `/verify`) | prática: projeto de referência enxuto (`/verify`: "reportar é o trabalho"); prática: projeto de referência controlado (`verify.sh` com lock) |
 | Segredos em duas camadas, fail-closed, staged (`pre-commit`) | prática: projeto de referência controlado (gitleaks não pega senha genérica); [RG] varrer staged, fail-closed |

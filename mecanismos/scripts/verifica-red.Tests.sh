@@ -45,6 +45,30 @@ git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
 tl_espera 1 "rejeita RED que toca fora dos diretórios de teste" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 tl_contem "src/soma.sh" "aponta o arquivo de produção"
 
+# RED que atualiza o documento da task (docs/) e o intent: documentação não é produção.
+r=$(prepara); teste_red "$r"
+mkdir -p "$r/docs/specs/x/tasks" "$r/intent"
+echo '- [x] RED' > "$r/docs/specs/x/tasks/001-x.md"
+echo 'intenção' > "$r/intent/001-x.md"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma + atualiza task"
+echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): soma"
+tl_espera 0 "aceita RED que também atualiza docs/specs/x/tasks/001-x.md e intent/" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+
+# Isenção é só para docs/ e intent/: produção fora de DIRS_TESTE segue bloqueada mesmo com doc junto.
+r=$(prepara); teste_red "$r"
+mkdir -p "$r/docs/specs/x/tasks"; echo '- [x] RED' > "$r/docs/specs/x/tasks/001-x.md"
+echo 'module.exports = 1' > "$r/src/x.js"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 1 "rejeita RED que toca src/x.js mesmo junto com doc da task" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_contem "src/x.js" "aponta src/x.js"
+
+# Nome parecido com docs/ não é isento (casamento por prefixo de diretório).
+r=$(prepara); teste_red "$r"
+mkdir -p "$r/docsx"; echo 'x' > "$r/docsx/a.md"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 1 "rejeita RED que toca docsx/ (não é docs/)" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+
 # GREEN que remove asserção.
 r=$(prepara); teste_red "$r"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"

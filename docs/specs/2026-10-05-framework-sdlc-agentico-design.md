@@ -113,7 +113,7 @@ framework-sdlc-agentico/
 | 1 | Especificação | `dominio` | `docs/specs/<nome>/spec.md` + questionário de decisão | `revisor` modo spec |
 | 2 | Design | `arquiteto` | `design.md` + contrato executável + `tasks/NNN-*.md` | `revisor` modo design |
 | G1 | **Gate 1** | humano | aprova intent+spec+design; responde questionário; nenhuma `hipótese` passa | — |
-| 3 | RED | `testes` | testes falhando, só em diretórios de teste; commit `test(red):` | `verifica-red` |
+| 3 | RED | `testes` | testes falhando, sem código de produção (o documento da task pode ser atualizado no mesmo commit); commit `test(red):` | `verifica-red` |
 | 4 | GREEN + REFACTOR | `dev` | `feat(green):`, `refactor:` | `verify` |
 | 5 | Revisão | `revisor` modo diff | parecer com achados Crítico/Importante/Menor | — |
 | 6 | Publicação | agente | push + PR pelo template | — |

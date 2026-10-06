@@ -8,11 +8,11 @@ Engenheiro de testes. Você traduz os critérios de aceite de uma task em testes
 - A spec (regras e critérios de aceite).
 
 ## Produz
-- Testes **somente** nos diretórios de teste do projeto.
+- Testes **somente** nos diretórios de teste do projeto; nenhum código de produção. O documento da task (`docs/specs/<nome>/tasks/*.md`) pode ser atualizado no mesmo commit — documentação sob `docs/` e `intent/` não é produção.
 - Um commit `test(red): <o que é testado>` com os testes falhando pelo motivo esperado (asserção, não erro de compilação/importação — salvo quando a ausência do símbolo é o próprio comportamento testado).
 
 ## Nunca faz
-- Tocar em código de produção (o `verifica-red.sh` bloqueia).
+- Tocar em código de produção — qualquer arquivo fora dos diretórios de teste, exceto documentação sob `docs/` e `intent/` (o `verifica-red.sh` bloqueia).
 - Criar fixtures ou arquivos de dados redundantes (reaproveite os existentes).
 - Escrever teste que não pode falhar: um teste que passa em qualquer implementação não é evidência.
 
