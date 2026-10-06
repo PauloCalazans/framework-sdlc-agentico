@@ -54,4 +54,46 @@ tl_espera 1 "bloqueia quando git diff --cached falha" \
 tl_contem "git diff --cached falhou" "explica a falha da camada 2"
 tl_espera 0 "camada 2 com índice válido e sem achados passa (controle)" sh -c "cd '$r' && sh '$dir/pre-commit'"
 
+# --- Camada 2: casos medidos no projeto de referência (valor sem aspas, chave hifenizada, placeholders).
+# commita_caso <esperado> <descricao> <arquivo> <linha>: grava a linha num repositório novo e tenta o commit.
+commita_caso() {
+  cc_r=$(novo_repo)
+  printf '%s\n' "$4" > "$cc_r/$3"; git -C "$cc_r" add -- "$3"
+  tl_espera "$1" "$2" git -C "$cc_r" commit -q -m "x"
+}
+PW="PASS""WORD"
+sec="sec""ret"
+lit="Super""Secreto123"
+
+commita_caso 1 "bloqueia YAML sem aspas ($pw: <literal>)" application.yml "$pw: $lit"
+tl_contem "possível segredo" "YAML sem aspas: bloqueado pela camada 2"
+commita_caso 1 "bloqueia env/sh sem aspas (PG$PW=<literal>)" run.sh "PG$PW=hunter2""hunter2"
+tl_contem "possível segredo" "env/sh: bloqueado pela camada 2"
+commita_caso 1 "bloqueia properties (spring.datasource.$pw=<literal>)" application.properties "spring.datasource.$pw=$lit"
+tl_contem "possível segredo" "properties: bloqueado pela camada 2"
+commita_caso 1 "bloqueia atribuição com aspas ($pw = \"<literal>\")" b.py "$pw = \"$lit\""
+tl_contem "possível segredo" "aspas: bloqueado pela camada 2"
+commita_caso 1 "bloqueia JSON (\"$pw\": \"<literal>\")" config.json "{\"$pw\": \"$lit\"}"
+tl_contem "possível segredo" "JSON: bloqueado pela camada 2"
+commita_caso 0 "permite referência a variável entre aspas (SPRING_DATASOURCE_$PW: \"\${DB_$PW}\")" docker-compose.yml "SPRING_DATASOURCE_$PW: \"\${DB_$PW}\""
+commita_caso 0 "permite referência a variável sem aspas ($pw: \${DB_$PW})" application.yml "$pw: \${DB_$PW}"
+commita_caso 0 "permite referência com default vazio ($pw: \${DB_$PW:-})" application.yml "$pw: \${DB_$PW:-}"
+commita_caso 1 "bloqueia default literal embutido ($pw: \"\${DB_$PW:<literal>}\")" application.yml "$pw: \"\${DB_$PW:Fake""Value123}\""
+tl_contem "possível segredo" "default literal: bloqueado pela camada 2"
+commita_caso 1 "bloqueia default literal estilo shell ($pw=\${DB_$PW:-<literal>})" run.sh "$pw=\${DB_$PW:-Fake""Value123}"
+commita_caso 0 "permite placeholder changeme" application.yml "$pw: change""me"
+commita_caso 0 "permite placeholder <senha>" application.yml "$pw: <senha>"
+commita_caso 0 "permite placeholder {{SENHA}}" application.yml "$pw: {{SENHA}}"
+commita_caso 0 "permite valor vazio (\"\")" application.yml "$pw: \"\""
+commita_caso 0 "permite placeholder placeholder/example/xxx/secret" application.yml "$(printf '%s: %s\n' "$pw" placeholder api_key example token xxxxxxxx "$pw" "$sec")"
+commita_caso 0 "permite placeholder %SENHA%" application.yml "$pw: %SENHA%"
+commita_caso 0 "permite \${{ secrets.X }} do CI sem aspas internas" ci.yml "  DB_$PW: \${{ ${sec}s.DB_$PW }}"
+commita_caso 1 "bloqueia \${{ }} com literal entre aspas internas" ci.yml "  DB_$PW: \${{ 'Super''Secreto123' }}"
+commita_caso 0 "permite substituição de comando no shell" run.sh "PG$PW=\"\$(cat /run/${sec}s/db)\""
+commita_caso 1 "bloqueia chave hifenizada (jwt-$sec-key: <literal>)" application.yml "jwt-$sec-key: abcdefghij"
+tl_contem "possível segredo" "chave hifenizada: bloqueada pela camada 2"
+commita_caso 0 "permite literal sem aspas curto (< 8)" application.yml "$pw: abc1234"
+commita_caso 0 "valor sem aspas em código é expressão, não literal" Servico.kt "class S(private val ${pw}Encoder: ${PW}Encoder)"
+commita_caso 0 "linha marcada como permitida passa (sem aspas)" application.yml "$pw: $lit  # agentic:permitir-segredo"
+
 tl_fim
