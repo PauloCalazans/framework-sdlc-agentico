@@ -63,4 +63,16 @@ r=$(prepara)
 echo x > "$r/src/pedidos/criar.py"; git -C "$r" add -A; git -C "$r" commit -q -m "impl"
 mkdir -p "$r/.agentic/worktrees/pedidos-002/src"; echo y > "$r/.agentic/worktrees/pedidos-002/src/outro.py"
 tl_espera 0 "ignora worktrees aninhados em .agentic/worktrees/ mesmo sem .gitignore" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+r=$(prepara)
+printf '# Spec\r\n**Intent:** intent/001-pedidos.md \r\n' > "$r/docs/specs/pedidos/spec.md"
+mkdir -p "$r/intent"; echo i > "$r/intent/001-pedidos.md"
+tl_espera 0 "isenta o intent referenciado pela spec da task" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+
+echo i > "$r/intent/002-outro.md"
+tl_espera 1 "rejeita outro intent não referenciado pela spec" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
+tl_contem "intent/002-outro.md" "lista o intent não referenciado"
+
+r=$(prepara)
+mkdir -p "$r/intent"; echo i > "$r/intent/001-pedidos.md"
+tl_espera 1 "sem spec.md não há isenção de intent" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' docs/specs/pedidos/tasks/001-criar.md"
 tl_fim
