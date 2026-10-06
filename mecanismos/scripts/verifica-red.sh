@@ -1,6 +1,8 @@
 #!/bin/sh
-# verifica-red.sh [base] — prova que cada commit test(red): (1) só tocou testes, (2) falhava de fato,
-# (3) não teve asserções removidas depois. Roda os testes do RED num worktree isolado.
+# verifica-red.sh [base] — prova que cada commit test(red): (1) não tocou código de produção (só
+# DIRS_TESTE; documentação sob docs/ e intent/ é isenta — o documento da task pode ser atualizado no
+# mesmo commit), (2) falhava de fato, (3) não teve asserções removidas depois. Roda os testes do RED
+# num worktree isolado.
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 base=${1:-$(agentic_base)}
@@ -36,13 +38,15 @@ for c in $reds; do
   while IFS= read -r f; do
     [ -n "$f" ] || continue
     dentro=1
+    # Documentação não é código de produção: os scripts só leem docs/specs/*/tasks/*.md e intent/.
+    case "$f" in docs/*|intent/*) dentro=0 ;; esac
     set -f
     for d in $DIRS_TESTE; do
       case "$f" in "$d"*) dentro=0 ;; esac
     done
     set +f
     if [ "$dentro" -ne 0 ]; then
-      echo "agentic: BLOQUEADO — RED $curto toca arquivo fora dos diretórios de teste: $f"
+      echo "agentic: BLOQUEADO — RED $curto toca arquivo fora dos diretórios de teste (código de produção): $f"
       status=1
     fi
   done <<EOT
