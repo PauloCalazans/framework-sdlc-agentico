@@ -17,7 +17,7 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas do notebook (`
 | Contrato executável antes do RED (`papeis/arquiteto.md`) | avitech `docs/agentes/arquiteto.md` |
 | Arquiteto dono único das tasks (`papeis/arquiteto.md`) | avitech `c34359f` |
 | Revisor separado, contexto limpo, nunca corrige, 3 modos (`papeis/revisor.md`) | [RG] separação autor/revisor; avitech reestruturação `7098bd0`; abapmcp revisão por diff |
-| Revisor sem ferramenta de escrita (`agents/revisor.md`) | proposta nossa — transforma "nunca corrige" de prompt em mecanismo |
+| Revisor sem Write/Edit (`agents/revisor.md`) | proposta nossa — reduz (não garante: o revisor tem Bash) a chance de corrigir; "nunca corrige" segue verificado por revisão |
 | Achados Crítico/Importante/Menor; menores para revisão final (`ciclo.md`) | abapmcp SDD (findings parked, `0105617`) |
 | Dois gates humanos (`ciclo.md`) | avitech ADR 0009 (espera humana dominava o ciclo); [CI] aprovação do intent |
 | Escalonamento N3 (`ciclo.md`) | avitech N3; [FC] níveis de risco N1–N4; [QG] auth/pagamentos/cripto exigem humano |
