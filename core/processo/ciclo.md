@@ -5,6 +5,7 @@ Leia antes de qualquer trabalho. Princípios: `docs/agentic/principios.md`. Pap�
 ## Escolha a trilha
 
 - **Trilha padrão** — funcionalidade nova ou qualquer mudança de comportamento observável.
+- **Trilha enxuta** — mudança pequena de comportamento que cabe numa única task e não aciona nenhum gatilho N3 (contrato público, segurança/autenticação/autorização, migração destrutiva, dependência nova, caminho protegido, gatilhos da stack em `AGENTS.md`).
 - **Trilha rápida** — `chore`, `docs`, ferramental, correção sem mudança de comportamento: branch → `verify` → PR → Gate 2.
 
 Na dúvida, trilha padrão.
@@ -28,6 +29,15 @@ Na dúvida, trilha padrão.
 - **Gate 1 não aceita hipótese:** toda regra da spec chega ao Gate 1 com estado `confirmada`. O questionário de decisão existe para que o humano resolva todas as dúvidas de uma vez, antes da implementação.
 - **Gate 2 sem plataforma de PR:** o orquestrador deixa a branch rebaseada na principal; o humano integra com `git merge --ff-only <branch>` (fast-forward não cria commit de merge, não dispara hooks e preserva os commits RED/GREEN).
 
+## Trilha enxuta
+
+Mantém RED provado, revisor independente, escopo verificado e os dois gates humanos; troca intent + spec + design + task por **um documento** (`docs/agentic/templates/mudanca.md`, gravado em `docs/specs/<nome>/tasks/001-<nome>.md`, onde os scripts leem `**Branch:**` e `## Arquivos`).
+
+`/mudanca <descrição>` → `arquiteto` em modo enxuto escreve o documento → **Gate 1** (o humano aprova o documento; nenhuma hipótese) → `testes` RED → `dev` GREEN/REFACTOR → `verify` → `revisor` modo `diff` (revisa o código **e** confere se a trilha enxuta cabia) → publicação → **Gate 2** → worktree removido.
+
+- **Elegibilidade:** a mudança cabe numa única task e não aciona nenhum gatilho N3. Na dúvida, trilha padrão.
+- **Promoção:** se surgir gatilho N3 ou o `revisor` julgar a classificação errada, pare; o trabalho sobe para a trilha padrão e o documento enxuto vira rascunho do intent. Registre uma Ruling.
+
 ## Escalonamento N3
 
 Pare a execução e chame o humano — mesmo fora de um gate — quando a mudança envolver:
@@ -42,7 +52,7 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 
 ## Regras de fluxo
 
-- **Isolamento:** um worktree por sessão/trilha, dentro do repositório: `git worktree add .agentic/worktrees/<nome> -b <branch>`, onde `<nome>` é a branch com `/` trocado por `-` (ex.: `pedidos/001-criar` → `.agentic/worktrees/pedidos-001-criar`). O diretório é ignorado pelo `.gitignore` e as regras `deny` valem nele (variantes `**/`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree.
+- **Isolamento:** um worktree por sessão/trilha, dentro do repositório: `git worktree add .agentic/worktrees/<nome> -b <branch>`, onde `<nome>` é a branch com `/` trocado por `-` (ex.: `pedidos/001-criar` → `.agentic/worktrees/pedidos-001-criar`). O diretório é ignorado pelo `.gitignore` e as regras `deny` valem nele (variantes `**/`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree. Depois que o humano integrar (Gate 2), o orquestrador remove o worktree com `git worktree remove .agentic/worktrees/<nome>` e a branch com `git branch -d <branch>` (só `-d`, nunca `-D`) e marca a task `integrada`.
 - **Escopo:** cada task declara `## Arquivos`. `verify.sh` falha se a branch tocar arquivo fora da lista. Ampliar o escopo exige atualizar a lista num commit `docs(task): …` — visível na revisão e no Gate 2.
 - **Divergência spec × código:** pare, registre em "Questões em aberto" da spec e corrija via commit `docs(spec): …` no mesmo PR.
 - **Verificação:** `sh scripts/agentic/verify.sh` é o ponto único. Ninguém afirma sucesso sem ter visto a saída.

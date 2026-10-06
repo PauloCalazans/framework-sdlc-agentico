@@ -6,7 +6,7 @@ dir=$(cd "$(dirname "$0")" && pwd)
 r=$(tl_repo)
 tl_espera 0 "instala num repositório git" sh "$dir/instalar.sh" "$r"
 for f in AGENTS.md CLAUDE.md docs/agentic/ciclo.md docs/agentic/principios.md docs/agentic/entrevista.md \
-         docs/agentic/papeis/dev.md docs/agentic/templates/task.md .githooks/pre-commit .githooks/pre-push \
+         docs/agentic/papeis/dev.md docs/agentic/templates/task.md docs/agentic/templates/mudanca.md .claude/commands/mudanca.md .githooks/pre-commit .githooks/pre-push \
          scripts/agentic/verify.sh scripts/agentic/lib-agentic.sh .claude/agents/revisor.md \
          .claude/commands/bootstrap.md .claude/hooks/pre-tool-use.sh .agentic/config .agentic/auto-mode \
          .agentic/settings.pendente.json; do

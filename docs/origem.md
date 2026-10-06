@@ -22,6 +22,7 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas do notebook (`
 | Dois gates humanos (`ciclo.md`) | avitech ADR 0009 (espera humana dominava o ciclo); [CI] aprovação do intent |
 | Escalonamento N3 (`ciclo.md`) | avitech N3; [FC] níveis de risco N1–N4; [QG] auth/pagamentos/cripto exigem humano |
 | Trilha rápida (`ciclo.md`) | avitech `docs/process/ciclo-do-agente.md` |
+| Trilha enxuta (`ciclo.md`, `templates/mudanca.md`, `/mudanca`) | validação v1 (ciclo real: 326 linhas de docs para uma faixa de desconto); avitech reestruturação (cerimônia > código). Proposta nossa, validada parcialmente |
 | Escopo de arquivos declarado e verificado (`verifica-escopo.sh`) | [RG] expansão de escopo plausível; [RR] escopo delimitado; decisão desta spec (sem limite de linhas) |
 | Commit `test(red):` provado em worktree; asserções comparadas (`verifica-red.sh`) | avitech `scripts/verifica-red.sh`; [FC]/[RR] test tampering |
 | Skips lidos do relatório real (`verifica-skip.sh`) | avitech `verify-skip-check.sh` |

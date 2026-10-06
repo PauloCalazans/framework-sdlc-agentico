@@ -22,6 +22,8 @@ Todo trabalho segue `docs/agentic/ciclo.md`. Princípios em `docs/agentic/princi
 | Arquitetura | `{{CMD_ARQUITETURA}}` |
 | **Verificação completa** | `sh scripts/agentic/verify.sh` |
 
+No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); dentro do Claude Code isso já é tratado.
+
 ## Regras invioláveis
 - Nunca faça merge na branch principal nem altere permissões do agente.
 - Nunca afirme sucesso sem ter visto a saída do `verify.sh`.

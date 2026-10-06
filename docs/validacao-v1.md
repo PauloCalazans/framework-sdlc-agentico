@@ -2,7 +2,7 @@
 
 **Data:** 2026-10-05
 
-Resumo: o framework passou nas suítes dos mecanismos, instanciou dois projetos de teste de forma headless (um novo, um existente) com a checagem estrutural verde, e foi testado em sessão real do Claude Code e contra um clone de um projeto maduro. A validação encontrou defeitos reais, todos corrigidos (seção 8). O ciclo real completo ainda não foi executado (seção 5).
+Resumo: o framework passou nas suítes dos mecanismos, instanciou dois projetos de teste de forma headless (um novo, um existente) com a checagem estrutural verde, e foi testado em sessão real do Claude Code e contra um clone de um projeto maduro. A validação encontrou defeitos reais, todos corrigidos (seção 8). O ciclo real foi concluído pelo humano no exemplo node (seção 5).
 
 ## 1. Suítes dos mecanismos
 
@@ -35,7 +35,7 @@ O núcleo (`docs/agentic/principios.md`, `ciclo.md`, contratos de papéis, templ
 
 ## 5. Ciclo real
 
-**PENDENTE — aguarda execução interativa pelo humano no exemplo node.** O ciclo completo (`/intent` → spec → tasks → TDD → verify → revisão → integração) exige sessão interativa e decisões nos gates; não foi executado de forma headless. Esta seção deve ser preenchida fase a fase, com evidências e travamentos, após essa execução.
+**Concluído pelo humano no `validacao-node`, sem travamentos.** O ciclo completo (`/intent` → spec → tasks → TDD → verify → revisão → integração) rodou em sessão interativa. Commits na ordem: `docs(spec)` → `test(red)` → `feat(green)` → `docs(spec)` (revisão) → integração por `git merge --ff-only`. Os artefatos somaram **326 linhas** de documentação para uma única mudança (uma faixa de desconto). Ficou um worktree remanescente após a integração (origem do ajuste de remoção do worktree no Gate 2).
 
 ## 6. Teste de fogo (avitech)
 
@@ -71,6 +71,7 @@ Limitação: o agente não conseguiu ler as versões do kit; o lado "kit" foi in
 ## 7. O que ficou desconfortável
 
 - **N3 e independência do revisor continuam só por revisão:** nada mecânico impede o mesmo contexto de implementar e aprovar; a independência do revisor depende de disciplina e de revisão humana.
+- **Custo da trilha padrão para mudança pequena:** 326 linhas de artefatos para uma faixa de desconto; a cerimônia superou o código. Origem da trilha enxuta (`/mudanca`).
 - **Os deny são contornáveis:** a posição de flags num comando Bash e redirecionamentos (`>`) escapam das regras de deny por padrão. Os githooks são o controle real; os deny são uma camada auxiliar.
 - **Bootstrap headless exige bypass em diretório descartável:** com permissões de projeto ativas (ou `bypassPermissions` desabilitado) ele não consegue escrever.
 - **Projeto existente exige consolidação conduzida por humano:** hooks, agentes, comandos, auto-mode e registro de decisões próprios competem com os do kit; o framework propõe, mas não consolida sozinho. Sem `**Branch:**` nas tasks, a verificação de escopo não roda.
