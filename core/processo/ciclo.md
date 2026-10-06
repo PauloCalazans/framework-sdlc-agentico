@@ -1,0 +1,66 @@
+# Ciclo de desenvolvimento agêntico
+
+Leia antes de qualquer trabalho. Princípios: `docs/agentic/principios.md`. Papéis: `docs/agentic/papeis/`.
+
+## Escolha a trilha
+
+- **Trilha padrão** — funcionalidade nova ou qualquer mudança de comportamento observável.
+- **Trilha rápida** — `chore`, `docs`, ferramental, correção sem mudança de comportamento: branch → `verify` → PR → Gate 2.
+
+Na dúvida, trilha padrão.
+
+## Trilha padrão
+
+| # | Fase | Papel | Artefato | Verificação |
+|---|---|---|---|---|
+| 0 | Intenção | humano + `dominio` | `intent/NNN-<nome>.md` | — |
+| 1 | Especificação | `dominio` | `docs/specs/<nome>/spec.md` + questionário de decisão | `revisor` modo `spec` |
+| 2 | Design | `arquiteto` | `design.md` + contrato executável + `tasks/NNN-<nome>.md` | `revisor` modo `design` |
+| G1 | **Gate 1** | humano | aprova intent + spec + design; responde o questionário | — |
+| 3 | RED | `testes` | testes falhando, só em diretórios de teste; commit `test(red): …` | `verifica-red.sh` |
+| 4 | GREEN + REFACTOR | `dev` | commits `feat(green): …` e `refactor: …` | `verify.sh` |
+| 5 | Revisão | `revisor` modo `diff` | parecer com achados Crítico / Importante / Menor | — |
+| 6 | Publicação | orquestrador | push + PR pelo template `docs/agentic/templates/pr.md` | — |
+| G2 | **Gate 2** | humano | merge **sem squash** (preserva a evidência RED/GREEN) | merge negado ao agente |
+
+- Achado **Crítico** ou **Importante** devolve o trabalho ao papel autor; a revisão roda de novo no diff corrigido.
+- Achados **Menores** ficam registrados e são tratados na revisão final da branch, antes da publicação.
+- **Gate 1 não aceita hipótese:** toda regra da spec chega ao Gate 1 com estado `confirmada`. O questionário de decisão existe para que o humano resolva todas as dúvidas de uma vez, antes da implementação.
+
+## Escalonamento N3
+
+Pare a execução e chame o humano — mesmo fora de um gate — quando a mudança envolver:
+- contrato público (API, schema publicado, formato de arquivo consumido por terceiros);
+- segurança, autenticação ou autorização;
+- migração destrutiva de dados;
+- dependência nova;
+- caminho protegido;
+- qualquer gatilho adicional listado em `AGENTS.md` (seção "Gatilhos de escalonamento").
+
+`Verificado por:` revisão. Nenhum mecanismo impede o agente de seguir sem escalar — esta é uma limitação declarada.
+
+## Regras de fluxo
+
+- **Isolamento:** um worktree por sessão/trilha (`git worktree add ../<repo>-<branch> -b <branch>`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree.
+- **Escopo:** cada task declara `## Arquivos`. `verify.sh` falha se a branch tocar arquivo fora da lista. Ampliar o escopo exige atualizar a lista num commit `docs(task): …` — visível na revisão e no Gate 2.
+- **Divergência spec × código:** pare, registre em "Questões em aberto" da spec e corrija via commit `docs(spec): …` no mesmo PR.
+- **Verificação:** `sh scripts/agentic/verify.sh` é o ponto único. Ninguém afirma sucesso sem ter visto a saída.
+- **Commits:** `test(red):`, `feat(green):`, `refactor:`, `fix:`, `docs(spec):`, `docs(task):`, `chore:`. Um commit por passo do ciclo.
+- **Modo automático:** se `.agentic/auto-mode` contém `enabled: true`, o orquestrador encadeia tasks e publica PRs sem pedir confirmação. Nunca faz merge.
+
+## Orquestração
+
+O orquestrador é a sessão principal — não é um papel. Ele:
+1. lê `status-projeto` (injetado no início da sessão) e escolhe a próxima task;
+2. cria o worktree e o registro de execução em `.agentic/execucao/<AAAA-MM-DD>-<nome>/`:
+   - `progress.md` — task atual, SHA base, próximo passo (permite retomar uma sessão interrompida);
+   - `task-N-brief.md` — o que o papel recebe (task, contrato, caminhos absolutos, comandos);
+   - `task-N-relatorio.md` — o que o papel devolveu (`FEITO` / `FEITO_COM_RESSALVAS` / `BLOQUEADO`) e o parecer do revisor;
+3. despacha cada papel com o brief; nunca implementa ele mesmo;
+4. registra uma **Ruling** em `progress.md` sempre que decide algo não previsto no plano (o quê, por quê, alternativa descartada);
+5. escolhe o modelo por tipo de trabalho: forte para `arquiteto` e `revisor`; médio para `dominio`, `testes`, `dev`; leve quando o brief já contém o código completo (transcrição).
+
+## Interfaces para versões futuras (não implementadas)
+
+- **Incidente → intent:** um incidente gera `intent/NNN-<nome>.md` com `Origem: incidente <id>`.
+- **Release:** um gate de release consome as evidências do PR (RED/GREEN, saída do `verify`, parecer do revisor).
