@@ -51,6 +51,7 @@ copia "$fw/bootstrap/auto-mode.padrao" .agentic/auto-mode
 
 acrescenta .gitignore ".agentic/execucao/"
 acrescenta .gitignore ".agentic/verify.lock/"
+acrescenta .gitignore ".agentic/worktrees/"
 acrescenta .gitattributes "*.sh text eol=lf"
 acrescenta .gitattributes ".githooks/* text eol=lf"
 

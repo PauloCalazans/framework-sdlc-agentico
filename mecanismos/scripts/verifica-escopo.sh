@@ -24,7 +24,7 @@ fora=$(
   | sort -u | while IFS= read -r f; do
       [ -n "$f" ] || continue
       case "$f" in "$dir_spec"/*) continue ;; esac
-      case "$f" in .agentic/verify.lock/*|.agentic/execucao/*) continue ;; esac
+      case "$f" in .agentic/verify.lock/*|.agentic/execucao/*|.agentic/worktrees/*) continue ;; esac
       dentro=1
       for p in $padroes; do
         case "$f" in $p) dentro=0; break ;; esac
