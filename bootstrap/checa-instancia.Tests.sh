@@ -43,6 +43,11 @@ tl_contem ".githooks/pre-push" "aponta o hook sem bit executável"
 git -C "$r" update-index --chmod=+x .githooks/pre-push
 tl_espera 0 "hooks 100755 no índice passam" sh "$dir/checa-instancia.sh" "$r"
 
+sed -i 's/^CMD_VERIFY_STACK="true"$/CMD_VERIFY_STACK="false"/' "$r/.agentic/config"
+tl_espera 1 "verify vermelho na instância é problema" sh "$dir/checa-instancia.sh" "$r"
+tl_contem "VERIFY: FALHOU" "mostra a saída do verify (arquivo temporário via mktemp)"
+sed -i 's/^CMD_VERIFY_STACK="false"$/CMD_VERIFY_STACK="true"/' "$r/.agentic/config"
+
 git -C "$r" config core.hooksPath .outro
 tl_espera 1 "detecta hooksPath errado" sh "$dir/checa-instancia.sh" "$r"
 tl_contem "core.hooksPath" "aponta o hooksPath"
