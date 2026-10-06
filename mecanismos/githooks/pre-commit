@@ -25,7 +25,9 @@ fi
 
 # --- Segredos: camada 2, palavras-chave com valor literal (o gitleaks não pega senha genérica).
 agentic_padrao="(senha|password|passwd|secret|segredo|api[_-]?key|token)[A-Za-z0-9_]*[\"']?[[:space:]]*[:=][[:space:]]*[\"'][^\"']{8,}[\"']"
-agentic_achados=$(git diff --cached -U0 --no-color | grep '^+' | grep -v '^+++' | \
+agentic_diff=$(git diff --cached -U0 --no-color) || \
+  agentic_falha "git diff --cached falhou — não há como varrer o conteúdo staged (fail-closed)."
+agentic_achados=$(printf '%s\n' "$agentic_diff" | grep '^+' | grep -v '^+++' | \
   grep -iE "$agentic_padrao" | grep -vc 'agentic:permitir-segredo')
 if [ "$agentic_achados" -gt 0 ]; then
   agentic_falha "possível segredo literal em $agentic_achados linha(s) staged. Veja 'git diff --cached'. Se for falso positivo, marque a linha com 'agentic:permitir-segredo' e justifique no PR."
