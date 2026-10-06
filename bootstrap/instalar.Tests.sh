@@ -55,11 +55,25 @@ tl_espera 0 ".gitignore: nova linha isolada" grep -qxF ".agentic/execucao/" "$r/
 tl_espera 0 ".gitattributes preserva linha original" grep -qxF "*.png binary" "$r/.gitattributes"
 tl_espera 0 ".gitattributes: nova linha isolada" grep -qxF "*.sh text eol=lf" "$r/.gitattributes"
 sh "$dir/instalar.sh" "$r" >/dev/null
-tl_espera 0 "reinstalação sem duplicar" sh -c "[ \$(wc -l < '$r/.gitignore') -eq 4 ] && [ \$(wc -l < '$r/.gitattributes') -eq 3 ]"
+tl_espera 0 "reinstalação sem duplicar" sh -c "[ \$(wc -l < '$r/.gitignore') -eq 5 ] && [ \$(wc -l < '$r/.gitattributes') -eq 3 ]"
 
 r=$(tl_repo); mkdir -p "$r/.agentic"; echo "velho" > "$r/.agentic/conflitos-instalacao.txt"
 tl_espera 0 "instala com conflitos-instalacao.txt obsoleto" sh "$dir/instalar.sh" "$r"
 tl_espera 1 "remove arquivo de conflitos obsoleto" test -f "$r/.agentic/conflitos-instalacao.txt"
+
+tl_espera 1 "agente-template não vive em .claude/agents" test -e "$r/.claude/agents/_oraculo.md"
+tl_espera 0 "template do agente oráculo vai para docs/agentic/templates" test -f "$r/docs/agentic/templates/agente-oraculo.md"
+
+r=$(tl_repo); mkdir -p "$r/.claude"; echo '{"meu":1}' > "$r/.claude/settings.json"; echo "meu claude" > "$r/CLAUDE.md"
+tl_espera 0 "instala com settings.json pré-existente" sh "$dir/instalar.sh" "$r"
+tl_espera 0 "settings.json existente entra nos conflitos" grep -qx ".claude/settings.json" "$r/.agentic/conflitos-instalacao.txt"
+tl_espera 0 "settings.json existente preservado" grep -qF '"meu":1' "$r/.claude/settings.json"
+tl_espera 0 "guarda a versão do kit do CLAUDE.md" cmp -s "$dir/../adapters/claude-code/CLAUDE.md" "$r/.agentic/kit-conflitos/CLAUDE.md"
+tl_espera 0 "guarda o template de settings do kit" test -f "$r/.agentic/kit-conflitos/.claude/settings.json"
+tl_espera 0 ".gitignore ignora kit-conflitos" grep -qxF ".agentic/kit-conflitos/" "$r/.gitignore"
+rm "$r/CLAUDE.md"; rm "$r/.claude/settings.json"
+tl_espera 0 "reinstala sem conflitos" sh "$dir/instalar.sh" "$r"
+tl_espera 1 "kit-conflitos removido no início da execução" test -e "$r/.agentic/kit-conflitos"
 
 tl_espera 2 "recusa alvo que não é git" sh "$dir/instalar.sh" "$(mktemp -d)"
 tl_espera 2 "recusa sem argumento" sh "$dir/instalar.sh"

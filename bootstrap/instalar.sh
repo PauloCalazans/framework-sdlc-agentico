@@ -8,11 +8,19 @@ alvo=${1:-}
 git -C "$alvo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "o alvo não é um repositório git: $alvo" >&2; exit 2; }
 alvo=$(cd "$alvo" && pwd)
 rm -f "$alvo/.agentic/conflitos-instalacao.txt" # o arquivo reflete só a execução atual
+rm -rf "$alvo/.agentic/kit-conflitos"
 conflitos=$(mktemp)
 
+guarda_kit() { # guarda_kit <origem> <caminho relativo> — versão do kit para o /bootstrap comparar
+  mkdir -p "$(dirname "$alvo/.agentic/kit-conflitos/$2")"
+  cp "$1" "$alvo/.agentic/kit-conflitos/$2"
+}
 copia() { # copia <origem> <destino relativo ao alvo>
   if [ -e "$alvo/$2" ]; then
-    cmp -s "$1" "$alvo/$2" || printf '%s\n' "$2" >> "$conflitos"
+    if ! cmp -s "$1" "$alvo/$2"; then
+      printf '%s\n' "$2" >> "$conflitos"
+      guarda_kit "$1" "$2"
+    fi
     return 0
   fi
   mkdir -p "$(dirname "$alvo/$2")"
@@ -45,6 +53,7 @@ copia_dir "$fw/adapters/claude-code/agents" .claude/agents
 copia_dir "$fw/adapters/claude-code/commands" .claude/commands
 copia_dir "$fw/adapters/claude-code/hooks" .claude/hooks
 copia "$fw/adapters/claude-code/CLAUDE.md" CLAUDE.md
+copia "$fw/adapters/claude-code/agente-oraculo.tmpl.md" docs/agentic/templates/agente-oraculo.md
 copia "$fw/adapters/claude-code/settings.json.tmpl" .agentic/settings.pendente.json
 copia "$fw/bootstrap/config.padrao" .agentic/config
 copia "$fw/bootstrap/auto-mode.padrao" .agentic/auto-mode
@@ -52,8 +61,15 @@ copia "$fw/bootstrap/auto-mode.padrao" .agentic/auto-mode
 acrescenta .gitignore ".agentic/execucao/"
 acrescenta .gitignore ".agentic/verify.lock/"
 acrescenta .gitignore ".agentic/worktrees/"
+acrescenta .gitignore ".agentic/kit-conflitos/"
 acrescenta .gitattributes "*.sh text eol=lf"
 acrescenta .gitattributes ".githooks/* text eol=lf"
+
+# settings.json existente não é copiado, mas o ativar-protecoes.sh depende da ausência dele
+if [ -e "$alvo/.claude/settings.json" ]; then
+  printf '%s\n' ".claude/settings.json" >> "$conflitos"
+  guarda_kit "$fw/adapters/claude-code/settings.json.tmpl" ".claude/settings.json"
+fi
 
 git -C "$alvo" config core.hooksPath .githooks
 
