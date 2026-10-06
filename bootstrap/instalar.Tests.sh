@@ -21,6 +21,9 @@ for p in .claude/settings.json .claude/hooks/** .agentic/config .agentic/auto-mo
   tl_espera 0 "settings pendente nega Edit/Write em $p" sh -c "grep -qF '\"Edit($p)\"' '$r/.agentic/settings.pendente.json' && grep -qF '\"Write($p)\"' '$r/.agentic/settings.pendente.json'"
 done
 set +f
+for c in "git add" "git commit" "git checkout" "git rebase"; do
+  tl_espera 0 "settings pendente permite Bash($c:*)" grep -qF "\"Bash($c:*)\"" "$r/.agentic/settings.pendente.json"
+done
 if command -v node >/dev/null 2>&1; then
   tl_espera 0 "settings pendente é JSON válido" node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$r/.agentic/settings.pendente.json"
 fi
