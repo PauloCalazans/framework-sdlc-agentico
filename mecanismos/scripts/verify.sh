@@ -39,6 +39,9 @@ fi
 if [ -n "$task" ]; then
   etapa escopo sh "$dir/verifica-escopo.sh" "$task"
 else
+  if [ -n "$(ls docs/specs/*/tasks/*.md 2>/dev/null | head -n 1)" ]; then
+    echo; echo "aviso: nenhuma task com **Branch:** ${branch:-?} — escopo não verificado (trilha rápida?)"
+  fi
   echo; echo "== escopo: nenhuma task associada à branch (trilha rápida) — pulado"
 fi
 
