@@ -10,7 +10,7 @@ tl_espera 2 "bloqueia find /" roda 'find / -name x'
 tl_contem "varredura" "explica o bloqueio"
 tl_espera 2 "bloqueia grep -r na raiz" roda 'grep -rn senha /'
 tl_espera 2 "bloqueia find na raiz de drive" roda 'find C:/ -name x'
-tl_espera 2 "bloqueia raiz de drive com barra invertida" roda 'find C:\ -name x'
+tl_espera 2 "bloqueia raiz de drive com barra invertida" roda 'find C:\\ -name x'
 tl_espera 2 "bloqueia ls -R no home" roda 'ls -R ~'
 tl_espera 0 "permite find no diretório atual" roda 'find . -name x'
 tl_espera 0 "permite find em caminho absoluto específico" roda 'find /tmp/x -name y'
