@@ -32,6 +32,11 @@ git -C "$r" add -A
 git -C "$r" add --chmod=+x .githooks/pre-commit .githooks/pre-merge-commit .githooks/pre-push
 tl_espera 0 "instância completa passa" sh "$dir/checa-instancia.sh" "$r"
 
+git -C "$r" rm -q --cached .claude/settings.json
+tl_espera 1 "detecta settings.json não rastreado" sh "$dir/checa-instancia.sh" "$r"
+tl_contem "não rastreado" "aponta o settings não rastreado"
+git -C "$r" add .claude/settings.json
+
 git -C "$r" update-index --chmod=-x .githooks/pre-push
 tl_espera 1 "detecta hook 100644 no índice" sh "$dir/checa-instancia.sh" "$r"
 tl_contem ".githooks/pre-push" "aponta o hook sem bit executável"

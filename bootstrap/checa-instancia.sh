@@ -21,6 +21,12 @@ restantes=$(grep -rl '{{' AGENTS.md CLAUDE.md docs/agentic/papeis .claude/agents
 
 [ "$(git config core.hooksPath)" = ".githooks" ] || problema "core.hooksPath não aponta para .githooks"
 
+# O settings.json precisa ser versionado: senão some em clones/worktrees e as proteções não valem lá.
+if [ -f .claude/settings.json ]; then
+  git ls-files --error-unmatch .claude/settings.json >/dev/null 2>&1 || \
+    problema ".claude/settings.json não rastreado pelo git; commite (ação humana): git add .claude/settings.json && git commit -m 'chore: ativa proteções do agente'"
+fi
+
 # Hooks precisam estar no índice como executáveis (100755); senão, num clone Unix, o git os ignora em silêncio.
 for h in .githooks/pre-commit .githooks/pre-merge-commit .githooks/pre-push; do
   modo=$(git ls-files -s -- "$h" 2>/dev/null | cut -d' ' -f1)

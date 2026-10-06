@@ -51,9 +51,10 @@ Rode `sh scripts/agentic/verify.sh`. Deve terminar com `VERIFY: OK`; se não, re
 1. Stageie tudo e marque os hooks e scripts como executáveis no índice (no Windows o bit não vem do disco; sem ele, num clone Unix o git ignora os hooks em silêncio):
    `git add -A && git add --chmod=+x .githooks/pre-commit .githooks/pre-merge-commit .githooks/pre-push scripts/agentic/*.sh .claude/hooks/*.sh`
    Confira com `git ls-files -s .githooks` (modo `100755`) e faça o commit `chore: instancia o framework de SDLC agêntico` na branch `agentic/bootstrap`.
-2. Peça ao humano, nesta ordem:
-   - ativar as proteções: `sh scripts/agentic/ativar-protecoes.sh` (ação humana — permissões são do humano);
-   - integrar a branch (`git merge --ff-only agentic/bootstrap` na principal, ou via PR);
+2. Peça ao humano, nesta ordem (ações humanas — permissões são do humano):
+   - ainda na branch `agentic/bootstrap`, ativar as proteções: `sh scripts/agentic/ativar-protecoes.sh`;
+   - commitar o settings na mesma branch: `git add .claude/settings.json && git commit -m 'chore: ativa proteções do agente'`;
+   - só então integrar a branch (`git merge --ff-only agentic/bootstrap` na principal, ou via PR);
    - reiniciar a sessão do Claude Code.
 3. Rode a checagem estrutural se o framework estiver acessível: `sh <framework>/bootstrap/checa-instancia.sh .`
 4. Sugira o primeiro intent: `/intent <ideia>`.
