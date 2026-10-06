@@ -179,7 +179,7 @@ O orquestrador pode usar modelo **leve** em tasks de transcrição (brief traz o
 | Agente não faz merge, não força, não altera permissões | `deny` (`gh pr merge`, `git push --force*`, `git reset --hard`, edição de `.claude/settings*`) + `disableBypassPermissionsMode` | adaptador |
 | Sem varredura de disco / escrita externa | `deny` de escrita fora do repositório; PreToolUse mínimo bloqueando varredura a partir da raiz | adaptador |
 | Estado atual | `status-projeto.sh` no SessionStart | adaptador + script |
-| RED realmente falhava | `verifica-red.sh` (worktree isolado; compara asserções com HEAD); invocado pelo `verify` quando há commit `test(red):` na branch | script |
+| RED realmente falhava | `verifica-red.sh` (worktree isolado no commit RED; com `CMD_TESTE_ARQUIVO`, cada arquivo de teste tocado pelo RED precisa falhar — sem ele, a suíte inteira, modo degradado; asserções comparadas com HEAD por arquivo, só nos arquivos de teste tocados pelo RED; RED não toca código de produção, documentação sob `docs/` e `intent/` isenta); invocado pelo `verify` quando há commit `test(red):` na branch | script |
 | Escopo respeitado | `verifica-escopo.sh`: diff da branch × `Arquivos:` da task | script |
 | Testes não desabilitados/pulados | `verifica-skip.sh`: lê o relatório real dos testes; padrão de "desabilitado" vem do bootstrap | script |
 | Fronteiras de arquitetura | ferramenta da stack declarada no bootstrap | stack |
