@@ -1,0 +1,15 @@
+#!/bin/sh
+# pre-commit — bloqueia commit em branch protegida. Fail-closed.
+agentic_lib=""
+for agentic_c in "$(dirname "$0")/../scripts/agentic/lib-agentic.sh" "$(dirname "$0")/../scripts/lib-agentic.sh"; do
+  if [ -f "$agentic_c" ]; then agentic_lib=$agentic_c; break; fi
+done
+[ -n "$agentic_lib" ] || { echo "agentic: BLOQUEADO — lib-agentic.sh não encontrada (fail-closed)" >&2; exit 1; }
+. "$agentic_lib"
+
+branch=$(git symbolic-ref --short -q HEAD) || branch=""
+if [ -n "$branch" ] && agentic_branch_protegida "$branch"; then
+  agentic_falha "commit direto em '$branch' (branch protegida). Trabalhe numa branch e integre via PR."
+fi
+
+exit 0
