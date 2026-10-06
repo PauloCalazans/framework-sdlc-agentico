@@ -27,6 +27,7 @@ Na dúvida, trilha padrão.
 - Achado **Crítico** ou **Importante** devolve o trabalho ao papel autor; a revisão roda de novo no diff corrigido.
 - Achados **Menores** ficam registrados e são tratados na revisão final da branch, antes da publicação.
 - **Gate 1 não aceita hipótese:** toda regra da spec chega ao Gate 1 com estado `confirmada`. O questionário de decisão existe para que o humano resolva todas as dúvidas de uma vez, antes da implementação.
+- **Registro do Gate 1:** depois da aprovação humana, o orquestrador cria a branch e o worktree da primeira task, e o primeiro commit da branch é `docs(spec): <nome> aprovada (Gate 1)`, com intent, spec, design e tasks (`**Status:** aprovado` em intent, spec e design). A principal é protegida para todos, então o registro vive na branch, não nela. As tasks seguintes da mesma spec saem da principal depois que a primeira é integrada.
 - **Gate 2 sem plataforma de PR:** o orquestrador deixa a branch rebaseada na principal; o humano integra com `git merge --ff-only <branch>` (fast-forward não cria commit de merge, não dispara hooks e preserva os commits RED/GREEN).
 
 ## Trilha enxuta
