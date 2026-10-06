@@ -13,4 +13,4 @@ mkdir -p .claude
 cp .agentic/settings.pendente.json .claude/settings.json
 echo "Proteções ativadas em .claude/settings.json."
 echo "Commite agora (ação humana): git add .claude/settings.json && git commit -m 'chore: ativa proteções do agente'"
-echo "Depois integre a branch e reinicie a sessão do Claude Code."
+echo "Depois integre a branch, reinicie a sessão e abra o Claude Code interativamente neste projeto uma vez, aceitando o diálogo de confiança do workspace (sem isso as regras permissions.allow são ignoradas e o modo auto trava em prompts)."
