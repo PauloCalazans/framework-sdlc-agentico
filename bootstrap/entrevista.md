@@ -34,7 +34,7 @@ Grave `docs/bootstrap.md` com todas as respostas, cada uma marcada `confirmado` 
 3. `docs/agentic/papeis/{dominio,arquiteto,testes,dev,revisor}.md`: substitua `{{CONTEXTO_STACK}}` por um bloco **específico daquele papel**: comandos que ele usa, convenções da stack relevantes para o trabalho dele, ferramentas. Curto — o contrato já diz o que fazer.
 4. Para cada fonte externa: copie `docs/agentic/papeis/_oraculo.md` para `docs/agentic/papeis/oraculo-<nome>.md` e `.claude/agents/_oraculo.md` para `.claude/agents/oraculo-<nome>.md`, preenchendo `{{NOME_ORACULO}}`, `{{FONTE_ORACULO}}`, `{{ACESSO_ORACULO}}`. Liste-os em `{{ORACULOS}}` do `AGENTS.md` (sem oráculos: `- Nenhum.`).
 5. `docs/decisoes.md` a partir de `docs/agentic/templates/decisoes.md`, com `D1 — Stack e comandos de verificação` (Verificado por: `verify.sh`) e uma decisão por ferramenta de arquitetura com o mecanismo de baseline dela.
-6. Ajuste `.agentic/settings.pendente.json`: acrescente ao `permissions.allow` os comandos `CMD_*` da stack (ex.: `"Bash(npm test:*)"`), e, se a plataforma de PR não for GitHub, troque `gh pr create`/`gh pr view`/`gh pr merge` pelos equivalentes.
+6. Ajuste `.agentic/settings.pendente.json`: acrescente ao `permissions.allow` os comandos `CMD_*` da stack (ex.: `"Bash(npm test:*)"`), e, se a plataforma de PR não for GitHub, troque `gh pr create`/`gh pr view`/`gh pr merge` pelos equivalentes. As regras de deny de merge nunca são removidas: se a plataforma for outra ou não houver plataforma de PR, ACRESCENTE os equivalentes (ex.: `Bash(git merge:*)` para integração local) e mantenha `Bash(gh pr merge:*)`.
 7. Se o projeto tem CI: gere o workflow da plataforma chamando `sh scripts/agentic/verify.sh`, e registre em `docs/decisoes.md` que ele só vale depois de **provado verde num PR de teste**.
 
 ## Passo 5 — Conflitos
@@ -55,7 +55,7 @@ Rode `sh scripts/agentic/verify.sh`. Deve terminar com `VERIFY: OK`; se não, re
    - ainda na branch `agentic/bootstrap`, ativar as proteções: `sh scripts/agentic/ativar-protecoes.sh`;
    - commitar o settings na mesma branch: `git add .claude/settings.json && git commit -m 'chore: ativa proteções do agente'`;
    - só então integrar a branch (`git merge --ff-only agentic/bootstrap` na principal, ou via PR);
-   - reiniciar a sessão do Claude Code.
+   - reiniciar a sessão e abrir o Claude Code interativamente no projeto uma vez, aceitando o diálogo de confiança do workspace (senão as regras `allow` são ignoradas e o modo auto trava em prompts; os `deny` valem de qualquer forma).
 3. Rode a checagem estrutural se o framework estiver acessível: `sh <framework>/bootstrap/checa-instancia.sh .`
 4. Sugira o primeiro intent: `/intent <ideia>`.
 
