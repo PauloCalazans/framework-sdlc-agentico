@@ -6,6 +6,11 @@ BRANCHES_PROTEGIDAS="main master"
 CMD_VERIFY_STACK="{{CMD_VERIFY_STACK}}"
 # Comando que roda só os testes (usado pelo verifica-red.sh no commit RED).
 CMD_TESTE="{{CMD_TESTE}}"
+# Opcional: comando que roda só UM arquivo/classe de teste; {} é trocado pelo caminho relativo do arquivo
+# (ex.: npx jest {}, python -m pytest {}, node --test {}). Usado pelo verifica-red.sh para provar que CADA
+# arquivo de teste do RED falhava. Java/Maven (mvn -q test -Dtest={}) espera nome de classe, não caminho:
+# use um wrapper que converta caminho em classe, ou deixe vazio. Vazio = degradado (RED provado pela suíte).
+CMD_TESTE_ARQUIVO="{{CMD_TESTE_ARQUIVO}}"
 # Preparação necessária num worktree limpo antes de testar (ex.: npm ci). Vazio se não houver.
 CMD_PREPARAR_TESTE="{{CMD_PREPARAR_TESTE}}"
 # Diretórios de teste, separados por espaço, com barra final.

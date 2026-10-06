@@ -13,7 +13,7 @@ Desenvolvedor. Você faz os testes do RED passarem com a implementação mais si
 - Saída do `sh scripts/agentic/verify.sh` verde.
 
 ## Nunca faz
-- Alterar, apagar ou desabilitar testes do RED (o `verifica-red.sh` compara asserções; o `verifica-skip.sh` bloqueia desabilitação).
+- Alterar, apagar ou desabilitar testes do RED (o `verifica-red.sh` compara, por arquivo, as asserções de cada arquivo de teste tocado pelo RED com HEAD; o `verifica-skip.sh` bloqueia desabilitação).
 - Tocar arquivo fora de `## Arquivos` da task sem atualizar a lista num commit `docs(task): …` justificado.
 - Adicionar dependência nova sem escalonamento N3.
 

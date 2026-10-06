@@ -19,7 +19,7 @@ Pergunte um bloco por vez; prefira múltipla escolha com uma recomendação.
 | Bloco | Perguntas |
 |---|---|
 | Contexto | O que é o produto? Quem usa? Qual o domínio? Projeto novo ou existente? Restrições regulatórias ou de legado? |
-| Stack | Linguagens e frameworks? Gerenciador de pacotes? Comandos de instalar, build, lint, testes e verificação de arquitetura? Como a stack marca teste desabilitado? Os testes geram relatório JUnit XML (onde)? O que precisa rodar num checkout limpo antes dos testes? |
+| Stack | Linguagens e frameworks? Gerenciador de pacotes? Comandos de instalar, build, lint, testes e verificação de arquitetura? Qual comando roda um único arquivo/classe de teste, recebendo o caminho do arquivo (`CMD_TESTE_ARQUIVO`, com `{}` no lugar do caminho; ex.: `npx jest {}`, `python -m pytest {}`; Java: wrapper que converte caminho em classe, ou vazio — opcional, vazio = RED provado pela suíte inteira)? Como a stack marca teste desabilitado? Os testes geram relatório JUnit XML (onde)? O que precisa rodar num checkout limpo antes dos testes? |
 | Estrutura | Camadas/módulos e suas fronteiras? Diretórios de teste? Que ferramenta verifica fronteiras (ex.: ArchUnit, dependency-cruiser, import-linter)? |
 | Risco | Caminhos protegidos? Gatilhos de escalonamento específicos da stack/domínio? Dependências sensíveis? |
 | Fontes externas | Há sistema legado, API externa ou norma que os agentes devem consultar? Onde está e como se acessa (somente leitura)? |
