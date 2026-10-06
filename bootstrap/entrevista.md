@@ -26,7 +26,7 @@ Pergunte um bloco por vez; prefira múltipla escolha com uma recomendação.
 | Operação | Branch principal? Plataforma de PR (GitHub, GitLab, Azure…)? Existe CI? Quem aprova o Gate 1 e o Gate 2? Modo automático começa ligado? |
 
 ## Passo 3 — Registro
-Grave `docs/bootstrap.md` com todas as respostas, cada uma marcada `confirmado` (humano respondeu/confirmou) ou `inferido`. Re-execuções do `/bootstrap` partem deste arquivo.
+Grave `docs/bootstrap.md` com todas as respostas, cada uma marcada `confirmado` (humano respondeu/confirmou) ou `inferido`. Re-execuções do `/bootstrap` partem deste arquivo. Depois que as proteções estão ativas, alterações em `.agentic/config`, `.githooks/**` e `.claude/hooks/**` (inclusive em re-execuções do /bootstrap e nos merges do Passo 5) são ação humana: proponha o conteúdo e peça ao humano que aplique.
 
 ## Passo 4 — Instanciação
 1. `.agentic/config`: substitua todos os `{{...}}` (valores vazios são permitidos onde o comentário diz "degradado"). Se a stack exigir combinar etapas, `CMD_VERIFY_STACK` pode encadear comandos com `&&`.
