@@ -11,7 +11,7 @@ tl_contem "settings.json" "aponta settings não ativado"
 
 # Simula um bootstrap completo: preenche placeholders, configura comandos e ativa as proteções.
 find "$r/AGENTS.md" "$r/docs/agentic/papeis" "$r/.claude/agents" -type f ! -name '_oraculo.md' \
-  -exec sed -i 's/{{[A-Z_]*}}/preenchido/g' {} +
+  -exec sed -i 's/{{[A-Z0-9_]*}}/preenchido/g' {} +
 cat > "$r/.agentic/config" <<'EOF'
 BRANCH_PRINCIPAL="main"
 BRANCHES_PROTEGIDAS="main master"
