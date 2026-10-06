@@ -1,7 +1,8 @@
 # Framework de SDLC Agêntico — Design (v1)
 
 **Data:** 2026-10-05
-**Status:** draft — aguardando revisão humana
+**Status:** aprovado
+**Integrado:** na main em 2026-10-06
 **Autor:** mantenedores do framework (decisões) · Claude (redação)
 
 ## 1. Objetivo
@@ -63,7 +64,7 @@ framework-sdlc-agentico/
 ├── mecanismos/                 DETERMINÍSTICO, sem dependência de ferramenta
 │   ├── githooks/               pre-commit, pre-push, pre-merge-commit (+ .Tests.sh)
 │   └── scripts/                status-projeto, verifica-red, verifica-escopo,
-│                               verifica-skip, verify.tmpl (+ .Tests.sh)
+│                               verifica-skip, verify — lê .agentic/config (+ .Tests.sh)
 ├── adapters/claude-code/       ADAPTADOR FINO
 │   ├── agents/                 frontmatter + "leia core/papeis/X.md"
 │   ├── commands/               bootstrap, nova-task, verify, status
@@ -185,7 +186,7 @@ O orquestrador pode usar modelo **leve** em tasks de transcrição (brief traz o
 | Fronteiras de arquitetura | ferramenta da stack declarada no bootstrap | stack |
 | Independência do revisor, N3, checklist Gate 1 | — | por revisão |
 
-**`verify`:** ponto único. Gerado a partir de `verify.tmpl` com os comandos da stack, encadeado com `verifica-escopo`, `verifica-skip` e `verifica-red`. Lock contra execução concorrente. O comando `/verify` só reporta, nunca conserta.
+**`verify`:** ponto único. `verify.sh` genérico que lê os comandos da stack de `.agentic/config` (sem templating de script), encadeado com `verifica-escopo`, `verifica-skip` e `verifica-red`. Lock contra execução concorrente. O comando `/verify` só reporta, nunca conserta.
 
 **Deliberadamente excluídos:** parser de texto de comando no PreToolUse (redundante com `.githooks`); CI na v1. Se o projeto tiver CI, o bootstrap gera workflow que chama o mesmo `verify`, e ele só é aprovado depois de provado verde num PR de teste.
 

@@ -104,3 +104,13 @@ df867c5 docs: deny de merge nunca removido e passo de confiança do workspace
 ```
 
 `652c565` e `df867c5` vêm do smoke; os quatro demais, do teste de fogo. A revisão final da branch cobriu as Tasks 1–15; as correções do teste de fogo não passaram por revisão independente.
+
+## 9. Ajustes pós-parecer (2026-10-06)
+
+Parecer que comparou o framework com o projeto de referência controlado; cinco ajustes, um commit cada:
+
+1. **RED pode tocar documentação** — `verifica-red.sh` isenta `docs/` e `intent/`: 32 dos últimos 40 commits RED do projeto de referência também editam o documento da task, e seriam bloqueados.
+2. **Camada 2 de segredos** — `pre-commit` passa a pegar valor sem aspas (YAML, env/sh, properties) e chave hifenizada, e a aceitar placeholders: medido, `password: <literal>`, `PGPASSWORD=<literal>` e `spring.datasource.password=<literal>` passavam, e `SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"` era bloqueado.
+3. **RED por arquivo** — `CMD_TESTE_ARQUIVO` opcional prova que cada arquivo de teste do RED falha, e as asserções são comparadas por arquivo: a suíte inteira aceitava qualquer falha, e a soma global escondia asserção movida entre arquivos e bloqueava refactor de teste antigo não tocado pelo RED.
+4. **Itens N3 aprovados no Gate 1** — design lista os itens N3 visíveis e a task cita os que usa: no projeto de referência (D8), as paradas N3 no meio da task vinham de itens já visíveis no design.
+5. **Deriva documental** — spec marcada `aprovado`, `verify.tmpl` trocado pelo `verify.sh` que lê `.agentic/config`, `montar-exemplo.Tests.sh` movida para `scripts/`, ao lado do script que testa.
