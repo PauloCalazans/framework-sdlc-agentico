@@ -39,7 +39,7 @@ Relatado pelo humano: ciclo concluído no `validacao-node`, sem travamentos. Med
 
 ### 5.2 Trilha enxuta (comparação)
 
-Medido no git em C:/Workspace/IA/validacao-node-enxuta (instância nova com o kit atual):
+Medido no git no exemplo node (instância de validação, nova, com o kit atual):
 
 **Primeira tentativa:** `/mudanca desconto de 15% a partir de 500 unidades` foi RECUSADA pela trilha enxuta porque "mudança em regra de desconto" é gatilho N3 da stack nesse projeto (AGENTS.md); seguiu a trilha padrão — comportamento correto. Documentação gerada: 309 linhas em 4 arquivos (intent, spec, design, task). A trilha padrão não definia onde registrar o Gate 1 (principal protegida); o agente improvisou → corrigido no kit: Gate 1 = 1º commit da branch; verifica-escopo isenta o intent referenciado pela spec (restrito a intent/, sem "..").
 
@@ -47,13 +47,13 @@ Medido no git em C:/Workspace/IA/validacao-node-enxuta (instância nova com o ki
 
 **Conclusão:** ~80% menos documentação que a trilha padrão, mantendo RED provado, revisor independente (que achou defeito real), escopo e os dois gates.
 
-## 6. Teste de fogo (avitech)
+## 6. Teste de fogo (projeto existente maduro)
 
-Alvo: **clone local** do avitech (Java 25 / Spring Boot / Modulith, 65 tasks, hooks, agentes, comandos e `.claude/settings.json` próprios). Não foi usado worktree: **zero escrita no repositório original**.
+Alvo: **clone local** de um projeto existente maduro (Java 25 / Spring Boot / Modulith, 65 tasks, hooks, agentes, comandos e `.claude/settings.json` próprios). Não foi usado worktree: **zero escrita no repositório original**.
 
 **Resultado do bootstrap headless:** não instanciou nada, e esse é o comportamento correto. O `.claude/settings.json` existente do projeto desabilitou `bypassPermissions`, então todas as escritas foram negadas (também a criação de branch e o `mvn -v`). O clone permaneceu intacto (em `main`, nada commitado nem staged). O bootstrap headless de um projeto existente precisa de bypass num diretório descartável; com as permissões do projeto ativas, ele para sem escrever. Apareceu também o aviso de workspace não confiado (`Ignoring 22 permissions.allow entries ... this workspace has not been trusted`; idem para `additionalDirectories`).
 
-Mesmo sem escrever, o agente produziu as respostas dos Passos 1–3 (todas `inferido`: contexto, stack Java/Maven, estrutura de módulos, gatilhos N3, oráculo `oraculo-sisdan`, operação em `main` com GitHub e sem CI) e o conteúdo que gravaria no Passo 4. Notou que o projeto tem o auto-mode próprio ligado e recomendou o modo automático desligado no início.
+Mesmo sem escrever, o agente produziu as respostas dos Passos 1–3 (todas `inferido`: contexto, stack Java/Maven, estrutura de módulos, gatilhos N3, oráculo de domínio legado, operação em `main` com GitHub e sem CI) e o conteúdo que gravaria no Passo 4. Notou que o projeto tem o auto-mode próprio ligado e recomendou o modo automático desligado no início.
 
 **Propostas de conflito geradas (Passo 5, nada aplicado):**
 

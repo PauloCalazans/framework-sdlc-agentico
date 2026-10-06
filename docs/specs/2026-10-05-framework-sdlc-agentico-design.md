@@ -2,7 +2,7 @@
 
 **Data:** 2026-10-05
 **Status:** draft — aguardando revisão humana
-**Autor:** Paulo Calazans (decisões) · Claude (redação)
+**Autor:** mantenedores do framework (decisões) · Claude (redação)
 
 ## 1. Objetivo
 
@@ -15,31 +15,31 @@ Este repositório contém **apenas a parte agêntica**. Não contém código de 
 1. Um projeto Python novo e um projeto Node/TypeScript existente são instrumentados pelo mesmo núcleo, sem editar o `core/` (prova de agnosticismo).
 2. Uma funcionalidade real percorre o ciclo completo (intent → Gate 2) num projeto-exemplo, com registro do que ficou desconfortável.
 3. Todo mecanismo de controle tem suíte de testes com casos que **devem** bloquear e casos que **não devem** bloquear.
-4. Toda regra do `core/` é rastreável até sua origem (notebook, `abapmcp`, `avitech`) ou é marcada como proposta não validada.
+4. Toda regra do `core/` é rastreável até sua origem (referências teóricas, prática de projetos de referência) ou é marcada como proposta não validada.
 
 ## 2. Contexto e fontes
 
 O design consolida três fontes:
 
-- **Teoria:** notebook NotebookLM `c3b88221-73f7-46bf-b589-468ec5ecf249` (AGENTS.md; Continuous Quality Gates for Agentic PRs; Bridging AI Agents and CI/CD Quality Gates; Capture as intent.md — Claude Academy; Repository Guardrails for AI-Generated Code; Framework Corporativo de SDLC com IA; Research report de SDLC agêntico). Ressalva: o "Framework Corporativo" foi gerado por IA e seus números (36 agentes, scores RMI/ARS) são propostas, não prática validada.
-- **Prática enxuta:** `C:\Workspace\mcps\abapmcp` — ciclo baseado no plugin superpowers, baixo retrabalho (1 revert em 545 commits). Atrito: `CLAUDE.md` inchado (110 KB, estado duplicado), contagens escritas à mão que envelheceram.
-- **Prática controlada:** `C:\Workspace\java\avitech` — contratos de papéis portáveis, `.githooks`, estado derivado, "Verificado por". Exigiu grandes rodadas de correção; as lições dessas rodadas são a principal entrada deste design.
+- **Teoria:** referências teóricas (AGENTS.md; Continuous Quality Gates for Agentic PRs; Bridging AI Agents and CI/CD Quality Gates; Capture as intent.md — Claude Academy; Repository Guardrails for AI-Generated Code; Framework Corporativo de SDLC com IA; Research report de SDLC agêntico). Ressalva: o "Framework Corporativo" foi gerado por IA e seus números (36 agentes, scores RMI/ARS) são propostas, não prática validada.
+- **Prática enxuta:** um projeto de referência enxuto — ciclo baseado no plugin superpowers, baixo retrabalho (1 revert em mais de 500 commits). Atrito: `CLAUDE.md` inchado (110 KB, estado duplicado), contagens escritas à mão que envelheceram.
+- **Prática controlada:** um projeto de referência com mais controle — contratos de papéis portáveis, `.githooks`, estado derivado, "Verificado por". Exigiu grandes rodadas de correção; as lições dessas rodadas são a principal entrada deste design.
 
 ### Lições que moldam o design
 
 | Lição | Origem |
 |---|---|
-| Prompt é orientação; só mecanismo determinístico diz "não" | notebook [RG]; avitech (find órfão 7h apesar da regra em prosa) |
-| Erro repetido 2x vira mecanismo, não terceira instrução | avitech `dfdb4e8` |
-| Plugin genérico de processo compete com o processo do projeto | avitech (superpowers removido) |
-| Parser de texto de comando é corrida armamentista; hook nativo do git é a defesa sólida | avitech task 008 (15→20 bypasses) |
-| Agente afirma controles que não existem → todo controle declara "Verificado por" | avitech ADR 0008 (CI nunca verde) |
-| Espera humana domina o tempo de ciclo → concentrar decisões num gate com questionário | avitech ADR 0009 (3–4h de espera / tasks de 20–40min) |
-| Cerimônia cresce mais rápido que o código | avitech reestruturação (11 ADRs, 7→5 agentes) |
-| Estado escrito à mão envelhece em um dia → estado derivado | abapmcp e avitech |
-| Revisor separado do autor, em contexto limpo, nunca corrige | notebook [RG]; avitech; abapmcp |
-| Roteamento de modelo por tipo de task | abapmcp |
-| Expansão de escopo plausível é o antipadrão mais comum | notebook [RG] |
+| Prompt é orientação; só mecanismo determinístico diz "não" | [RG]; projeto de referência controlado (varredura de disco órfã por 7h apesar da regra em prosa) |
+| Erro repetido 2x vira mecanismo, não terceira instrução | projeto de referência controlado |
+| Plugin genérico de processo compete com o processo do projeto | projeto de referência controlado (plugin de processo removido) |
+| Parser de texto de comando é corrida armamentista; hook nativo do git é a defesa sólida | projeto de referência controlado (15→20 bypasses) |
+| Agente afirma controles que não existem → todo controle declara "Verificado por" | projeto de referência controlado (CI nunca verde) |
+| Espera humana domina o tempo de ciclo → concentrar decisões num gate com questionário | projeto de referência controlado (3–4h de espera / tasks de 20–40min) |
+| Cerimônia cresce mais rápido que o código | projeto de referência controlado (reestruturação: 11 ADRs, 7→5 agentes) |
+| Estado escrito à mão envelhece em um dia → estado derivado | ambos os projetos de referência |
+| Revisor separado do autor, em contexto limpo, nunca corrige | [RG]; ambos os projetos de referência |
+| Roteamento de modelo por tipo de task | projeto de referência enxuto |
+| Expansão de escopo plausível é o antipadrão mais comum | [RG] |
 
 ## 3. Decisões
 
@@ -213,11 +213,11 @@ O orquestrador pode usar modelo **leve** em tasks de transcrição (brief traz o
 1. **Mecanismos:** cada script/hook com `.Tests.sh` cobrindo casos que devem e que não devem bloquear; executados em Git Bash (Windows) e Linux por `scripts/verify.sh` do framework.
 2. **Agnosticismo:** `exemplos/python-cli-novo/` e `exemplos/node-servico-existente/` instrumentados por `instalar.sh` + `/bootstrap` com respostas pré-gravadas; checagem estrutural (arquivos presentes, nenhum placeholder residual, `verify` executa, hooks ativos).
 3. **Ciclo real:** uma funcionalidade pequena percorre intent → Gate 2 num exemplo; registro em `docs/validacao-v1.md` com "o que ficou desconfortável".
-4. **Teste de fogo:** bootstrap aplicado a `abapmcp` ou `avitech` num worktree descartável, comparando o gerado com o que o projeto já tem. O repositório original não é alterado.
+4. **Teste de fogo:** bootstrap aplicado a um projeto existente maduro num worktree descartável, comparando o gerado com o que o projeto já tem. O repositório original não é alterado.
 
 ## 12. O que não muda
 
-Os projetos `abapmcp` e `avitech` são apenas fontes de leitura; nenhum arquivo neles é alterado por este trabalho.
+Os projetos de referência são apenas fontes de leitura; nenhum arquivo neles é alterado por este trabalho.
 
 ## 13. Fora de escopo (v1)
 
