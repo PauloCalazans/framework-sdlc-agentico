@@ -16,7 +16,7 @@ for p in dominio arquiteto testes dev revisor; do
 done
 
 restantes=$(grep -rl '{{' AGENTS.md CLAUDE.md docs/agentic/papeis .claude/agents .agentic/config docs/bootstrap.md docs/decisoes.md 2>/dev/null \
-  | grep -v '_oraculo.md$')
+  | grep -v 'papeis/_oraculo.md$') # o contrato-base do oráculo é template; o agente-template fica em docs/agentic/templates
 [ -z "$restantes" ] || problema "placeholders {{...}} não preenchidos em: $(echo $restantes)"
 
 [ "$(git config core.hooksPath)" = ".githooks" ] || problema "core.hooksPath não aponta para .githooks"
