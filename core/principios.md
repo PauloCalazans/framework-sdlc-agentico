@@ -13,7 +13,7 @@ Quando o mesmo erro acontece pela segunda vez, a correção é um controle mecâ
 **Verificado por:** revisão.
 
 ## 3. Estado é derivado, nunca escrito à mão
-O estado do projeto (o que está em andamento, o que foi aprovado) vem do git e dos campos `**Status:**` dos artefatos. É exibido no início de cada sessão por `scripts/agentic/status-projeto.sh`. Números (contagens, totais) são gerados por script.
+O estado do projeto (o que está em andamento, o que foi aprovado) vem do git e dos campos `**Status:**` dos artefatos. É exibido no início de cada sessão por `agentic/mecanismos/scripts/status-projeto.sh`. Números (contagens, totais) são gerados por script.
 **Por quê:** estado escrito à mão envelhece em um dia e passa a mentir para a próxima sessão.
 **Verificado por:** `status-projeto.sh` (hook de início de sessão).
 
@@ -25,10 +25,10 @@ Toda afirmação sobre comportamento do sistema é marcada `medido` (há saída/
 ## 5. O agente nunca integra e nunca altera as próprias permissões
 Merge na branch principal e permissões do agente pertencem ao humano.
 **Por quê:** o ponto de integração é onde o humano responde pela decisão; um agente que amplia as próprias permissões elimina o controle que deveria limitá-lo.
-**Verificado por:** `deny` de `gh pr merge` e de edição de `.claude/settings*.json`, `.claude/hooks/**`, `.agentic/config`, `.agentic/auto-mode`, `.agentic/baseline-skips`, `.githooks/**`, `scripts/agentic/**`, `.gitleaksignore`; `pre-push` e `pre-merge-commit` bloqueiam a branch protegida.
+**Verificado por:** `deny` de `gh pr merge` e de edição de `.claude/settings*.json`, `.claude/hooks/**`, `agentic/config`, `agentic/auto-mode`, `agentic/baseline-skips`, `agentic/mecanismos/githooks/**`, `agentic/mecanismos/scripts/**`, `.gitleaksignore`; `pre-push` e `pre-merge-commit` bloqueiam a branch protegida.
 
 ## 6. Memória enxuta
-`AGENTS.md` e `CLAUDE.md` são mapa e regras. Narrativa de ciclo vai para documentos datados; decisões vão para `docs/decisoes.md`.
+`AGENTS.md` e `CLAUDE.md` são mapa e regras. Narrativa de ciclo vai para documentos datados; decisões vão para `agentic/projeto/decisoes.md`.
 **Por quê:** memória que vira changelog consome contexto a cada sessão e acumula contradições.
 **Verificado por:** revisão.
 

@@ -5,10 +5,10 @@ dir=$(cd "$(dirname "$0")" && pwd)
 
 prepara() {
   r=$(tl_repo)
-  mkdir -p "$r/.agentic" "$r/tests" "$r/sub/dir" "$r/docs/specs/x/tasks"
-  printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/.agentic/config"
+  mkdir -p "$r/agentic/.estado" "$r/tests" "$r/sub/dir" "$r/agentic/projeto/specs/x/tasks"
+  printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
   echo 'exit 0' > "$r/tests/stack.sh"
-  printf '# T\n**Status:** em-andamento\n**Branch:** x/001\n\n## Arquivos\n- tests/*\n' > "$r/docs/specs/x/tasks/001-t.md"
+  printf '# T\n**Status:** em-andamento\n**Branch:** x/001\n\n## Arquivos\n- tests/*\n' > "$r/agentic/projeto/specs/x/tasks/001-t.md"
   git -C "$r" add -A; git -C "$r" commit -q -m "base"
   git -C "$r" checkout -q -b x/001
   printf '%s\n' "$r"
@@ -30,9 +30,9 @@ echo z > "$r/fora.txt"
 tl_espera 1 "falha quando o escopo é violado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 rm "$r/fora.txt"
 
-mkdir "$r/.agentic/verify.lock"; echo $$ > "$r/.agentic/verify.lock/pid"
+mkdir "$r/agentic/.estado/verify.lock"; echo $$ > "$r/agentic/.estado/verify.lock/pid"
 tl_espera 3 "recusa rodar com outro verify vivo" sh -c "cd '$r' && sh '$dir/verify.sh'"
-echo 999999 > "$r/.agentic/verify.lock/pid"
+echo 999999 > "$r/agentic/.estado/verify.lock/pid"
 tl_espera 0 "recupera lock abandonado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 
 git -C "$r" checkout -q main
@@ -42,16 +42,16 @@ tl_contem "aviso: nenhuma task com **Branch:** main" "avisa que o escopo não fo
 
 # Trilha enxuta: o documento único (template real) é achado pela **Branch:** e o escopo vale.
 r=$(tl_repo)
-mkdir -p "$r/.agentic" "$r/tests" "$r/src" "$r/docs/specs/desc/tasks"
-printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/.agentic/config"
+mkdir -p "$r/agentic/.estado" "$r/tests" "$r/src" "$r/agentic/projeto/specs/desc/tasks"
+printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
 echo 'exit 0' > "$r/tests/stack.sh"
 sed -e 's|<nome>/001-<nome>|desc/001-desc|' -e 's|<caminho/exato>|src/desc.txt|' -e 's|<diretorio/\*>|tests/*|' \
-  "$dir/../../core/templates/mudanca.md" > "$r/docs/specs/desc/tasks/001-desc.md"
+  "$dir/../../core/templates/mudanca.md" > "$r/agentic/projeto/specs/desc/tasks/001-desc.md"
 git -C "$r" add -A; git -C "$r" commit -q -m "base"
 git -C "$r" checkout -q -b desc/001-desc
 echo a > "$r/src/desc.txt"
 tl_espera 0 "trilha enxuta: acha o documento pela Branch e respeita o escopo" sh -c "cd '$r' && sh '$dir/verify.sh'"
-tl_contem "escopo: OK (docs/specs/desc/tasks/001-desc.md)" "trilha enxuta: escopo verificado pelo documento único"
+tl_contem "escopo: OK (agentic/projeto/specs/desc/tasks/001-desc.md)" "trilha enxuta: escopo verificado pelo documento único"
 echo z > "$r/fora.txt"
 tl_espera 1 "trilha enxuta: arquivo fora de ## Arquivos é bloqueado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 tl_contem "fora.txt" "trilha enxuta: nomeia o arquivo fora do escopo"

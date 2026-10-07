@@ -40,14 +40,14 @@ printf '%s\n' "$pat" > "$r/g.txt"; git -C "$r" add g.txt
 tl_espera 1 "bloqueia token nú (sem keyword) — testa camada 1" git -C "$r" commit -q -m "x"
 
 r=$(novo_repo)
-mkdir -p "$r/.agentic"; echo 'GITLEAKS_BIN="/nao/existe/gitleaks"' > "$r/.agentic/config"
+mkdir -p "$r/agentic/.estado"; echo 'GITLEAKS_BIN="/nao/existe/gitleaks"' > "$r/agentic/config"
 echo ok > "$r/h.txt"; git -C "$r" add h.txt
 tl_espera 1 "fail-closed quando o gitleaks não está instalado" git -C "$r" commit -q -m "x"
 tl_contem "gitleaks" "mensagem orienta a instalar o gitleaks"
 
 # Camada 2 fail-closed: se 'git diff --cached' falhar (índice corrompido), bloqueia.
 r=$(novo_repo)
-mkdir -p "$r/.agentic"; echo 'GITLEAKS_BIN="true"' > "$r/.agentic/config"
+mkdir -p "$r/agentic/.estado"; echo 'GITLEAKS_BIN="true"' > "$r/agentic/config"
 echo lixo > "$r/indice-corrompido"
 tl_espera 1 "bloqueia quando git diff --cached falha" \
   sh -c "cd '$r' && GIT_INDEX_FILE='$r/indice-corrompido' sh '$dir/pre-commit'"

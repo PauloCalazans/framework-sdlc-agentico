@@ -24,7 +24,7 @@ O design consolida três fontes:
 
 - **Teoria:** referências teóricas (AGENTS.md; Continuous Quality Gates for Agentic PRs; Bridging AI Agents and CI/CD Quality Gates; Capture as intent.md — Claude Academy; Repository Guardrails for AI-Generated Code; Framework Corporativo de SDLC com IA; Research report de SDLC agêntico). Ressalva: o "Framework Corporativo" foi gerado por IA e seus números (36 agentes, scores RMI/ARS) são propostas, não prática validada.
 - **Prática enxuta:** um projeto de referência enxuto — ciclo baseado no plugin superpowers, baixo retrabalho (1 revert em mais de 500 commits). Atrito: `CLAUDE.md` inchado (110 KB, estado duplicado), contagens escritas à mão que envelheceram.
-- **Prática controlada:** um projeto de referência com mais controle — contratos de papéis portáveis, `.githooks`, estado derivado, "Verificado por". Exigiu grandes rodadas de correção; as lições dessas rodadas são a principal entrada deste design.
+- **Prática controlada:** um projeto de referência com mais controle — contratos de papéis portáveis, `agentic/mecanismos/githooks`, estado derivado, "Verificado por". Exigiu grandes rodadas de correção; as lições dessas rodadas são a principal entrada deste design.
 
 ### Lições que moldam o design
 
@@ -64,7 +64,7 @@ framework-sdlc-agentico/
 ├── mecanismos/                 DETERMINÍSTICO, sem dependência de ferramenta
 │   ├── githooks/               pre-commit, pre-push, pre-merge-commit (+ .Tests.sh)
 │   └── scripts/                status-projeto, verifica-red, verifica-escopo,
-│                               verifica-skip, verify — lê .agentic/config (+ .Tests.sh)
+│                               verifica-skip, verify — lê agentic/config (+ .Tests.sh)
 ├── adapters/claude-code/       ADAPTADOR FINO
 │   ├── agents/                 frontmatter + "leia core/papeis/X.md"
 │   ├── commands/               bootstrap, nova-task, verify, status
@@ -80,19 +80,22 @@ framework-sdlc-agentico/
 └── scripts/verify.sh           verificação do próprio framework
 ```
 
-**Mapeamento no projeto alvo após o bootstrap:**
+**Mapeamento no projeto alvo após o bootstrap.** Na raiz entra só o que as ferramentas exigem lá (`AGENTS.md`, `CLAUDE.md`, `.claude/`, uma linha em `.gitignore` e `.gitattributes`); todo o resto vive em `agentic/`, separado entre o que é do kit e o que é do projeto:
 
 | Origem no framework | Destino no projeto |
 |---|---|
-| `core/principios.md`, `core/processo/` | `docs/agentic/principios.md`, `docs/agentic/ciclo.md` |
-| `core/papeis/` (instanciados) | `docs/agentic/papeis/` |
-| `core/templates/` | `docs/agentic/templates/` |
+| `core/principios.md`, `core/processo/`, `bootstrap/entrevista.md` | `agentic/processo/principios.md`, `agentic/processo/ciclo.md`, `agentic/processo/entrevista.md` |
+| `core/papeis/` (instanciados) | `agentic/processo/papeis/` |
+| `core/templates/` | `agentic/processo/templates/` |
 | `core/templates/AGENTS.md` (instanciado) | `AGENTS.md` (raiz) |
-| `mecanismos/githooks/` | `.githooks/` |
-| `mecanismos/scripts/` | `scripts/agentic/` |
+| `mecanismos/githooks/` | `agentic/mecanismos/githooks/` (`core.hooksPath`) |
+| `mecanismos/scripts/` | `agentic/mecanismos/scripts/` |
 | `adapters/claude-code/` | `.claude/` + `CLAUDE.md` mínimo |
-| — | `.agentic/auto-mode` (versionado), `.agentic/execucao/` (gitignored) |
-| — | `docs/bootstrap.md`, `docs/decisoes.md`, `intent/`, `docs/specs/` |
+| `bootstrap/config.padrao`, `bootstrap/auto-mode.padrao` | `agentic/config`, `agentic/auto-mode` (versionados; política) |
+| — | `agentic/projeto/`: `bootstrap.md`, `decisoes.md`, `intent/`, `specs/` (artefatos do projeto; o kit nunca os toca) |
+| — | `agentic/.estado/`: `execucao/`, `worktrees/`, `verify.lock/`, `kit-conflitos/`, `settings.pendente.json` (efêmero, uma linha no `.gitignore`) |
+
+Instâncias do layout anterior (`docs/agentic/`, `scripts/agentic/`, `.githooks/`, `.agentic/`, `intent/`, `docs/specs/`) migram com `bootstrap/migrar-layout.sh <projeto>` (ação humana: cria a branch `agentic/migrar-layout`, move com `git mv`, atualiza os mecanismos para a versão do kit, reescreve os caminhos e só stageia).
 
 ## 5. Princípios-meta (`core/principios.md`)
 
@@ -110,8 +113,8 @@ framework-sdlc-agentico/
 
 | # | Fase | Papel | Artefato | Verificação |
 |---|---|---|---|---|
-| 0 | Intenção | humano + `dominio` | `intent/NNN-<nome>.md` | — |
-| 1 | Especificação | `dominio` | `docs/specs/<nome>/spec.md` + questionário de decisão | `revisor` modo spec |
+| 0 | Intenção | humano + `dominio` | `agentic/projeto/intent/NNN-<nome>.md` | — |
+| 1 | Especificação | `dominio` | `agentic/projeto/specs/<nome>/spec.md` + questionário de decisão | `revisor` modo spec |
 | 2 | Design | `arquiteto` | `design.md` + contrato executável + `tasks/NNN-*.md` | `revisor` modo design |
 | G1 | **Gate 1** | humano | aprova intent+spec+design; responde questionário; nenhuma `hipótese` passa | — |
 | 3 | RED | `testes` | testes falhando, sem código de produção (o documento da task pode ser atualizado no mesmo commit); commit `test(red):` | `verifica-red` |
@@ -135,13 +138,13 @@ Gatilhos que interrompem a execução fora dos gates e exigem humano. Genéricos
 - **Escopo:** cada task declara `Arquivos:`. Arquivo fora da lista faz o `verify` falhar, salvo justificativa em commit `docs(task):` no mesmo PR.
 - **Divergência spec × código:** parar, registrar em "Questões em Aberto", corrigir via `docs(spec):` no mesmo PR.
 - **Isolamento:** um worktree por sessão/trilha. Nunca duas sessões no mesmo diretório.
-- **Modo automático:** `.agentic/auto-mode` versionado (`enabled: true|false`). Ligado: encadeia tasks e publica PRs sem confirmação. Nunca faz merge.
-- **Registro de execução:** o orquestrador mantém `.agentic/execucao/<data>-<nome>/` com `progress.md`, `task-N-brief.md`, `task-N-relatorio.md`, e registra **Rulings** quando decide algo não previsto no plano. Permite retomar sessões interrompidas.
+- **Modo automático:** `agentic/auto-mode` versionado (`enabled: true|false`). Ligado: encadeia tasks e publica PRs sem confirmação. Nunca faz merge.
+- **Registro de execução:** o orquestrador mantém `agentic/.estado/execucao/<data>-<nome>/` com `progress.md`, `task-N-brief.md`, `task-N-relatorio.md`, e registra **Rulings** quando decide algo não previsto no plano. Permite retomar sessões interrompidas.
 - **Orquestrador:** é a sessão principal guiada por `ciclo.md`, não um papel.
 
 ### Interfaces para a v2 (não implementadas)
 
-- Incidente → novo `intent/` (campo `Origem: incidente <id>`).
+- Incidente → novo `agentic/projeto/intent/` (campo `Origem: incidente <id>`).
 - Gate de release consome as evidências do PR (RED/GREEN, `verify`, parecer do revisor).
 
 ## 7. Papéis (`core/papeis/`)
@@ -159,7 +162,7 @@ Estrutura fixa de cada contrato: **Quem você é** · **Consome** · **Produz** 
 
 O orquestrador pode usar modelo **leve** em tasks de transcrição (brief traz o código completo).
 
-**Adaptador Claude Code:** `.claude/agents/<papel>.md` contém frontmatter (`tools`, `model`) e a instrução "Leia `docs/agentic/papeis/<papel>.md`; não duplique regras aqui".
+**Adaptador Claude Code:** `.claude/agents/<papel>.md` contém frontmatter (`tools`, `model`) e a instrução "Leia `agentic/processo/papeis/<papel>.md`; não duplique regras aqui".
 
 ## 8. Artefatos (`core/templates/`)
 
@@ -168,31 +171,31 @@ O orquestrador pode usar modelo **leve** em tasks de transcrição (brief traz o
 - **`design.md`:** `Status:`; Decisões numeradas; Contrato executável (o que é, como se valida); Itens N3 (aprovação no Gate 1); Como isso se prova; O que não muda; O desconfortável, declarado.
 - **`task.md`:** `Status:`; Objetivo; `Arquivos:` (escopo); Interfaces Produz/Consome; N3 aprovados no Gate 1; Critérios de pronto; Questões em aberto.
 - **`decisoes.md`:** entradas `D<n>` com Decisão · Por quê · Consequência · `Verificado por:`; seção "Decisões revogadas" (nunca apagar, marcar superação).
-- **`AGENTS.md`:** Visão geral; Comandos (instalar, build, lint, teste, arquitetura, `verify`); Regras invioláveis; Estrutura do repositório; Onde estão intents/specs/decisões; "Leia `docs/agentic/ciclo.md`".
+- **`AGENTS.md`:** Visão geral; Comandos (instalar, build, lint, teste, arquitetura, `verify`); Regras invioláveis; Estrutura do repositório; Onde estão intents/specs/decisões; "Leia `agentic/processo/ciclo.md`".
 - **`pr.md`:** Intent/task de origem; Evidência RED/GREEN (hashes); saída do `verify`; Arquivos, linhas e caminhos sensíveis tocados; Parecer do revisor; O que ficou desconfortável.
 
 ## 9. Mecanismos
 
 | Controle | Mecanismo | Camada |
 |---|---|---|
-| Segredos não entram | `pre-commit`: gitleaks + scan de palavras-chave sobre conteúdo staged; fail-closed | `.githooks` |
-| Branch protegida / force-push | `pre-commit`, `pre-push`, `pre-merge-commit` | `.githooks` |
+| Segredos não entram | `pre-commit`: gitleaks + scan de palavras-chave sobre conteúdo staged; fail-closed | `agentic/mecanismos/githooks` |
+| Branch protegida / force-push | `pre-commit`, `pre-push`, `pre-merge-commit` | `agentic/mecanismos/githooks` |
 | Agente não faz merge, não força, não altera permissões | `deny` (`gh pr merge`, `git push --force*`, `git reset --hard`, edição de `.claude/settings*`) + `disableBypassPermissionsMode` | adaptador |
 | Sem varredura de disco / escrita externa | `deny` de escrita fora do repositório; PreToolUse mínimo bloqueando varredura a partir da raiz | adaptador |
 | Estado atual | `status-projeto.sh` no SessionStart | adaptador + script |
-| RED realmente falhava | `verifica-red.sh` (worktree isolado no commit RED; com `CMD_TESTE_ARQUIVO`, cada arquivo de teste tocado pelo RED precisa falhar — sem ele, a suíte inteira, modo degradado; asserções comparadas com HEAD por arquivo, só nos arquivos de teste tocados pelo RED; RED não toca código de produção, documentação sob `docs/` e `intent/` isenta); invocado pelo `verify` quando há commit `test(red):` na branch | script |
+| RED realmente falhava | `verifica-red.sh` (worktree isolado no commit RED; com `CMD_TESTE_ARQUIVO`, cada arquivo de teste tocado pelo RED precisa falhar — sem ele, a suíte inteira, modo degradado; asserções comparadas com HEAD por arquivo, só nos arquivos de teste tocados pelo RED; RED não toca código de produção, documentação sob `docs/` e `agentic/projeto/intent/` isenta); invocado pelo `verify` quando há commit `test(red):` na branch | script |
 | Escopo respeitado | `verifica-escopo.sh`: diff da branch × `Arquivos:` da task | script |
 | Testes não desabilitados/pulados | `verifica-skip.sh`: lê o relatório real dos testes; padrão de "desabilitado" vem do bootstrap | script |
 | Fronteiras de arquitetura | ferramenta da stack declarada no bootstrap | stack |
 | Independência do revisor, N3, checklist Gate 1 | — | por revisão |
 
-**`verify`:** ponto único. `verify.sh` genérico que lê os comandos da stack de `.agentic/config` (sem templating de script), encadeado com `verifica-escopo`, `verifica-skip` e `verifica-red`. Lock contra execução concorrente. O comando `/verify` só reporta, nunca conserta.
+**`verify`:** ponto único. `verify.sh` genérico que lê os comandos da stack de `agentic/config` (sem templating de script), encadeado com `verifica-escopo`, `verifica-skip` e `verifica-red`. Lock contra execução concorrente. O comando `/verify` só reporta, nunca conserta.
 
-**Deliberadamente excluídos:** parser de texto de comando no PreToolUse (redundante com `.githooks`); CI na v1. Se o projeto tiver CI, o bootstrap gera workflow que chama o mesmo `verify`, e ele só é aprovado depois de provado verde num PR de teste.
+**Deliberadamente excluídos:** parser de texto de comando no PreToolUse (redundante com `agentic/mecanismos/githooks`); CI na v1. Se o projeto tiver CI, o bootstrap gera workflow que chama o mesmo `verify`, e ele só é aprovado depois de provado verde num PR de teste.
 
 ## 10. Bootstrap
 
-**Passo 1 — `bootstrap/instalar.sh <alvo>`:** copia o kit conforme o mapeamento da seção 4, configura `git config core.hooksPath .githooks`, adiciona `.agentic/execucao/` ao `.gitignore`. Não pergunta nada. Não sobrescreve arquivos existentes: conflitos são listados e deixados para o passo 2.
+**Passo 1 — `bootstrap/instalar.sh <alvo>`:** copia o kit conforme o mapeamento da seção 4, configura `git config core.hooksPath agentic/mecanismos/githooks`, adiciona `agentic/.estado/execucao/` ao `.gitignore`. Não pergunta nada. Não sobrescreve arquivos existentes: conflitos são listados e deixados para o passo 2.
 
 **Passo 2 — `/bootstrap`:** entrevista e instanciação. Em projeto existente, o agente lê o repositório antes e propõe respostas marcadas `inferido`; o humano confirma ou corrige.
 
@@ -200,12 +203,12 @@ O orquestrador pode usar modelo **leve** em tasks de transcrição (brief traz o
 |---|---|---|
 | Contexto | produto, usuários, domínio, novo/existente, restrições regulatórias e de legado | `AGENTS.md`, persona do `dominio` |
 | Stack | linguagens, frameworks, gerenciador de pacotes, comandos de build/lint/teste/arquitetura, marcador de teste desabilitado, formato do relatório de testes | `verify`, "Contexto da stack" dos papéis |
-| Estrutura | camadas/módulos, diretórios de teste, locais de intent/spec/decisões | ferramenta de fronteiras, templates |
-| Risco | caminhos protegidos, gatilhos N3 da stack, dependências sensíveis | `.githooks`, `settings.json`, lista N3 |
+| Estrutura | camadas/módulos, diretórios de teste, locais de agentic/projeto/intent/spec/decisões | ferramenta de fronteiras, templates |
+| Risco | caminhos protegidos, gatilhos N3 da stack, dependências sensíveis | `agentic/mecanismos/githooks`, `settings.json`, lista N3 |
 | Fontes externas | sistemas legados, APIs, normas | oráculos |
 | Operação | branch principal, plataforma de PR, CI, aprovadores dos Gates, modo automático | `settings.json`, `auto-mode`, template de PR |
 
-**Saída:** artefatos instanciados; `docs/bootstrap.md` com as respostas (re-execuções partem dele); `docs/decisoes.md` com D1 = stack. Em projeto existente: gitleaks e ferramenta de arquitetura em modo baseline (violações atuais registradas, só novas bloqueiam); `CLAUDE.md`/`AGENTS.md` existentes recebem proposta de merge aprovada pelo humano.
+**Saída:** artefatos instanciados; `agentic/projeto/bootstrap.md` com as respostas (re-execuções partem dele); `agentic/projeto/decisoes.md` com D1 = stack. Em projeto existente: gitleaks e ferramenta de arquitetura em modo baseline (violações atuais registradas, só novas bloqueiam); `CLAUDE.md`/`AGENTS.md` existentes recebem proposta de merge aprovada pelo humano.
 
 **Encerramento:** roda `verify` e `status` (o primeiro deve passar ou registrar o motivo de falha) e sugere o primeiro intent. **O bootstrap nunca escreve código de produto.**
 

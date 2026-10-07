@@ -1,6 +1,6 @@
 # Task <NNN>: <nome>
 
-**Spec:** docs/specs/<nome>/spec.md
+**Spec:** agentic/projeto/specs/<nome>/spec.md
 **Status:** pendente
 <!-- pendente | em-andamento | em-revisão | publicada  (integrada não é escrito: deriva do git) -->
 **Branch:** <spec>/<NNN>-<nome>
@@ -23,7 +23,7 @@
 
 ## Critérios de pronto
 - <critério de aceite da spec coberto por esta task>
-- `sh scripts/agentic/verify.sh` verde
+- `sh agentic/mecanismos/scripts/verify.sh` verde
 
 ## Questões em aberto
 - <…>

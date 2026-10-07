@@ -5,8 +5,8 @@ dir=$(cd "$(dirname "$0")" && pwd)
 
 prepara() {
   r=$(tl_repo)
-  mkdir -p "$r/.agentic" "$r/src" "$r/tests"
-  cat > "$r/.agentic/config" <<'EOT'
+  mkdir -p "$r/agentic/.estado" "$r/src" "$r/tests"
+  cat > "$r/agentic/config" <<'EOT'
 CMD_TESTE="sh tests/run.sh"
 DIRS_TESTE="tests/"
 MARCADOR_ASSERCAO="assert_igual"
@@ -47,17 +47,17 @@ tl_contem "src/soma.sh" "aponta o arquivo de produção"
 
 # RED que atualiza o documento da task (docs/) e o intent: documentação não é produção.
 r=$(prepara); teste_red "$r"
-mkdir -p "$r/docs/specs/x/tasks" "$r/intent"
-echo '- [x] RED' > "$r/docs/specs/x/tasks/001-x.md"
-echo 'intenção' > "$r/intent/001-x.md"
+mkdir -p "$r/agentic/projeto/specs/x/tasks" "$r/agentic/projeto/intent"
+echo '- [x] RED' > "$r/agentic/projeto/specs/x/tasks/001-x.md"
+echo 'intenção' > "$r/agentic/projeto/intent/001-x.md"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma + atualiza task"
 echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
 git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): soma"
-tl_espera 0 "aceita RED que também atualiza docs/specs/x/tasks/001-x.md e intent/" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_espera 0 "aceita RED que também atualiza agentic/projeto/specs/x/tasks/001-x.md e agentic/projeto/intent/" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 
-# Isenção é só para docs/ e intent/: produção fora de DIRS_TESTE segue bloqueada mesmo com doc junto.
+# Isenção é só para docs/ e agentic/projeto/: produção fora de DIRS_TESTE segue bloqueada mesmo com doc junto.
 r=$(prepara); teste_red "$r"
-mkdir -p "$r/docs/specs/x/tasks"; echo '- [x] RED' > "$r/docs/specs/x/tasks/001-x.md"
+mkdir -p "$r/agentic/projeto/specs/x/tasks"; echo '- [x] RED' > "$r/agentic/projeto/specs/x/tasks/001-x.md"
 echo 'module.exports = 1' > "$r/src/x.js"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
 tl_espera 1 "rejeita RED que toca src/x.js mesmo junto com doc da task" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
@@ -97,32 +97,32 @@ tl_espera 0 "aceita RED com arquivo de teste com acento e espaço" sh -c "cd '$r
 # CMD_TESTE inexistente (127) ou não executável (126) não é evidência de RED.
 r=$(prepara); teste_red "$r"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
-echo 'CMD_TESTE="comando-que-nao-existe-xyz"' >> "$r/.agentic/config"
+echo 'CMD_TESTE="comando-que-nao-existe-xyz"' >> "$r/agentic/config"
 tl_espera 1 "CMD_TESTE inexistente bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 tl_contem "comando de teste não encontrado" "explica o comando ausente"
 
 r=$(prepara); teste_red "$r"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
-echo 'CMD_TESTE="./tests"' >> "$r/.agentic/config" # diretório: exit 126 em qualquer plataforma
+echo 'CMD_TESTE="./tests"' >> "$r/agentic/config" # diretório: exit 126 em qualquer plataforma
 tl_espera 1 "CMD_TESTE não executável (126) bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 tl_contem "não encontrado/não executável" "explica o comando não executável"
 
 # Contagem de asserções fail-closed.
 r=$(prepara); teste_red "$r"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
-echo 'MARCADOR_ASSERCAO="assert_igual("' >> "$r/.agentic/config"
+echo 'MARCADOR_ASSERCAO="assert_igual("' >> "$r/agentic/config"
 tl_espera 1 "git grep com erro (regex inválida) bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 tl_contem "asserções" "explica a falha na contagem"
 
 r=$(prepara); teste_red "$r"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
-echo 'MARCADOR_ASSERCAO=""' >> "$r/.agentic/config"
+echo 'MARCADOR_ASSERCAO=""' >> "$r/agentic/config"
 tl_espera 1 "MARCADOR_ASSERCAO vazio com RED bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 tl_contem "MARCADOR_ASSERCAO" "aponta o marcador vazio"
 
 r=$(prepara); teste_red "$r"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
-echo 'DIRS_TESTE=""' >> "$r/.agentic/config"
+echo 'DIRS_TESTE=""' >> "$r/agentic/config"
 tl_espera 1 "DIRS_TESTE vazio com RED bloqueia" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 tl_contem "DIRS_TESTE" "aponta DIRS_TESTE vazio"
 
@@ -164,7 +164,7 @@ green_soma() {
   git -C "$1" add -A; git -C "$1" commit -q -m "feat(green): soma"
 }
 modo_arquivo() { config_extra "$1" 'CMD_TESTE_ARQUIVO="sh {}"'; }
-config_extra() { echo "$2" >> "$1/.agentic/config"; git -C "$1" add -A; git -C "$1" commit -q -m "chore: config"; }
+config_extra() { echo "$2" >> "$1/agentic/config"; git -C "$1" add -A; git -C "$1" commit -q -m "chore: config"; }
 
 # (a) Prova por arquivo.
 r=$(prepara_multi); modo_arquivo "$r"; teste_soma "$r"

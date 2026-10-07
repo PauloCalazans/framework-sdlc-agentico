@@ -4,18 +4,18 @@ dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/testlib.sh"
 
 r=$(tl_repo)
-mkdir -p "$r/intent" "$r/docs/specs/pedidos/tasks" "$r/.agentic"
-printf '# Intent: pedidos\n**Status:** aprovado\n' > "$r/intent/001-pedidos.md"
-printf '# Task 001\n**Status:** em-andamento\n**Branch:** pedidos/001\n' > "$r/docs/specs/pedidos/tasks/001-criar.md"
-printf '# modelo\n**Status:** <x>\n' > "$r/docs/specs/_template.md"
-echo "enabled: true" > "$r/.agentic/auto-mode"
+mkdir -p "$r/agentic/projeto/intent" "$r/agentic/projeto/specs/pedidos/tasks" "$r/agentic/.estado"
+printf '# Intent: pedidos\n**Status:** aprovado\n' > "$r/agentic/projeto/intent/001-pedidos.md"
+printf '# Task 001\n**Status:** em-andamento\n**Branch:** pedidos/001\n' > "$r/agentic/projeto/specs/pedidos/tasks/001-criar.md"
+printf '# modelo\n**Status:** <x>\n' > "$r/agentic/projeto/specs/_template.md"
+echo "enabled: true" > "$r/agentic/auto-mode"
 git -C "$r" checkout -q -b pedidos/001
 git -C "$r" commit -q --allow-empty -m "w1"
 
 tl_espera 0 "status sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
 tl_contem "Branch atual: pedidos/001" "mostra a branch atual"
-tl_contem "intent/001-pedidos.md: aprovado" "lista status de intent"
-tl_contem "docs/specs/pedidos/tasks/001-criar.md: em-andamento" "lista status de task"
+tl_contem "agentic/projeto/intent/001-pedidos.md: aprovado" "lista status de intent"
+tl_contem "agentic/projeto/specs/pedidos/tasks/001-criar.md: em-andamento" "lista status de task"
 tl_contem "pedidos/001: 1 commit(s)" "mostra branch à frente da principal"
 tl_contem "Modo automático: ligado" "lê o auto-mode"
 copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
