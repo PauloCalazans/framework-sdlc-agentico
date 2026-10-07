@@ -5,8 +5,8 @@ dir=$(cd "$(dirname "$0")" && pwd)
 
 prepara() {
   r=$(tl_repo)
-  mkdir -p "$r/.agentic" "$r/tests" "$r/relatorio"
-  cat > "$r/.agentic/config" <<'EOT'
+  mkdir -p "$r/agentic/.estado" "$r/tests" "$r/relatorio"
+  cat > "$r/agentic/config" <<'EOT'
 MARCADOR_DESABILITADO='@unittest\.skip|\.skip\('
 RELATORIO_TESTES="relatorio/*.xml"
 EOT
@@ -42,7 +42,7 @@ r=$(prepara); junit "$r" ""
 printf '@unittest.skip("x")\ndef test_d(): pass\n' > "$r/tests/test_ação.py"
 tl_espera 1 "marcador em arquivo novo com acento em DIRS_TESTE bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 
-r=$(prepara); junit "$r" ""; echo 'DIRS_TESTE=""' >> "$r/.agentic/config"
+r=$(prepara); junit "$r" ""; echo 'DIRS_TESTE=""' >> "$r/agentic/config"
 tl_espera 1 "marcador configurado com DIRS_TESTE vazio bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 tl_contem "DIRS_TESTE" "explica DIRS_TESTE vazio"
 
@@ -56,18 +56,18 @@ tl_espera 0 "relatório com espaço no nome e sem skip passa" sh -c "cd '$r' && 
 r=$(prepara); junit "$r" '<testcase name="b"><skipped/></testcase>'
 tl_espera 1 "falha com skip no relatório acima do baseline" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 
-echo 1 > "$r/.agentic/baseline-skips"
+echo 1 > "$r/agentic/baseline-skips"
 tl_espera 0 "aceita skips até o baseline registrado" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 
-printf '1\r\n' > "$r/.agentic/baseline-skips"
+printf '1\r\n' > "$r/agentic/baseline-skips"
 tl_espera 0 "baseline com CRLF é aceito" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
-printf 'abc\n' > "$r/.agentic/baseline-skips"
+printf 'abc\n' > "$r/agentic/baseline-skips"
 tl_espera 1 "baseline não numérico bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
-: > "$r/.agentic/baseline-skips"
+: > "$r/agentic/baseline-skips"
 tl_espera 1 "baseline vazio bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 
 r=$(prepara); junit "$r" '<testcase name="b"><skipped/></testcase><testcase name="c"><skipped/></testcase>'
-echo 1 > "$r/.agentic/baseline-skips"
+echo 1 > "$r/agentic/baseline-skips"
 tl_espera 1 "2 skips com baseline 1 bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 
 r=$(prepara)

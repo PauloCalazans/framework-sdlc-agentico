@@ -4,4 +4,4 @@ description: Oráculo somente leitura sobre {{FONTE_ORACULO}} — responde com c
 tools: Read, Grep, Glob
 model: sonnet
 ---
-Leia `docs/agentic/papeis/oraculo-{{NOME_ORACULO}}.md` e siga-o integralmente. Não duplique regras aqui.
+Leia `agentic/processo/papeis/oraculo-{{NOME_ORACULO}}.md` e siga-o integralmente. Não duplique regras aqui.

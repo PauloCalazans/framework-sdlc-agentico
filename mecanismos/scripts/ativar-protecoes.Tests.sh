@@ -3,13 +3,13 @@
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/testlib.sh"
 
-r=$(tl_repo); mkdir -p "$r/.agentic"; echo '{"x":1}' > "$r/.agentic/settings.pendente.json"
+r=$(tl_repo); mkdir -p "$r/agentic/.estado"; echo '{"x":1}' > "$r/agentic/.estado/settings.pendente.json"
 tl_espera 0 "instala settings quando não existe" sh -c "cd '$r' && sh '$dir/ativar-protecoes.sh'"
 tl_contem "git add .claude/settings.json && git commit" "orienta o commit humano do settings.json"
 tl_espera 0 "conteúdo copiado" grep -q '"x":1' "$r/.claude/settings.json"
 
-r=$(tl_repo); mkdir -p "$r/.agentic" "$r/.claude"
-echo '{"x":1}' > "$r/.agentic/settings.pendente.json"; echo '{"meu":true}' > "$r/.claude/settings.json"
+r=$(tl_repo); mkdir -p "$r/agentic/.estado" "$r/.claude"
+echo '{"x":1}' > "$r/agentic/.estado/settings.pendente.json"; echo '{"meu":true}' > "$r/.claude/settings.json"
 tl_espera 1 "não sobrescreve settings existente" sh -c "cd '$r' && sh '$dir/ativar-protecoes.sh'"
 tl_contem "merge" "orienta o merge manual"
 tl_espera 0 "settings original preservado" grep -q '"meu":true' "$r/.claude/settings.json"

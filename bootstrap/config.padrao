@@ -1,4 +1,4 @@
-# .agentic/config — configuração dos mecanismos do framework. Preenchida no /bootstrap.
+# agentic/config — configuração dos mecanismos do framework. Preenchida no /bootstrap.
 # Superfície de política: depois de ativadas as proteções, o agente não edita este arquivo.
 BRANCH_PRINCIPAL="main"
 BRANCHES_PROTEGIDAS="main master"

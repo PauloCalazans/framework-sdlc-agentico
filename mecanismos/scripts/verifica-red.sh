@@ -1,6 +1,6 @@
 #!/bin/sh
 # verifica-red.sh [base] — prova que cada commit test(red):
-#   (1) não tocou código de produção: só DIRS_TESTE; documentação sob docs/ e intent/ é isenta (o
+#   (1) não tocou código de produção: só DIRS_TESTE; documentação sob docs/ e agentic/projeto/ é isenta (o
 #       documento da task pode ser atualizado no mesmo commit);
 #   (2) falhava de fato, num worktree isolado no commit RED: com CMD_TESTE_ARQUIVO configurado, roda o
 #       comando para CADA arquivo de teste tocado pelo RED (arquivo sob DIRS_TESTE com asserção) e exige
@@ -19,9 +19,9 @@ if [ -z "$reds" ]; then
   echo "verifica-red: nenhum commit test(red): na branch"
   exit 0
 fi
-[ -n "$CMD_TESTE" ] || agentic_falha "CMD_TESTE não configurado em .agentic/config"
-[ -n "$MARCADOR_ASSERCAO" ] || agentic_falha "MARCADOR_ASSERCAO vazio em .agentic/config — não há como comparar asserções"
-[ -n "$(printf '%s' "$DIRS_TESTE" | tr -d '[:space:]')" ] || agentic_falha "DIRS_TESTE vazio em .agentic/config"
+[ -n "$CMD_TESTE" ] || agentic_falha "CMD_TESTE não configurado em agentic/config"
+[ -n "$MARCADOR_ASSERCAO" ] || agentic_falha "MARCADOR_ASSERCAO vazio em agentic/config — não há como comparar asserções"
+[ -n "$(printf '%s' "$DIRS_TESTE" | tr -d '[:space:]')" ] || agentic_falha "DIRS_TESTE vazio em agentic/config"
 if [ -z "$CMD_TESTE_ARQUIVO" ]; then
   echo "degradado: CMD_TESTE_ARQUIVO não configurado — RED provado pela suíte inteira"
 fi
@@ -77,8 +77,8 @@ for c in $reds; do
     [ -n "$f" ] || continue
     dentro=1
     teste=1
-    # Documentação não é código de produção: os scripts só leem docs/specs/*/tasks/*.md e intent/.
-    case "$f" in docs/*|intent/*) dentro=0 ;; esac
+    # Documentação não é código de produção: os scripts só leem agentic/projeto/specs/*/tasks/*.md e agentic/projeto/intent/.
+    case "$f" in docs/*|agentic/projeto/*) dentro=0 ;; esac
     set -f
     for d in $DIRS_TESTE; do
       case "$f" in "$d"*) dentro=0; teste=0 ;; esac
