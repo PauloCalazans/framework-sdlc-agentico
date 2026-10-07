@@ -11,7 +11,35 @@ Referência reutilizável de SDLC agêntico: papéis de agentes, artefatos, gate
 
 No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); dentro do Claude Code isso já é tratado.
 
-## Estrutura
+## O que é instalado no projeto
+
+Na raiz entra só o que as ferramentas exigem lá; todo o resto fica em `agentic/`:
+
+```
+AGENTS.md              mapa e regras para qualquer agente
+CLAUDE.md              ponte mínima para o Claude Code
+.claude/               agentes, comandos, hooks e settings.json (proteções)
+agentic/
+  config, auto-mode    política da instância (só o humano edita)
+  processo/            do kit: princípios, ciclo, entrevista, papéis, templates
+  mecanismos/          do kit: githooks/ (core.hooksPath) e scripts/
+  projeto/             do projeto: bootstrap.md, decisoes.md, intent/, specs/
+  .estado/             efêmero, ignorado pelo git: execução, worktrees, conflitos
+```
+
+Mais uma linha em `.gitignore` (`agentic/.estado/`) e em `.gitattributes` (LF nos scripts).
+
+### Migrando uma instância do layout antigo
+
+Instâncias anteriores (`docs/agentic/`, `scripts/agentic/`, `.githooks/`, `.agentic/`, `intent/`, `docs/specs/`) migram com:
+
+```
+sh bootstrap/migrar-layout.sh <caminho-do-projeto>
+```
+
+Exige árvore limpa e nenhum worktree ativo. Cria a branch `agentic/migrar-layout`, move com `git mv` (preserva histórico), atualiza os mecanismos para a versão do kit, reescreve os caminhos (framework, `settings.json`, CI) e só stageia — revise, commite e integre (ação humana); depois rode `sh bootstrap/checa-instancia.sh <projeto>`.
+
+## Estrutura do framework
 
 | Pasta | Conteúdo |
 |---|---|
