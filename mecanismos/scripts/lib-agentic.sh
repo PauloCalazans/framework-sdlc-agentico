@@ -1,5 +1,5 @@
 # lib-agentic.sh — configuração e funções comuns aos hooks e scripts do framework.
-# Carregar com ". lib-agentic.sh". Lê <raiz>/.agentic/config sobre os padrões abaixo.
+# Carregar com ". lib-agentic.sh". Lê <raiz>/agentic/config sobre os padrões abaixo.
 agentic_raiz=$(git rev-parse --show-toplevel 2>/dev/null) || {
   echo "agentic: BLOQUEADO — fora de um repositório git" >&2
   exit 1
@@ -17,8 +17,8 @@ CMD_TESTE_ARQUIVO=""
 CMD_VERIFY_STACK=""
 GITLEAKS_BIN="gitleaks"
 
-if [ -f "$agentic_raiz/.agentic/config" ]; then
-  . "$agentic_raiz/.agentic/config"
+if [ -f "$agentic_raiz/agentic/config" ]; then
+  . "$agentic_raiz/agentic/config"
 fi
 
 # agentic_branch_protegida <branch>: retorna 0 se a branch está em BRANCHES_PROTEGIDAS.

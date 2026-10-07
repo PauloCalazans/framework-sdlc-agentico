@@ -1,6 +1,6 @@
 ## Origem
-- Intent: <intent/NNN-nome.md>
-- Task: <docs/specs/<nome>/tasks/NNN-nome.md>
+- Intent: <agentic/projeto/intent/NNN-nome.md>
+- Task: <agentic/projeto/specs/<nome>/tasks/NNN-nome.md>
 
 ## Evidência
 - RED: <sha> — saída mostrando a falha (resumo)

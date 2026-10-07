@@ -1,7 +1,7 @@
 #!/bin/sh
 # pre-push — bloqueia push para branch protegida, exclusão de branch protegida e force-push. Fail-closed.
 agentic_lib=""
-for agentic_c in "$(dirname "$0")/../scripts/agentic/lib-agentic.sh" "$(dirname "$0")/../scripts/lib-agentic.sh"; do
+for agentic_c in "$(dirname "$0")/../agentic/mecanismos/scripts/lib-agentic.sh" "$(dirname "$0")/../scripts/lib-agentic.sh"; do
   if [ -f "$agentic_c" ]; then agentic_lib=$agentic_c; break; fi
 done
 [ -n "$agentic_lib" ] || { echo "agentic: BLOQUEADO — lib-agentic.sh não encontrada (fail-closed)" >&2; exit 1; }

@@ -1,6 +1,6 @@
 # Spec: <nome>
 
-**Intent:** intent/<NNN-nome>.md
+**Intent:** agentic/projeto/intent/<NNN-nome>.md
 **Status:** draft
 
 ## Regras

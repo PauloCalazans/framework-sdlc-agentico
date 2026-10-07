@@ -18,9 +18,9 @@ tl_contem "agentic: BLOQUEADO" "mensagem de bloqueio padronizada"
 git -C "$r" checkout -q -b feat/x
 tl_espera 0 "permite commit em branch de trabalho" git -C "$r" commit -q -m "x"
 
-# --- branches protegidas vêm do .agentic/config
+# --- branches protegidas vêm do agentic/config
 r=$(novo_repo)
-mkdir -p "$r/.agentic"; echo 'BRANCHES_PROTEGIDAS="develop"' > "$r/.agentic/config"
+mkdir -p "$r/agentic/.estado"; echo 'BRANCHES_PROTEGIDAS="develop"' > "$r/agentic/config"
 git -C "$r" checkout -q -b develop
 echo a > "$r/a.txt"; git -C "$r" add a.txt
 tl_espera 1 "bloqueia branch protegida declarada no config" git -C "$r" commit -q -m "x"

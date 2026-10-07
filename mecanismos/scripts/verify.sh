@@ -7,10 +7,10 @@ cd "$agentic_raiz" || exit 1
 
 task=""
 [ "${1:-}" = "--task" ] && task=${2:-}
-[ -n "$CMD_VERIFY_STACK" ] || agentic_falha "CMD_VERIFY_STACK não configurado em .agentic/config (rode /bootstrap)"
+[ -n "$CMD_VERIFY_STACK" ] || agentic_falha "CMD_VERIFY_STACK não configurado em agentic/config (rode /bootstrap)"
 
-mkdir -p .agentic
-lock=".agentic/verify.lock"
+mkdir -p agentic/.estado
+lock="agentic/.estado/verify.lock"
 if ! mkdir "$lock" 2>/dev/null; then
   pid=$(cat "$lock/pid" 2>/dev/null)
   if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
@@ -34,12 +34,12 @@ etapa stack sh -c "$CMD_VERIFY_STACK"
 
 if [ -z "$task" ]; then
   branch=$(git symbolic-ref --short -q HEAD)
-  [ -n "$branch" ] && task=$(grep -l "^\*\*Branch:\*\*[[:space:]]*$branch[[:space:]]*$" docs/specs/*/tasks/*.md 2>/dev/null | head -n 1)
+  [ -n "$branch" ] && task=$(grep -l "^\*\*Branch:\*\*[[:space:]]*$branch[[:space:]]*$" agentic/projeto/specs/*/tasks/*.md 2>/dev/null | head -n 1)
 fi
 if [ -n "$task" ]; then
   etapa escopo sh "$dir/verifica-escopo.sh" "$task"
 else
-  if [ -n "$(ls docs/specs/*/tasks/*.md 2>/dev/null | head -n 1)" ]; then
+  if [ -n "$(ls agentic/projeto/specs/*/tasks/*.md 2>/dev/null | head -n 1)" ]; then
     echo; echo "aviso: nenhuma task com **Branch:** ${branch:-?} — escopo não verificado (trilha rápida?)"
   fi
   echo; echo "== escopo: nenhuma task associada à branch (trilha rápida) — pulado"

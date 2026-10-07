@@ -11,7 +11,7 @@ if [ -n "$MARCADOR_DESABILITADO" ]; then
   [ -n "$base" ] || agentic_falha "marcador de teste desabilitado configurado, mas sem base de comparação (branch $BRANCH_PRINCIPAL ausente?)"
   git rev-parse --verify -q "$base^{commit}" >/dev/null || agentic_falha "base inválida: $base"
   [ -n "$(printf '%s' "$DIRS_TESTE" | tr -d '[:space:]')" ] || \
-    agentic_falha "MARCADOR_DESABILITADO configurado, mas DIRS_TESTE vazio em .agentic/config"
+    agentic_falha "MARCADOR_DESABILITADO configurado, mas DIRS_TESTE vazio em agentic/config"
   set -f # DIRS_TESTE é pathspec/prefixo, não glob contra o disco
   # Linhas adicionadas em arquivos rastreados sob DIRS_TESTE (commits + working tree).
   # shellcheck disable=SC2086
@@ -52,8 +52,8 @@ if [ -n "$RELATORIO_TESTES" ]; then
     echo "agentic: BLOQUEADO — relatório de testes não encontrado ($RELATORIO_TESTES). Rode os testes antes."
     status=1
   else
-    if [ -f .agentic/baseline-skips ]; then
-      limite=$(tr -d '\r[:space:]' < .agentic/baseline-skips)
+    if [ -f agentic/baseline-skips ]; then
+      limite=$(tr -d '\r[:space:]' < agentic/baseline-skips)
     else
       limite=0
     fi

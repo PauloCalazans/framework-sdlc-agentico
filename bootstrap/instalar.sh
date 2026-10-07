@@ -1,19 +1,19 @@
 #!/bin/sh
 # instalar.sh <projeto-alvo> — copia o kit do framework para o projeto.
-# Não pergunta nada e não sobrescreve nada: conflitos vão para .agentic/conflitos-instalacao.txt
+# Não pergunta nada e não sobrescreve nada: conflitos vão para agentic/.estado/conflitos-instalacao.txt
 # e são resolvidos no /bootstrap.
 fw=$(cd "$(dirname "$0")/.." && pwd)
 alvo=${1:-}
 { [ -n "$alvo" ] && [ -d "$alvo" ]; } || { echo "uso: instalar.sh <projeto-alvo>" >&2; exit 2; }
 git -C "$alvo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "o alvo não é um repositório git: $alvo" >&2; exit 2; }
 alvo=$(cd "$alvo" && pwd)
-rm -f "$alvo/.agentic/conflitos-instalacao.txt" # o arquivo reflete só a execução atual
-rm -rf "$alvo/.agentic/kit-conflitos"
+rm -f "$alvo/agentic/.estado/conflitos-instalacao.txt" # o arquivo reflete só a execução atual
+rm -rf "$alvo/agentic/.estado/kit-conflitos"
 conflitos=$(mktemp)
 
 guarda_kit() { # guarda_kit <origem> <caminho relativo> — versão do kit para o /bootstrap comparar
-  mkdir -p "$(dirname "$alvo/.agentic/kit-conflitos/$2")"
-  cp "$1" "$alvo/.agentic/kit-conflitos/$2"
+  mkdir -p "$(dirname "$alvo/agentic/.estado/kit-conflitos/$2")"
+  cp "$1" "$alvo/agentic/.estado/kit-conflitos/$2"
 }
 copia() { # copia <origem> <destino relativo ao alvo>
   if [ -e "$alvo/$2" ]; then
@@ -41,29 +41,26 @@ acrescenta() { # acrescenta <arquivo relativo> <linha> — sem duplicar
   printf '%s\n' "$2" >> "$alvo/$1"
 }
 
-copia "$fw/core/principios.md" docs/agentic/principios.md
-copia "$fw/core/processo/ciclo.md" docs/agentic/ciclo.md
-copia_dir "$fw/core/papeis" docs/agentic/papeis
-copia_dir "$fw/core/templates" docs/agentic/templates
+copia "$fw/core/principios.md" agentic/processo/principios.md
+copia "$fw/core/processo/ciclo.md" agentic/processo/ciclo.md
+copia_dir "$fw/core/papeis" agentic/processo/papeis
+copia_dir "$fw/core/templates" agentic/processo/templates
 copia "$fw/core/templates/AGENTS.md" AGENTS.md
-copia "$fw/bootstrap/entrevista.md" docs/agentic/entrevista.md
-copia_dir "$fw/mecanismos/githooks" .githooks
-copia_dir "$fw/mecanismos/scripts" scripts/agentic
+copia "$fw/bootstrap/entrevista.md" agentic/processo/entrevista.md
+copia_dir "$fw/mecanismos/githooks" agentic/mecanismos/githooks
+copia_dir "$fw/mecanismos/scripts" agentic/mecanismos/scripts
 copia_dir "$fw/adapters/claude-code/agents" .claude/agents
 copia_dir "$fw/adapters/claude-code/commands" .claude/commands
 copia_dir "$fw/adapters/claude-code/hooks" .claude/hooks
 copia "$fw/adapters/claude-code/CLAUDE.md" CLAUDE.md
-copia "$fw/adapters/claude-code/agente-oraculo.tmpl.md" docs/agentic/templates/agente-oraculo.md
-copia "$fw/adapters/claude-code/settings.json.tmpl" .agentic/settings.pendente.json
-copia "$fw/bootstrap/config.padrao" .agentic/config
-copia "$fw/bootstrap/auto-mode.padrao" .agentic/auto-mode
+copia "$fw/adapters/claude-code/agente-oraculo.tmpl.md" agentic/processo/templates/agente-oraculo.md
+copia "$fw/adapters/claude-code/settings.json.tmpl" agentic/.estado/settings.pendente.json
+copia "$fw/bootstrap/config.padrao" agentic/config
+copia "$fw/bootstrap/auto-mode.padrao" agentic/auto-mode
 
-acrescenta .gitignore ".agentic/execucao/"
-acrescenta .gitignore ".agentic/verify.lock/"
-acrescenta .gitignore ".agentic/worktrees/"
-acrescenta .gitignore ".agentic/kit-conflitos/"
+acrescenta .gitignore "agentic/.estado/"
 acrescenta .gitattributes "*.sh text eol=lf"
-acrescenta .gitattributes ".githooks/* text eol=lf"
+acrescenta .gitattributes "agentic/mecanismos/githooks/* text eol=lf"
 
 # settings.json existente não é copiado, mas o ativar-protecoes.sh depende da ausência dele
 if [ -e "$alvo/.claude/settings.json" ]; then
@@ -71,11 +68,11 @@ if [ -e "$alvo/.claude/settings.json" ]; then
   guarda_kit "$fw/adapters/claude-code/settings.json.tmpl" ".claude/settings.json"
 fi
 
-git -C "$alvo" config core.hooksPath .githooks
+git -C "$alvo" config core.hooksPath agentic/mecanismos/githooks
 
 if [ -s "$conflitos" ]; then
-  cp "$conflitos" "$alvo/.agentic/conflitos-instalacao.txt"
-  echo "Arquivos já existentes e diferentes (NÃO sobrescritos) — listados em .agentic/conflitos-instalacao.txt:"
+  cp "$conflitos" "$alvo/agentic/.estado/conflitos-instalacao.txt"
+  echo "Arquivos já existentes e diferentes (NÃO sobrescritos) — listados em agentic/.estado/conflitos-instalacao.txt:"
   sed 's/^/  /' "$conflitos"
 fi
 rm -f "$conflitos"
