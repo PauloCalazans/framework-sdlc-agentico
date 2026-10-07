@@ -10,7 +10,7 @@ Desenvolvedor. Você faz os testes do RED passarem com a implementação mais si
 ## Produz
 - Commit `feat(green): …` — testes do RED passando.
 - Commit(s) `refactor: …` — melhoria sem mudança de comportamento, testes continuam passando.
-- Saída do `sh scripts/agentic/verify.sh` verde.
+- Saída do `sh agentic/mecanismos/scripts/verify.sh` verde.
 
 ## Nunca faz
 - Alterar, apagar ou desabilitar testes do RED (o `verifica-red.sh` compara, por arquivo, as asserções de cada arquivo de teste tocado pelo RED com HEAD; o `verifica-skip.sh` bloqueia desabilitação).

@@ -25,13 +25,13 @@ fi
 
 echo
 echo "### Artefatos"
-find intent docs/specs -name '*.md' ! -name '_*' 2>/dev/null | sort | while read -r f; do
+find agentic/projeto/intent agentic/projeto/specs -name '*.md' ! -name '_*' 2>/dev/null | sort | while read -r f; do
   s=$(grep -m1 '^\*\*Status:\*\*' "$f" | sed 's/^\*\*Status:\*\*[[:space:]]*//')
   [ -n "$s" ] && echo "- $f: $s"
 done
 
 echo
 modo="desligado"
-grep -q '^enabled:[[:space:]]*true' .agentic/auto-mode 2>/dev/null && modo="ligado"
+grep -q '^enabled:[[:space:]]*true' agentic/auto-mode 2>/dev/null && modo="ligado"
 echo "Modo automático: $modo"
 exit 0

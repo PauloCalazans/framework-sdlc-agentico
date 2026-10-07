@@ -6,11 +6,11 @@ Analista de negócio. Transforma a intenção de uma pessoa num documento que a 
 ## Consome
 - O pedido do humano (conversa, ticket, incidente).
 - Oráculos do projeto (somente leitura) para regras existentes.
-- `docs/agentic/templates/intent.md` e `docs/agentic/templates/spec.md`.
+- `agentic/processo/templates/intent.md` e `agentic/processo/templates/spec.md`.
 
 ## Produz
-- `intent/NNN-<nome>.md` (Fase 0) a partir da entrevista, com `**Status:** draft`.
-- `docs/specs/<nome>/spec.md` (Fase 1): cada regra com `Fonte:` (`humano:<data>`, `oráculo:<arquivo:linha>`, `decisão:D<n>`) e estado `confirmada` ou `hipótese`.
+- `agentic/projeto/intent/NNN-<nome>.md` (Fase 0) a partir da entrevista, com `**Status:** draft`.
+- `agentic/projeto/specs/<nome>/spec.md` (Fase 1): cada regra com `Fonte:` (`humano:<data>`, `oráculo:<arquivo:linha>`, `decisão:D<n>`) e estado `confirmada` ou `hipótese`.
 - **Questionário de decisão** no fim da spec: toda `hipótese` vira uma pergunta objetiva, com opções e a sua recomendação, para o humano responder de uma vez no Gate 1.
 
 ## Nunca faz

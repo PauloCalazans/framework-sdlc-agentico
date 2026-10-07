@@ -24,12 +24,12 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas das referênci
 | Trilha rápida (`ciclo.md`) | prática: projeto de referência controlado (ciclo do agente) |
 | Trilha enxuta (`ciclo.md`, `templates/mudanca.md`, `/mudanca`) | validação v1 (ciclo real: 326 linhas de docs para uma faixa de desconto); prática: projeto de referência controlado (reestruturação: cerimônia > código). Proposta nossa, validada parcialmente |
 | Escopo de arquivos declarado e verificado (`verifica-escopo.sh`) | [RG] expansão de escopo plausível; [RR] escopo delimitado; decisão desta spec (sem limite de linhas) |
-| Commit `test(red):` provado em worktree, por arquivo quando há `CMD_TESTE_ARQUIVO`; asserções comparadas por arquivo (`verifica-red.sh`) | prática: projeto de referência controlado (script de verificação do RED); [FC]/[RR] test tampering. Isenção de `docs/` e `intent/` no RED: projeto de referência controlado (32 dos últimos 40 commits RED também editam o documento da task). Prova e comparação por arquivo: parecer sobre o projeto de referência (suíte inteira aceitava qualquer falha; soma global de asserções escondia asserção movida entre arquivos e bloqueava refactor de teste antigo) |
+| Commit `test(red):` provado em worktree, por arquivo quando há `CMD_TESTE_ARQUIVO`; asserções comparadas por arquivo (`verifica-red.sh`) | prática: projeto de referência controlado (script de verificação do RED); [FC]/[RR] test tampering. Isenção de `docs/` e `agentic/projeto/intent/` no RED: projeto de referência controlado (32 dos últimos 40 commits RED também editam o documento da task). Prova e comparação por arquivo: parecer sobre o projeto de referência (suíte inteira aceitava qualquer falha; soma global de asserções escondia asserção movida entre arquivos e bloqueava refactor de teste antigo) |
 | Skips lidos do relatório real (`verifica-skip.sh`) | prática: projeto de referência controlado (verificação de skips) |
 | `verify` ponto único, só reporta, com lock (`verify.sh`, `/verify`) | prática: projeto de referência enxuto (`/verify`: "reportar é o trabalho"); prática: projeto de referência controlado (`verify.sh` com lock) |
 | Segredos em duas camadas, fail-closed, staged (`pre-commit`) | prática: projeto de referência controlado (gitleaks não pega senha genérica); [RG] varrer staged, fail-closed. Camada 2 com valor sem aspas, chave hifenizada e placeholders: projeto de referência controlado (YAML, env e properties com senha literal sem aspas passavam; `${DB_PASSWORD}` era bloqueado) |
-| Proteção de branch e force-push em hooks nativos (`.githooks`) | prática: projeto de referência controlado (15→20 bypasses no parser de comandos) |
-| PreToolUse mínimo, só varredura de disco (`pre-tool-use.sh`) | prática: projeto de referência controlado (varredura de disco); reestruturação: parser redundante com `.githooks` |
+| Proteção de branch e force-push em hooks nativos (`agentic/mecanismos/githooks`) | prática: projeto de referência controlado (15→20 bypasses no parser de comandos) |
+| PreToolUse mínimo, só varredura de disco (`pre-tool-use.sh`) | prática: projeto de referência controlado (varredura de disco); reestruturação: parser redundante com `agentic/mecanismos/githooks` |
 | Registro de execução, Rulings, roteamento de modelo (`ciclo.md` — Orquestração) | prática: projeto de referência enxuto (registro de execução do ciclo SDD) |
 | Worktree por sessão (`ciclo.md`) | prática: projeto de referência controlado; [RG] |
 | Modo automático versionado, nunca mergeia (`auto-mode`) | prática: projeto de referência controlado (auto-mode versionado) |
@@ -41,7 +41,7 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas das referênci
 | Oráculo somente leitura com `arquivo:linha` (`papeis/_oraculo.md`) | prática: projeto de referência enxuto e prática: projeto de referência controlado (oráculos de referência somente leitura) |
 | Settings ativado pelo humano (`ativar-protecoes.sh`) | proposta nossa — decorre de P5 |
 | Questionário de bootstrap (`entrevista.md`) | proposta nossa — nenhuma fonte propõe; derivado de [AG], [CI], [RG] |
-| Baseline de legado (`entrevista.md`, `.agentic/baseline-skips`) | [RG] baseline do legado, bloquear só violações novas |
+| Baseline de legado (`entrevista.md`, `agentic/baseline-skips`) | [RG] baseline do legado, bloquear só violações novas |
 | Interfaces incidente→intent e release (`ciclo.md`) | [CI] Maintain; [FC] G5 |
 | Registro do Gate 1 como 1º commit da branch (`ciclo.md`) | validação v1 (ciclo real na trilha padrão; principal protegida) |
 | Itens N3 pré-aprovados no Gate 1 (design.md, task.md, ciclo.md) | prática: projeto de referência controlado (D8: paradas N3 no meio da task vinham de itens visíveis no design) |
