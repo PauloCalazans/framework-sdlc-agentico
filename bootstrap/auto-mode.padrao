@@ -1,3 +1,10 @@
 # Modo automático: com enabled: true o orquestrador encadeia tasks e publica PRs sem confirmação.
 # Nunca faz merge. Alterar este arquivo é decisão humana.
 enabled: false
+# Gate 1: humano (padrão; o humano aprova intent, spec, design e itens N3) ou delegado (o orquestrador
+# aprova em nome do humano, dentro dos limites de agentic/processo/ciclo.md, "Gate 1 delegado").
+# Com delegado, gate1_decisao aponta a decisão (D<n> em agentic/projeto/decisoes.md) em que o humano registrou a delegação.
+gate1: humano
+gate1_decisao:
+# Categorias de N3 que o orquestrador nunca aprova, mesmo com gate1: delegado (separadas por espaço).
+gate1_humano_obrigatorio: seguranca migracao-destrutiva

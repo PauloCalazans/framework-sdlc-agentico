@@ -23,7 +23,7 @@ Pergunte um bloco por vez; prefira múltipla escolha com uma recomendação.
 | Estrutura | Camadas/módulos e suas fronteiras? Diretórios de teste? Que ferramenta verifica fronteiras (ex.: ArchUnit, dependency-cruiser, import-linter)? |
 | Risco | Caminhos protegidos? Gatilhos de escalonamento específicos da stack/domínio? Dependências sensíveis? |
 | Fontes externas | Há sistema legado, API externa ou norma que os agentes devem consultar? Onde está e como se acessa (somente leitura)? |
-| Operação | Branch principal? Plataforma de PR (GitHub, GitLab, Azure…)? Existe CI? Quem aprova o Gate 1 e o Gate 2? Modo automático começa ligado? |
+| Operação | Branch principal? Plataforma de PR (GitHub, GitLab, Azure…)? Existe CI? Quem aprova o Gate 1 e o Gate 2? O Gate 1 fica com o humano ou é delegado ao orquestrador (`gate1` em `agentic/auto-mode`; a delegação exige uma decisão registrada em `decisoes.md`)? Modo automático começa ligado? Quais agentes (produto/modelo) assumem cada papel — o revisor precisa ser independente de testes e dev (`REVISOR_DISTINTO_POR`)? |
 
 ## Passo 3 — Registro
 Grave `agentic/projeto/bootstrap.md` com todas as respostas, cada uma marcada `confirmado` (humano respondeu/confirmou) ou `inferido`. Re-execuções do `/bootstrap` partem deste arquivo. Depois que as proteções estão ativas, alterações em `agentic/config`, `agentic/auto-mode`, `agentic/baseline-skips`, `agentic/mecanismos/githooks/**`, `.claude/hooks/**`, `agentic/mecanismos/scripts/**` e `.gitleaksignore` (inclusive em re-execuções do /bootstrap e nos merges do Passo 5) são ação humana: proponha o conteúdo e peça ao humano que aplique.

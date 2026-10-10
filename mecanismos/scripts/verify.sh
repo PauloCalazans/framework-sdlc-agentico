@@ -1,6 +1,6 @@
 #!/bin/sh
 # verify.sh [--task <task.md>] — ponto único de verificação do projeto. Só reporta; nunca conserta.
-# Etapas: stack (CMD_VERIFY_STACK) → escopo → skip → red → decisões.
+# Etapas: stack (CMD_VERIFY_STACK) → escopo → skip → red → decisões → gate1 → autoria.
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
@@ -48,6 +48,8 @@ fi
 etapa skip sh "$dir/verifica-skip.sh"
 etapa red sh "$dir/verifica-red.sh"
 etapa decisoes sh "$dir/verifica-decisoes.sh"
+etapa gate1 sh "$dir/verifica-gate1.sh"
+etapa autoria sh "$dir/verifica-autoria.sh"
 
 echo
 if [ -z "$falhas" ]; then

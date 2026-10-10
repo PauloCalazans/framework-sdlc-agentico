@@ -35,6 +35,12 @@ printf 'Ver D2.\n' > "$r2/agentic/projeto/nota.md"; git -C "$r2" add -A; git -C 
 tl_espera 1 "falha quando há referência a decisão inexistente" sh -c "cd '$r2' && sh '$dir/verify.sh'"
 tl_contem "VERIFY: FALHOU em: decisoes" "nomeia a etapa decisoes"
 
+# etapa gate1: delegado sem decisão registrada derruba o verify
+printf 'gate1: delegado\n' > "$r2/agentic/auto-mode"; git -C "$r2" add -A; git -C "$r2" commit -q -m "auto-mode"
+git -C "$r2" rm -q agentic/projeto/nota.md; git -C "$r2" commit -q -m "remove nota"
+tl_espera 1 "falha quando gate1: delegado não tem decisão" sh -c "cd '$r2' && sh '$dir/verify.sh'"
+tl_contem "gate1" "nomeia a etapa gate1"
+
 echo z > "$r/fora.txt"
 tl_espera 1 "falha quando o escopo é violado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 rm "$r/fora.txt"

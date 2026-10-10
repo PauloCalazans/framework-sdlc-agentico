@@ -16,6 +16,7 @@ CMD_TESTE=""
 CMD_TESTE_ARQUIVO=""
 CMD_VERIFY_STACK=""
 GITLEAKS_BIN="gitleaks"
+REVISOR_DISTINTO_POR="agente"
 
 if [ -f "$agentic_raiz/agentic/config" ]; then
   . "$agentic_raiz/agentic/config"
@@ -38,4 +39,9 @@ agentic_falha() {
 # agentic_base: ponto de divergência entre HEAD e a branch principal.
 agentic_base() {
   git merge-base HEAD "$BRANCH_PRINCIPAL" 2>/dev/null
+}
+
+# agentic_auto_valor <chave>: valor de "chave: valor" em agentic/auto-mode (sem comentário nem espaços); vazio se ausente.
+agentic_auto_valor() {
+  sed -n "s/^$1:[[:space:]]*\([^#]*\).*/\1/p" "$agentic_raiz/agentic/auto-mode" 2>/dev/null | head -n 1 | tr -d '\r' | sed 's/[[:space:]]*$//'
 }

@@ -22,3 +22,6 @@ MARCADOR_ASSERCAO="{{MARCADOR_ASSERCAO}}"
 # Glob dos relatórios JUnit XML gerados pelo CMD_VERIFY_STACK. Vazio = verificação degradada.
 RELATORIO_TESTES="{{RELATORIO_TESTES}}"
 GITLEAKS_BIN="gitleaks"
+# Independência do revisor (verifica-autoria.sh): "agente" = produto/modelo diferentes dos de quem escreveu RED/GREEN;
+# "produto" = o produto também precisa diferir.
+REVISOR_DISTINTO_POR="agente"

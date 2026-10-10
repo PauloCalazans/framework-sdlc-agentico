@@ -18,6 +18,11 @@ tl_contem "agentic/projeto/intent/001-pedidos.md: aprovado" "lista status de int
 tl_contem "agentic/projeto/specs/pedidos/tasks/001-criar.md: em-andamento" "lista status de task"
 tl_contem "pedidos/001: 1 commit(s)" "mostra branch à frente da principal"
 tl_contem "Modo automático: ligado" "lê o auto-mode"
+tl_contem "Gate 1: humano" "gate1 ausente = humano"
+printf 'enabled: true\ngate1: delegado\ngate1_decisao: D11 # nota\n' > "$r/agentic/auto-mode"
+tl_espera 0 "status com Gate 1 delegado" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
+tl_contem "Gate 1: delegado (D11)" "mostra o Gate 1 delegado e a decisão"
+echo "enabled: true" > "$r/agentic/auto-mode"
 copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
 tl_espera 1 "ignora arquivos _modelo" grep -q "_template" "$copia_saida"
 

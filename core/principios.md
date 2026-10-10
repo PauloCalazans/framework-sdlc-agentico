@@ -25,7 +25,7 @@ Toda afirmação sobre comportamento do sistema é marcada `medido` (há saída/
 ## 5. O agente nunca integra e nunca altera as próprias permissões
 Merge na branch principal e permissões do agente pertencem ao humano.
 **Por quê:** o ponto de integração é onde o humano responde pela decisão; um agente que amplia as próprias permissões elimina o controle que deveria limitá-lo.
-**Verificado por:** `deny` de `gh pr merge` e de edição de `.claude/settings*.json`, `.claude/hooks/**`, `agentic/config`, `agentic/auto-mode`, `agentic/baseline-skips`, `agentic/mecanismos/githooks/**`, `agentic/mecanismos/scripts/**`, `.gitleaksignore`; `pre-push` e `pre-merge-commit` bloqueiam a branch protegida.
+**Verificado por:** `deny` de `gh pr merge` e de edição de `.claude/settings*.json`, `.claude/hooks/**`, `agentic/config`, `agentic/auto-mode`, `agentic/baseline-skips`, `agentic/mecanismos/githooks/**`, `agentic/mecanismos/scripts/**`, `.gitleaksignore`; `pre-push` e `pre-merge-commit` bloqueiam a branch protegida. A delegação do Gate 1 só existe se o humano a registra (`gate1`/`gate1_decisao` em `agentic/auto-mode`, editável só por ele): `verifica-gate1.sh`.
 
 ## 6. Memória enxuta
 `AGENTS.md` e `CLAUDE.md` são mapa e regras. Narrativa de ciclo vai para documentos datados; decisões vão para `agentic/projeto/decisoes.md`.

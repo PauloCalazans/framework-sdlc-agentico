@@ -34,4 +34,7 @@ echo
 modo="desligado"
 grep -q '^enabled:[[:space:]]*true' agentic/auto-mode 2>/dev/null && modo="ligado"
 echo "Modo automático: $modo"
+g1=$(agentic_auto_valor gate1); [ -n "$g1" ] || g1=humano
+g1d=$(agentic_auto_valor gate1_decisao)
+echo "Gate 1: $g1${g1d:+ ($g1d)}"
 exit 0

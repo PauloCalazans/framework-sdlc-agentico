@@ -187,7 +187,7 @@ O orquestrador pode usar modelo **leve** em tasks de transcrição (brief traz o
 | Fronteiras de arquitetura | ferramenta da stack declarada no bootstrap | stack |
 | Independência do revisor, N3, checklist Gate 1 | — | por revisão |
 
-**`verify`:** ponto único. `verify.sh` genérico que lê os comandos da stack de `agentic/config` (sem templating de script), encadeado com `verifica-escopo`, `verifica-skip`, `verifica-red` e `verifica-decisoes`. Lock contra execução concorrente. O comando `/verify` só reporta, nunca conserta.
+**`verify`:** ponto único. `verify.sh` genérico que lê os comandos da stack de `agentic/config` (sem templating de script), encadeado com `verifica-escopo`, `verifica-skip`, `verifica-red`, `verifica-decisoes`, `verifica-gate1` e `verifica-autoria`. Lock contra execução concorrente. O comando `/verify` só reporta, nunca conserta.
 
 **Deliberadamente excluídos:** parser de texto de comando no PreToolUse (redundante com `agentic/mecanismos/githooks`); CI na v1. Se o projeto tiver CI, o bootstrap gera workflow que chama o mesmo `verify`, e ele só é aprovado depois de provado verde num PR de teste.
 

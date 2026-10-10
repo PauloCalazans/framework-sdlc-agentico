@@ -15,6 +15,9 @@
 - Caminhos sensíveis tocados: <nenhum | lista>
 - Supressões novas (`agentic:permitir-segredo`, skips no baseline…): <nenhuma | lista com justificativa>
 
+## Autoria
+<resumo "Papel → Agente" impresso por `sh agentic/mecanismos/scripts/verifica-autoria.sh --publicar`>
+
 ## Parecer do revisor
 - Veredito: <APROVADO>
 - Achados menores registrados: <lista ou nenhum>
