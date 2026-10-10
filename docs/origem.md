@@ -35,6 +35,7 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas das referênci
 | Modo automático versionado, nunca mergeia (`auto-mode`) | prática: projeto de referência controlado (auto-mode versionado) |
 | Merge sem squash (`ciclo.md`, `templates/pr.md`) | prática: projeto de referência controlado (preserva evidência RED/GREEN) |
 | Registro de decisões com Verificado por e revogadas (`templates/decisoes.md`) | prática: projeto de referência controlado (registro de decisões D1–D10; controle afirmado e inexistente) |
+| Integridade do registro de decisões (`verifica-decisoes.sh`) | prática: segundo projeto de referência (decisão D11 perdida na resolução de conflito de um merge; `verify` passava com as referências órfãs). Proposta nossa, validada na história desse projeto |
 | CI só depois de provado verde (`entrevista.md`) | prática: projeto de referência controlado (CI declarado e nunca verde) |
 | Plugin de processo desligado (`settings.json.tmpl`, `CLAUDE.md`) | prática: projeto de referência controlado (plugin de processo sobrescrevendo convenções) |
 | Contratos portáveis + adaptador fino (`core/papeis/`, `adapters/`) | prática: projeto de referência controlado (contratos de papéis + adaptadores); [AG] |
