@@ -31,6 +31,7 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas das referênci
 | Proteção de branch e force-push em hooks nativos (`agentic/mecanismos/githooks`) | prática: projeto de referência controlado (15→20 bypasses no parser de comandos) |
 | PreToolUse mínimo, só varredura de disco (`pre-tool-use.sh`) | prática: projeto de referência controlado (varredura de disco); reestruturação: parser redundante com `agentic/mecanismos/githooks` |
 | Registro de execução, Rulings, roteamento de modelo (`ciclo.md` — Orquestração) | prática: projeto de referência enxuto (registro de execução do ciclo SDD) |
+| Nível de modelo por papel, ajuste por dado e composição do time com mais de um produto (`modelos.md`, `entrevista.md`) | prática: segundo projeto de referência (papel `testes` trocou de modelo três vezes por retrabalho no RED; com o revisor num modelo leve, o orquestrador passou a conferir os vereditos); proposta nossa — níveis por capacidade e regra de subir/descer |
 | Worktree por sessão (`ciclo.md`) | prática: projeto de referência controlado; [RG] |
 | Modo automático versionado, nunca mergeia (`auto-mode`) | prática: projeto de referência controlado (auto-mode versionado) |
 | Merge sem squash (`ciclo.md`, `templates/pr.md`) | prática: projeto de referência controlado (preserva evidência RED/GREEN) |

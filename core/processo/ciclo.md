@@ -74,7 +74,7 @@ O orquestrador é a sessão principal — não é um papel. Ele:
    - `task-N-relatorio.md` — o que o papel devolveu (`FEITO` / `FEITO_COM_RESSALVAS` / `BLOQUEADO`) e o parecer do revisor;
 3. despacha cada papel com o brief; nunca implementa ele mesmo;
 4. registra uma **Ruling** em `progress.md` sempre que decide algo não previsto no plano (o quê, por quê, alternativa descartada);
-5. escolhe o modelo por tipo de trabalho: forte para `arquiteto` e `revisor`; médio para `dominio`, `testes`, `dev`; leve quando o brief já contém o código completo (transcrição).
+5. escolhe o modelo de cada papel por `agentic/processo/modelos.md` (nível de partida, ajuste por dado, composição do time com mais de um produto).
 
 ## Interfaces para versões futuras (não implementadas)
 
