@@ -43,6 +43,7 @@ acrescenta() { # acrescenta <arquivo relativo> <linha> — sem duplicar
 
 copia "$fw/core/principios.md" agentic/processo/principios.md
 copia "$fw/core/processo/ciclo.md" agentic/processo/ciclo.md
+copia "$fw/core/processo/modelos.md" agentic/processo/modelos.md
 copia_dir "$fw/core/papeis" agentic/processo/papeis
 copia_dir "$fw/core/templates" agentic/processo/templates
 copia "$fw/core/templates/AGENTS.md" AGENTS.md
