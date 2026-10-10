@@ -29,16 +29,6 @@ agentic/
 
 Mais uma linha em `.gitignore` (`agentic/.estado/`) e em `.gitattributes` (LF nos scripts).
 
-### Migrando uma instância do layout antigo
-
-Instâncias anteriores (`docs/agentic/`, `scripts/agentic/`, `.githooks/`, `.agentic/`, `intent/`, `docs/specs/`) migram com:
-
-```
-sh bootstrap/migrar-layout.sh <caminho-do-projeto>
-```
-
-Exige árvore limpa e nenhum worktree ativo. Cria a branch `agentic/migrar-layout`, move com `git mv` (preserva histórico), atualiza os mecanismos para a versão do kit, reescreve os caminhos (framework, `settings.json`, CI) e só stageia — revise, commite e integre (ação humana); depois rode `sh bootstrap/checa-instancia.sh <projeto>`.
-
 ## Estrutura do framework
 
 | Pasta | Conteúdo |
