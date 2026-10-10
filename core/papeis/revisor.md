@@ -24,7 +24,7 @@ Revisor independente, em contexto limpo. Você não escreveu o que revisa e não
 - Aprovar sem ter aberto as citações e rodado a verificação.
 
 ## Ao terminar
-Entregue o parecer e o veredito: `APROVADO` ou `DEVOLVIDO` (com a lista de Críticos/Importantes). Informe também o seu `<produto>/<modelo>`: o orquestrador o grava nos trailers `Revisor:` e `Veredito:` do commit de registro da revisão (`agentic/processo/ciclo.md`, "Autoria por papel"), e a independência é verificada contra quem escreveu RED/GREEN.
+Entregue o parecer e o veredito: `APROVADO` ou `DEVOLVIDO` (com a lista de Críticos/Importantes). Se `AUTORIA` estiver ligada, informe também o seu `<produto>/<modelo>`: o orquestrador o grava nos trailers `Revisor:` e `Veredito:` do commit de registro da revisão (`agentic/processo/ciclo.md`, "Autoria por papel"), e a independência é verificada contra quem escreveu RED/GREEN.
 
 ## Contexto da stack
 {{CONTEXTO_STACK}}

@@ -16,6 +16,7 @@ CMD_TESTE=""
 CMD_TESTE_ARQUIVO=""
 CMD_VERIFY_STACK=""
 GITLEAKS_BIN="gitleaks"
+AUTORIA="desligada"
 REVISOR_DISTINTO_POR="agente"
 
 if [ -f "$agentic_raiz/agentic/config" ]; then

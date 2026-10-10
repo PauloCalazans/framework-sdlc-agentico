@@ -14,8 +14,15 @@
 #       (agentic/config) = agente (padrão: produto/modelo diferentes) ou produto (só o produto precisa diferir);
 #   (4) --publicar (antes do push/PR): exige registro de revisão APROVADO posterior ao último commit de trabalho.
 # Imprime o resumo Papel → Agente para colar no PR. Sem commits de trabalho na branch: nada a verificar.
+# OPT-IN: AUTORIA em agentic/config = desligada (padrão: não verifica nada) | aviso (só avisa, nunca bloqueia) |
+# exigida (bloqueia). Pensado para times multiagente; quem usa um só agente deixa desligada, sem editar o script.
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
+case "${AUTORIA:-desligada}" in
+  desligada) echo "verifica-autoria: desligada (AUTORIA em agentic/config: aviso | exigida)"; exit 0 ;;
+  aviso|exigida) ;;
+  *) agentic_falha "AUTORIA='$AUTORIA' inválido em agentic/config (use desligada, aviso ou exigida)" ;;
+esac
 publicar=0
 [ "${1:-}" = "--publicar" ] && { publicar=1; shift; }
 base=${1:-$(agentic_base)}
@@ -28,6 +35,8 @@ trailer() { git log -1 --format=%B "$1" | git interpret-trailers --parse | sed -
 produto() { printf '%s' "${1%%/*}"; }
 
 status=0
+probs=$(mktemp)
+problema() { printf '%s\n' "$*" >> "$probs"; status=1; }
 resumo=$(mktemp); trab=$(mktemp)
 i=0; ult_trab=0; ult_rev=0; ult_ver=""; rev_agente=""
 for c in $(git log --reverse --no-merges --format=%H "$base..HEAD"); do
@@ -41,14 +50,14 @@ for c in $(git log --reverse --no-merges --format=%H "$base..HEAD"); do
   if [ -n "$tipo" ]; then
     papel=$(trailer "$c" Papel); agente=$(trailer "$c" Agente)
     if [ -z "$papel" ] || [ -z "$agente" ]; then
-      echo "agentic: BLOQUEADO — $curto ($s) sem trailers Papel: e Agente: <produto>/<modelo>"; status=1
+      problema "$curto ($s) sem trailers Papel: e Agente: <produto>/<modelo>"; status=1
     else
       ok=1
       case "$tipo:$papel" in testes:testes|dev:dev|fix:dev|fix:testes) ;; *) ok=0 ;; esac
       if [ "$ok" -eq 0 ]; then
-        echo "agentic: BLOQUEADO — $curto ($s) com Papel: $papel incompatível com o tipo do commit"; status=1
+        problema "$curto ($s) com Papel: $papel incompatível com o tipo do commit"; status=1
       fi
-      case "$agente" in */*) ;; *) echo "agentic: BLOQUEADO — $curto com Agente: '$agente' fora do formato <produto>/<modelo>"; status=1 ;; esac
+      case "$agente" in */*) ;; *) problema "$curto com Agente: '$agente' fora do formato <produto>/<modelo>"; status=1 ;; esac
       printf '%s\t%s\n' "$papel" "$agente" >> "$resumo"
       printf '%s\t%s\t%s\n' "$curto" "$papel" "$agente" >> "$trab"
     fi
@@ -58,7 +67,7 @@ for c in $(git log --reverse --no-merges --format=%H "$base..HEAD"); do
   if [ -n "$r" ]; then
     ult_rev=$i; rev_agente=$r; ult_ver=$(trailer "$c" Veredito)
     printf 'revisor\t%s\n' "$r" >> "$resumo"
-    case "$r" in */*) ;; *) echo "agentic: BLOQUEADO — $curto com Revisor: '$r' fora do formato <produto>/<modelo>"; status=1 ;; esac
+    case "$r" in */*) ;; *) problema "$curto com Revisor: '$r' fora do formato <produto>/<modelo>"; status=1 ;; esac
   fi
 done
 
@@ -68,7 +77,7 @@ if [ -n "$rev_agente" ]; then
     [ -n "$curto" ] || continue
     if [ "$dist" = produto ]; then a=$(produto "$agente"); b=$(produto "$rev_agente"); else a=$agente; b=$rev_agente; fi
     if [ "$a" = "$b" ]; then
-      echo "agentic: BLOQUEADO — revisor ($rev_agente) não é independente de $curto (Papel: $papel, Agente: $agente); REVISOR_DISTINTO_POR=$dist"
+      problema "revisor ($rev_agente) não é independente de $curto (Papel: $papel, Agente: $agente); REVISOR_DISTINTO_POR=$dist"
       status=1
     fi
   done < "$trab"
@@ -76,11 +85,11 @@ fi
 
 if [ "$publicar" -eq 1 ] && [ "$ult_trab" -gt 0 ]; then
   if [ "$ult_rev" -eq 0 ]; then
-    echo "agentic: BLOQUEADO — sem registro de revisão (trailers Revisor: e Veredito:) para publicar"; status=1
+    problema "sem registro de revisão (trailers Revisor: e Veredito:) para publicar"; status=1
   elif [ "$ult_rev" -lt "$ult_trab" ]; then
-    echo "agentic: BLOQUEADO — a revisão é anterior ao último commit de trabalho; revise de novo antes de publicar"; status=1
+    problema "a revisão é anterior ao último commit de trabalho; revise de novo antes de publicar"; status=1
   elif [ "$ult_ver" != APROVADO ]; then
-    echo "agentic: BLOQUEADO — último Veredito: '${ult_ver:-ausente}' (precisa ser APROVADO) para publicar"; status=1
+    problema "último Veredito: '${ult_ver:-ausente}' (precisa ser APROVADO) para publicar"; status=1
   fi
 elif [ "$ult_trab" -gt 0 ] && [ "$ult_rev" -eq 0 ]; then
   echo "aviso: ainda sem registro de revisão (Revisor:/Veredito:) — exigido na publicação (--publicar)"
@@ -91,5 +100,10 @@ if [ -s "$resumo" ]; then
   sort -u "$resumo" | awk -F'\t' '{ printf "  - %s: %s\n", $1, $2 }'
 fi
 rm -f "$resumo" "$trab"
-[ "$status" -eq 0 ] && echo "verifica-autoria: OK"
-exit $status
+if [ -s "$probs" ]; then
+  if [ "$AUTORIA" = exigida ]; then sed 's/^/agentic: BLOQUEADO — /' "$probs"; rm -f "$probs"; exit 1; fi
+  sed 's/^/aviso: /' "$probs"
+fi
+rm -f "$probs"
+echo "verifica-autoria: OK ($AUTORIA)"
+exit 0

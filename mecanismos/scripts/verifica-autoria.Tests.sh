@@ -4,7 +4,8 @@ dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/testlib.sh"
 
 prepara() {
-  r=$(tl_repo); echo base > "$r/base"; git -C "$r" add -A; git -C "$r" commit -q -m base
+  r=$(tl_repo); echo base > "$r/base"; mkdir -p "$r/agentic"; printf 'AUTORIA="%s"\n' "${1:-exigida}" > "$r/agentic/config"
+  git -C "$r" add -A; git -C "$r" commit -q -m base
   git -C "$r" checkout -q -b feat/k; printf '%s\n' "$r"
 }
 # c <repo> <assunto> [trailers...]: commit com trailers (um por argumento)
@@ -57,7 +58,7 @@ tl_contem "não é independente" "explica"
 r=$(prepara); c "$r" "test(red): x" "$RED" "$KIRO"; c "$r" "feat(green): x" "Papel: dev" "$KIRO"
 c "$r" "docs(task): x em-revisão" "Revisor: Kiro/Claude Opus 5.5" "Veredito: APROVADO"
 tl_espera 0 "mesmo produto, modelo diferente: independente no padrão (agente)" roda "$r"
-printf 'REVISOR_DISTINTO_POR="produto"\n' > "$r/agentic-config.tmp"; mkdir -p "$r/agentic"; mv "$r/agentic-config.tmp" "$r/agentic/config"
+printf 'REVISOR_DISTINTO_POR="produto"\n' >> "$r/agentic/config"
 tl_espera 1 "REVISOR_DISTINTO_POR=produto exige produto diferente" roda "$r"
 
 # publicação
@@ -76,5 +77,20 @@ r=$(prepara); c "$r" "feat(green): x" "Papel: dev" "$KIRO"
 git -C "$r" branch -m main trunk
 tl_espera 0 "sem principal: degradado, não falha" roda "$r"
 tl_contem "degradado" "declara"
+
+# opt-in: desligada (padrão) não verifica nada; aviso nunca bloqueia
+r=$(tl_repo); git -C "$r" checkout -q -b feat/k; c "$r" "test(red): x"
+tl_espera 0 "sem AUTORIA configurada (padrão desligada): não verifica" roda "$r"
+tl_contem "desligada" "declara que está desligada"
+
+r=$(prepara aviso); c "$r" "test(red): x"; c "$r" "feat(green): x" "Papel: dev" "$KIRO"
+c "$r" "docs(task): x em-revisão" "Revisor: Kiro/Claude Sonnet 5" "Veredito: APROVADO"
+tl_espera 0 "AUTORIA=aviso não bloqueia nem trailers ausentes nem revisor igual" roda "$r" --publicar
+tl_contem "aviso: " "mas avisa"
+tl_contem "não é independente" "inclusive a independência"
+
+
+r=$(prepara); printf 'AUTORIA="talvez"\n' > "$r/agentic/config"
+tl_espera 1 "valor inválido de AUTORIA bloqueia" roda "$r"
 
 tl_fim

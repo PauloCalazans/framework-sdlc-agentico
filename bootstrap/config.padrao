@@ -22,6 +22,9 @@ MARCADOR_ASSERCAO="{{MARCADOR_ASSERCAO}}"
 # Glob dos relatórios JUnit XML gerados pelo CMD_VERIFY_STACK. Vazio = verificação degradada.
 RELATORIO_TESTES="{{RELATORIO_TESTES}}"
 GITLEAKS_BIN="gitleaks"
-# Independência do revisor (verifica-autoria.sh): "agente" = produto/modelo diferentes dos de quem escreveu RED/GREEN;
+# Autoria por papel (verifica-autoria.sh), pensada para times multiagente. desligada (padrão) = não verifica;
+# aviso = só avisa, nunca bloqueia; exigida = bloqueia. Não edite o script para desligá-lo: mude só esta chave.
+AUTORIA="desligada"
+# Independência do revisor (só vale com AUTORIA aviso/exigida): "agente" = produto/modelo diferentes dos de quem escreveu RED/GREEN;
 # "produto" = o produto também precisa diferir.
 REVISOR_DISTINTO_POR="agente"
