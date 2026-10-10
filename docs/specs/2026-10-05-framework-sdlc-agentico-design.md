@@ -95,8 +95,6 @@ framework-sdlc-agentico/
 | — | `agentic/projeto/`: `bootstrap.md`, `decisoes.md`, `intent/`, `specs/` (artefatos do projeto; o kit nunca os toca) |
 | — | `agentic/.estado/`: `execucao/`, `worktrees/`, `verify.lock/`, `kit-conflitos/`, `settings.pendente.json` (efêmero, uma linha no `.gitignore`) |
 
-Instâncias do layout anterior (`docs/agentic/`, `scripts/agentic/`, `.githooks/`, `.agentic/`, `intent/`, `docs/specs/`) migram com `bootstrap/migrar-layout.sh <projeto>` (ação humana: cria a branch `agentic/migrar-layout`, move com `git mv`, atualiza os mecanismos para a versão do kit, reescreve os caminhos e só stageia).
-
 ## 5. Princípios-meta (`core/principios.md`)
 
 1. **Prompt orienta, mecanismo controla.** Toda regra declara `Verificado por:` com o mecanismo ou "por revisão".
