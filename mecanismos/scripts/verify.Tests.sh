@@ -26,6 +26,15 @@ tl_espera 1 "falha quando a stack falha" sh -c "cd '$r' && sh '$dir/verify.sh'"
 tl_contem "VERIFY: FALHOU em: stack" "nomeia a etapa que falhou"
 echo 'exit 0' > "$r/tests/stack.sh"
 
+# etapa decisões (trilha rápida, sem task): referência a decisão inexistente derruba o verify
+r2=$(tl_repo); mkdir -p "$r2/agentic/projeto" "$r2/tests"
+printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\n' > "$r2/agentic/config"; echo 'exit 0' > "$r2/tests/stack.sh"
+printf '# Decisões\n\n### D1 — t\n' > "$r2/agentic/projeto/decisoes.md"
+git -C "$r2" add -A; git -C "$r2" commit -q -m "base"; git -C "$r2" checkout -q -b chore/d
+printf 'Ver D2.\n' > "$r2/agentic/projeto/nota.md"; git -C "$r2" add -A; git -C "$r2" commit -q -m "nota"
+tl_espera 1 "falha quando há referência a decisão inexistente" sh -c "cd '$r2' && sh '$dir/verify.sh'"
+tl_contem "VERIFY: FALHOU em: decisoes" "nomeia a etapa decisoes"
+
 echo z > "$r/fora.txt"
 tl_espera 1 "falha quando o escopo é violado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 rm "$r/fora.txt"

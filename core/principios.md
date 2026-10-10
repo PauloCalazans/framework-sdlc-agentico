@@ -15,7 +15,7 @@ Quando o mesmo erro acontece pela segunda vez, a correção é um controle mecâ
 ## 3. Estado é derivado, nunca escrito à mão
 O estado do projeto (o que está em andamento, o que foi aprovado) vem do git e dos campos `**Status:**` dos artefatos. É exibido no início de cada sessão por `agentic/mecanismos/scripts/status-projeto.sh`. Números (contagens, totais) são gerados por script.
 **Por quê:** estado escrito à mão envelhece em um dia e passa a mentir para a próxima sessão.
-**Verificado por:** `status-projeto.sh` (hook de início de sessão).
+**Verificado por:** `status-projeto.sh` (hook de início de sessão); `verifica-decisoes.sh` (toda referência `D<n>` existe em `decisoes.md` e nenhuma decisão da base some).
 
 ## 4. Afirmações técnicas são medidas ou inferidas
 Toda afirmação sobre comportamento do sistema é marcada `medido` (há saída/execução que comprova) ou `inferido` (dedução ainda não comprovada). Nada é declarado funcionando sem a saída vista.
