@@ -40,6 +40,6 @@ Quando os papéis rodam em produtos diferentes (por exemplo, um canvas que orque
 3. **Cota.** Estime os despachos por papel: por spec, `dominio`, `arquiteto` e `revisor` (`spec` e `design`); por task, `testes`, `dev` e `revisor` (`diff`), mais as devoluções. Ponha os papéis frequentes no produto com mais cota.
 4. **Ferramentas.** O `revisor` vai para um produto que negue escrita; sem isso, "nunca corrige" fica por revisão, e a decisão diz isso. Os papéis que escrevem (`testes`, `dev`) vão de preferência para um produto que aplique `deny`; nos outros, só os githooks protegem, e a decisão também diz isso.
 5. **Independência.** Com mais de uma família de modelos, prefira o `revisor` numa família diferente da do `dev`: o mesmo modelo tende a repetir o próprio erro. É preferência, não exigência.
-6. **Proposta.** Apresente uma composição recomendada e uma alternativa mais barata, com o que cada uma sacrifica. O humano escolhe. Grave `D<n> — Composição do time` com a tabela papel | produto | modelo | nível | ferramentas.
+6. **Proposta.** Apresente uma composição recomendada e uma alternativa mais barata, com o que cada uma sacrifica. O humano escolhe. Grave `D<n> — Composição do time` com a tabela papel | produto | modelo | nível | ferramentas, incluindo a linha do orquestrador: é por ela que as demais sessões sabem que não são o orquestrador.
 
 **Verificado por:** revisão. Nenhum mecanismo confere qual modelo de fato rodou.
