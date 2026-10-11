@@ -24,6 +24,7 @@ Pergunte um bloco por vez; prefira múltipla escolha com uma recomendação.
 | Risco | Caminhos protegidos? Gatilhos de escalonamento específicos da stack/domínio? Dependências sensíveis? |
 | Fontes externas | Há sistema legado, API externa ou norma que os agentes devem consultar? Onde está e como se acessa (somente leitura)? |
 | Operação | Branch principal? Plataforma de PR (GitHub, GitLab, Azure…)? Existe CI? Quem aprova o Gate 1 e o Gate 2? Modo automático começa ligado? |
+| Time | Os papéis rodam num só produto ou num orquestrador externo com vários produtos? Quais produtos e modelos estão disponíveis, com que cota ou licença? |
 
 ## Passo 3 — Registro
 Grave `agentic/projeto/bootstrap.md` com todas as respostas, cada uma marcada `confirmado` (humano respondeu/confirmou) ou `inferido`. Re-execuções do `/bootstrap` partem deste arquivo. Depois que as proteções estão ativas, alterações em `agentic/config`, `agentic/auto-mode`, `agentic/baseline-skips`, `agentic/mecanismos/githooks/**`, `.claude/hooks/**`, `agentic/mecanismos/scripts/**` e `.gitleaksignore` (inclusive em re-execuções do /bootstrap e nos merges do Passo 5) são ação humana: proponha o conteúdo e peça ao humano que aplique.
@@ -36,6 +37,7 @@ Grave `agentic/projeto/bootstrap.md` com todas as respostas, cada uma marcada `c
 5. `agentic/projeto/decisoes.md` a partir de `agentic/processo/templates/decisoes.md`, com `D1 — Stack e comandos de verificação` (Verificado por: `verify.sh`) e uma decisão por ferramenta de arquitetura com o mecanismo de baseline dela.
 6. Ajuste `agentic/.estado/settings.pendente.json`: acrescente ao `permissions.allow` os comandos `CMD_*` da stack (ex.: `"Bash(npm test:*)"`), e, se a plataforma de PR não for GitHub, troque `gh pr create`/`gh pr view`/`gh pr merge` pelos equivalentes. As regras de deny de merge nunca são removidas: se a plataforma for outra ou não houver plataforma de PR, ACRESCENTE os equivalentes (ex.: `Bash(git merge:*)` para integração local) e mantenha `Bash(gh pr merge:*)`.
 7. Se o projeto tem CI: gere o workflow da plataforma chamando `sh agentic/mecanismos/scripts/verify.sh`, e registre em `agentic/projeto/decisoes.md` que ele só vale depois de **provado verde num PR de teste**.
+8. Time: com orquestrador externo ou mais de um produto, monte a proposta pela seção "Orquestrador externo ou mais de um produto" de `agentic/processo/modelos.md` e grave em `decisoes.md` a composição que o humano escolher. Com um só produto, confira o `model:` de `.claude/agents/*.md` contra a tabela de níveis do mesmo arquivo.
 
 ## Passo 5 — Conflitos
 Para cada arquivo em `agentic/.estado/conflitos-instalacao.txt`, compare a versão do projeto com a do kit, que o instalador guardou em `agentic/.estado/kit-conflitos/<mesmo caminho>` (para `.claude/settings.json`, o guardado é o template de settings do kit), mostre a diferença ao humano e proponha um merge. Aplique só o que o humano aprovar.
