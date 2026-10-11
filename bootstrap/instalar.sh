@@ -1,10 +1,17 @@
 #!/bin/sh
-# instalar.sh <projeto-alvo> — copia o kit do framework para o projeto.
+# instalar.sh <projeto-alvo> [--copilot] — copia o kit do framework para o projeto.
+# --copilot acrescenta o adaptador do GitHub Copilot em .github/ (instruções, agentes, prompts, setup do agente de nuvem).
 # Não pergunta nada e não sobrescreve nada: conflitos vão para agentic/.estado/conflitos-instalacao.txt
 # e são resolvidos no /bootstrap.
 fw=$(cd "$(dirname "$0")/.." && pwd)
 alvo=${1:-}
-{ [ -n "$alvo" ] && [ -d "$alvo" ]; } || { echo "uso: instalar.sh <projeto-alvo>" >&2; exit 2; }
+copilot=""
+case "${2:-}" in
+  "") ;;
+  --copilot) copilot=1 ;;
+  *) echo "uso: instalar.sh <projeto-alvo> [--copilot]" >&2; exit 2 ;;
+esac
+{ [ -n "$alvo" ] && [ -d "$alvo" ]; } || { echo "uso: instalar.sh <projeto-alvo> [--copilot]" >&2; exit 2; }
 git -C "$alvo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "o alvo não é um repositório git: $alvo" >&2; exit 2; }
 alvo=$(cd "$alvo" && pwd)
 rm -f "$alvo/agentic/.estado/conflitos-instalacao.txt" # o arquivo reflete só a execução atual
@@ -58,6 +65,12 @@ copia "$fw/adapters/claude-code/agente-oraculo.tmpl.md" agentic/processo/templat
 copia "$fw/adapters/claude-code/settings.json.tmpl" agentic/.estado/settings.pendente.json
 copia "$fw/bootstrap/config.padrao" agentic/config
 copia "$fw/bootstrap/auto-mode.padrao" agentic/auto-mode
+if [ -n "$copilot" ]; then
+  copia "$fw/adapters/copilot/copilot-instructions.md" .github/copilot-instructions.md
+  copia_dir "$fw/adapters/copilot/agents" .github/agents
+  copia_dir "$fw/adapters/copilot/prompts" .github/prompts
+  copia "$fw/adapters/copilot/copilot-setup-steps.yml" .github/workflows/copilot-setup-steps.yml
+fi
 
 acrescenta .gitignore "agentic/.estado/"
 acrescenta .gitattributes "*.sh text eol=lf"

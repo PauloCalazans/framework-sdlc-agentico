@@ -4,7 +4,7 @@ Referência reutilizável de SDLC agêntico: papéis de agentes, artefatos, gate
 
 ## Início rápido
 
-1. `sh bootstrap/instalar.sh <caminho-do-projeto>` — copia o kit (não pergunta nada, não sobrescreve nada).
+1. `sh bootstrap/instalar.sh <caminho-do-projeto>` — copia o kit (não pergunta nada, não sobrescreve nada). Com `--copilot`, acrescenta o adaptador do GitHub Copilot em `.github/` (veja `docs/portabilidade.md`).
 2. No projeto, abra o Claude Code e rode `/bootstrap` — entrevista sobre contexto e stack; instancia agentes e controles.
 3. Ative as proteções (ação humana): `sh agentic/mecanismos/scripts/ativar-protecoes.sh`.
 4. Comece pelo primeiro intent: `/intent` (ou `/mudanca <descrição>` para uma mudança pequena).
@@ -36,9 +36,10 @@ Mais uma linha em `.gitignore` (`agentic/.estado/`) e em `.gitattributes` (LF no
 | `core/` | Neutro: princípios, ciclo, contratos de papéis, templates de artefatos |
 | `mecanismos/` | Controle determinístico: githooks e scripts `sh`, cada um com testes |
 | `adapters/claude-code/` | Adaptador fino para Claude Code: agentes, comandos, hooks, settings |
+| `adapters/copilot/` | Adaptador fino para GitHub Copilot (opcional, `--copilot`): instruções, agentes, prompts, setup do agente de nuvem |
 | `bootstrap/` | Instalador, entrevista, checagem estrutural |
 | `exemplos/` | Projetos usados para validar o agnosticismo |
-| `docs/` | Spec, plano, origem de cada regra, validação |
+| `docs/` | Spec, plano, origem de cada regra, validação, portabilidade entre ferramentas |
 
 ## Verificação do framework
 

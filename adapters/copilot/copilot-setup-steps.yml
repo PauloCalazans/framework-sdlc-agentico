@@ -1,0 +1,45 @@
+# Preparação do ambiente do agente de nuvem do Copilot: roda antes de cada sessão do agente.
+# O GitHub só reconhece este arquivo em .github/workflows/copilot-setup-steps.yml, com o job chamado
+# copilot-setup-steps. Instalado pelo instalar.sh --copilot; complete o passo da stack no /bootstrap.
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths: [.github/workflows/copilot-setup-steps.yml]
+  pull_request:
+    paths: [.github/workflows/copilot-setup-steps.yml]
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # o verify compara a branch com a principal (escopo, RED, decisões)
+
+      # Stack do projeto: acrescente aqui a preparação da linguagem (ex.: actions/setup-node@v4).
+
+      - name: Instala o gitleaks (os githooks bloqueiam todo commit sem ele)
+        env:
+          GITLEAKS_VERSAO: 8.21.2
+          GITLEAKS_SHA256: 5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba
+        run: |
+          arq="gitleaks_${GITLEAKS_VERSAO}_linux_x64.tar.gz"
+          curl -sSfLO "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSAO}/$arq"
+          echo "$GITLEAKS_SHA256  $arq" | sha256sum -c -
+          sudo tar -xzf "$arq" -C /usr/local/bin gitleaks
+          gitleaks version
+
+      - name: Liga os githooks do framework
+        run: git config core.hooksPath agentic/mecanismos/githooks
+
+      - name: Preparação dos testes (CMD_PREPARAR_TESTE do agentic/config)
+        run: |
+          . ./agentic/config
+          case "$CMD_PREPARAR_TESTE" in
+            ""|*"{{"*) echo "sem preparação configurada" ;; # vazio ou /bootstrap ainda não rodou
+            *) sh -c "$CMD_PREPARAR_TESTE" ;;
+          esac
