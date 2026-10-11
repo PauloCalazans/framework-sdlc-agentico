@@ -58,7 +58,7 @@ O design consolida três fontes:
 framework-sdlc-agentico/
 ├── core/                       NEUTRO
 │   ├── principios.md
-│   ├── processo/ciclo.md
+│   ├── processo/ciclo.md, processo/modelos.md
 │   ├── papeis/                 dominio, arquiteto, testes, dev, revisor, _oraculo
 │   └── templates/              intent, spec, design, task, decisoes, AGENTS.md, pr
 ├── mecanismos/                 DETERMINÍSTICO, sem dependência de ferramenta
@@ -84,7 +84,7 @@ framework-sdlc-agentico/
 
 | Origem no framework | Destino no projeto |
 |---|---|
-| `core/principios.md`, `core/processo/`, `bootstrap/entrevista.md` | `agentic/processo/principios.md`, `agentic/processo/ciclo.md`, `agentic/processo/entrevista.md` |
+| `core/principios.md`, `core/processo/`, `bootstrap/entrevista.md` | `agentic/processo/principios.md`, `agentic/processo/ciclo.md`, `agentic/processo/modelos.md`, `agentic/processo/entrevista.md` |
 | `core/papeis/` (instanciados) | `agentic/processo/papeis/` |
 | `core/templates/` | `agentic/processo/templates/` |
 | `core/templates/AGENTS.md` (instanciado) | `AGENTS.md` (raiz) |
