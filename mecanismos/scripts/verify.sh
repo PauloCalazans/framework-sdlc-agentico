@@ -1,6 +1,6 @@
 #!/bin/sh
 # verify.sh [--task <task.md>] — ponto único de verificação do projeto. Só reporta; nunca conserta.
-# Etapas: stack (CMD_VERIFY_STACK) → escopo → skip → red → decisões.
+# Etapas: hooks → stack (CMD_VERIFY_STACK) → escopo → skip → red → decisões.
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
@@ -30,6 +30,16 @@ etapa() {
   if "$@"; then echo "-- $nome: OK"; else echo "-- $nome: FALHOU"; falhas="$falhas $nome"; fi
 }
 
+# Os githooks valem para qualquer autor, mas core.hooksPath é configuração local: um clone novo
+# (outra máquina, agente de nuvem) roda sem eles e nada avisa.
+verifica_hooks() {
+  atual=$(git config core.hooksPath)
+  [ "$atual" = "agentic/mecanismos/githooks" ] && { echo "githooks ligados"; return 0; }
+  echo "githooks desligados neste clone (core.hooksPath = '${atual:-<vazio>}')."
+  echo "Ligue com: git config core.hooksPath agentic/mecanismos/githooks (ação humana; o agente não altera as próprias proteções)."
+  return 1
+}
+etapa hooks verifica_hooks
 etapa stack sh -c "$CMD_VERIFY_STACK"
 
 if [ -z "$task" ]; then

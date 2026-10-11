@@ -35,7 +35,8 @@ agentic_falha() {
   exit 1
 }
 
-# agentic_base: ponto de divergência entre HEAD e a branch principal.
+# agentic_base: ponto de divergência entre HEAD e a branch principal. Sem a principal local (clone de CI
+# ou de agente de nuvem, que só traz origin/<principal>), usa a remota.
 agentic_base() {
-  git merge-base HEAD "$BRANCH_PRINCIPAL" 2>/dev/null
+  git merge-base HEAD "$BRANCH_PRINCIPAL" 2>/dev/null || git merge-base HEAD "origin/$BRANCH_PRINCIPAL" 2>/dev/null
 }

@@ -57,6 +57,7 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 ## Regras de fluxo
 
 - **Isolamento:** um worktree por sessão/trilha, dentro do repositório: `git worktree add agentic/.estado/worktrees/<nome> -b <branch>`, onde `<nome>` é a branch com `/` trocado por `-` (ex.: `pedidos/001-criar` → `agentic/.estado/worktrees/pedidos-001-criar`). O diretório é ignorado pelo `.gitignore` e as regras `deny` valem nele (variantes `**/`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree. Depois que o humano integrar (Gate 2), o orquestrador remove o worktree com `git worktree remove agentic/.estado/worktrees/<nome>` e a branch com `git branch -d <branch>` (só `-d`, nunca `-D`). O estado `integrada` não é escrito: deriva do git (branch contida na principal / removida). Se o `-d` recusar, atualize antes a principal local — nunca `-D`.
+- **Branches:** só o orquestrador cria branch e worktree, uma branch por task (ou por mudança da trilha rápida), com o nome exato do `**Branch:**` da task; nenhum papel cria branch. Ferramenta que impõe o próprio nome de branch (ex.: agente de nuvem que abre `copilot/…`) roda o verify com `--task <task.md>`: sem isso o escopo não é verificado.
 - **Escopo:** cada task declara `## Arquivos`. `verify.sh` falha se a branch tocar arquivo fora da lista. Ampliar o escopo exige atualizar a lista num commit `docs(task): …` — visível na revisão e no Gate 2.
 - **Divergência spec × código:** pare, registre em "Questões em aberto" da spec e corrija via commit `docs(spec): …` no mesmo PR.
 - **Verificação:** `sh agentic/mecanismos/scripts/verify.sh` é o ponto único. Ninguém afirma sucesso sem ter visto a saída.
@@ -66,11 +67,11 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 
 ## Orquestração
 
-O orquestrador é a sessão principal — não é um papel. Ele:
+O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador externo, com e sem subagentes) está em `AGENTS.md`, "Quem é você neste repositório". Ele:
 1. lê `status-projeto` (injetado no início da sessão) e escolhe a próxima task;
 2. cria o worktree e o registro de execução em `agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/`:
    - `progress.md` — task atual, SHA base, próximo passo (permite retomar uma sessão interrompida);
-   - `task-N-brief.md` — o que o papel recebe (task, contrato, caminhos absolutos, comandos);
+   - `task-N-brief.md` — o que o papel recebe; começa com `Papel: <papel>` e traz task, contrato, caminhos absolutos e comandos;
    - `task-N-relatorio.md` — o que o papel devolveu (`FEITO` / `FEITO_COM_RESSALVAS` / `BLOQUEADO`) e o parecer do revisor;
 3. despacha cada papel com o brief; nunca implementa ele mesmo;
 4. registra uma **Ruling** em `progress.md` sempre que decide algo não previsto no plano (o quê, por quê, alternativa descartada);
