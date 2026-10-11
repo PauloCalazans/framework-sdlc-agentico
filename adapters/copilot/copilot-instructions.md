@@ -8,6 +8,6 @@ Regras que valem sempre (repetidas do `AGENTS.md`, para não depender de ele ter
 - Nunca afirme sucesso sem ter visto `VERIFY: OK` de `sh agentic/mecanismos/scripts/verify.sh`. Numa branch com nome imposto pela ferramenta (ex.: `copilot/…`), rode `sh agentic/mecanismos/scripts/verify.sh --task <caminho da task>`.
 - Nunca altere nem desabilite testes de um commit `test(red):`.
 
-Papéis: despachar um papel é invocar o agente personalizado de mesmo nome (`.github/agents/<papel>.agent.md`). Se a ferramenta não deixar invocar outro agente, pare e peça ao humano que troque de agente. O orquestrador nunca implementa.
+Quem é você: com um brief que começa com `Papel: <papel>`, você é esse papel; sem brief de papel, você é o orquestrador e nunca faz o trabalho dos papéis (detalhes em `AGENTS.md`, "Quem é você neste repositório"). Despachar um papel é invocar o agente personalizado de mesmo nome (`.github/agents/<papel>.agent.md`). Se a ferramenta não deixar invocar outro agente, grave o brief e peça ao humano que o abra numa sessão nova com esse agente.
 
 Comandos do ciclo: os prompts de `.github/prompts/` (`nova-task`, `mudanca`, `intent`, `verify`, `status`).

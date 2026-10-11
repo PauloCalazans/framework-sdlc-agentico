@@ -36,7 +36,7 @@ Abra uma sessão nova na ferramenta, num projeto instanciado, **sem explicar nad
 2. Qual comando verifica tudo antes de afirmar que algo funciona?
 3. Quem faz o merge na branch principal?
 4. Em que branch você faria a task `<uma task existente>`? Quem cria essa branch?
-5. Se eu pedir "faça o RED da task `<a mesma>`", qual é o seu papel e o que você nunca faz?
+5. Se eu pedir "faça o RED da task `<a mesma>`", qual é o seu papel e o que você nunca faz? E sem brief nenhum, quem é você nesta sessão?
 
 **Passa** se a ferramenta acerta as cinco perguntas a partir dos arquivos do projeto. **Falha** se precisou ser mandada ler o `AGENTS.md`, ou se inventou regra. Registre o resultado abaixo, com a data e a versão da ferramenta.
 

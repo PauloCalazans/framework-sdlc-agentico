@@ -67,11 +67,11 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 
 ## Orquestração
 
-O orquestrador é a sessão principal — não é um papel. Ele:
+O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador externo, com e sem subagentes) está em `AGENTS.md`, "Quem é você neste repositório". Ele:
 1. lê `status-projeto` (injetado no início da sessão) e escolhe a próxima task;
 2. cria o worktree e o registro de execução em `agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/`:
    - `progress.md` — task atual, SHA base, próximo passo (permite retomar uma sessão interrompida);
-   - `task-N-brief.md` — o que o papel recebe (task, contrato, caminhos absolutos, comandos);
+   - `task-N-brief.md` — o que o papel recebe; começa com `Papel: <papel>` e traz task, contrato, caminhos absolutos e comandos;
    - `task-N-relatorio.md` — o que o papel devolveu (`FEITO` / `FEITO_COM_RESSALVAS` / `BLOQUEADO`) e o parecer do revisor;
 3. despacha cada papel com o brief; nunca implementa ele mesmo;
 4. registra uma **Ruling** em `progress.md` sempre que decide algo não previsto no plano (o quê, por quê, alternativa descartada);
