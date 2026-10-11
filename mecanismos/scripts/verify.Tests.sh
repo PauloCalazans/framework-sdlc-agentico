@@ -58,6 +58,12 @@ tl_espera 1 "com --task, arquivo fora do escopo é bloqueado" sh -c "cd '$r' && 
 rm "$r/fora.txt"
 git -C "$r" checkout -q x/001
 
+# Clone novo de CI ou de agente de nuvem: só existe origin/main, sem a principal local.
+c=$(mktemp -d); git clone -q "$r" "$c"; git -C "$c" checkout -q x/001; git -C "$c" branch -q -D main
+git -C "$c" config core.hooksPath agentic/mecanismos/githooks
+tl_espera 0 "clone sem a principal local: usa origin/main como base" sh -c "cd '$c' && sh '$dir/verify.sh'"
+tl_contem "escopo: OK" "clone sem a principal local: escopo verificado contra origin/main"
+
 echo z > "$r/fora.txt"
 tl_espera 1 "falha quando o escopo é violado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 rm "$r/fora.txt"
