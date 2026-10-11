@@ -28,6 +28,7 @@ No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); 
 - Nunca faça merge na branch principal nem altere permissões do agente.
 - Nunca afirme sucesso sem ter visto a saída do `verify.sh`.
 - Nunca desabilite ou altere testes de um commit `test(red):`.
+- Só o orquestrador cria branch: uma por task, depois do Gate 1, com o nome exato do `**Branch:**` da task (trilha rápida: uma por mudança). Nenhum papel cria branch. Se a ferramenta impõe o próprio nome de branch, rode o verify com `--task <caminho da task>`.
 {{REGRAS_INVIOLAVEIS}}
 
 ## Estrutura do repositório
