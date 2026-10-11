@@ -70,6 +70,10 @@ framework-sdlc-agentico/
 │   ├── commands/               bootstrap, nova-task, verify, status
 │   ├── hooks/                  SessionStart, PreToolUse mínimo
 │   └── settings.json.tmpl
+├── adapters/copilot/           ADAPTADOR FINO (opcional: instalar.sh --copilot)
+│   ├── copilot-instructions.md ponteiro para AGENTS.md + regras invioláveis
+│   ├── agents/, prompts/       "leia core/papeis/X.md" / "siga .claude/commands/X.md"
+│   └── copilot-setup-steps.yml agente de nuvem: histórico, gitleaks, githooks
 ├── bootstrap/
 │   ├── instalar.sh             copia o kit e configura core.hooksPath
 │   └── entrevista.md           blocos de perguntas e mapeamento para artefatos
@@ -91,6 +95,7 @@ framework-sdlc-agentico/
 | `mecanismos/githooks/` | `agentic/mecanismos/githooks/` (`core.hooksPath`) |
 | `mecanismos/scripts/` | `agentic/mecanismos/scripts/` |
 | `adapters/claude-code/` | `.claude/` + `CLAUDE.md` mínimo |
+| `adapters/copilot/` (com `--copilot`) | `.github/copilot-instructions.md`, `.github/agents/`, `.github/prompts/`, `.github/workflows/copilot-setup-steps.yml` |
 | `bootstrap/config.padrao`, `bootstrap/auto-mode.padrao` | `agentic/config`, `agentic/auto-mode` (versionados; política) |
 | — | `agentic/projeto/`: `bootstrap.md`, `decisoes.md`, `intent/`, `specs/` (artefatos do projeto; o kit nunca os toca) |
 | — | `agentic/.estado/`: `execucao/`, `worktrees/`, `verify.lock/`, `kit-conflitos/`, `settings.pendente.json` (efêmero, uma linha no `.gitignore`) |
