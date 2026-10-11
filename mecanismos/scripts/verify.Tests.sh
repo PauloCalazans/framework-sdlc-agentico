@@ -3,8 +3,11 @@
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/testlib.sh"
 
+# Instância com os githooks ligados, como o instalar.sh deixa (a etapa hooks exige).
+repo() { rr=$(tl_repo); git -C "$rr" config core.hooksPath agentic/mecanismos/githooks; printf '%s\n' "$rr"; }
+
 prepara() {
-  r=$(tl_repo)
+  r=$(repo)
   mkdir -p "$r/agentic/.estado" "$r/tests" "$r/sub/dir" "$r/agentic/projeto/specs/x/tasks"
   printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
   echo 'exit 0' > "$r/tests/stack.sh"
@@ -27,13 +30,39 @@ tl_contem "VERIFY: FALHOU em: stack" "nomeia a etapa que falhou"
 echo 'exit 0' > "$r/tests/stack.sh"
 
 # etapa decisões (trilha rápida, sem task): referência a decisão inexistente derruba o verify
-r2=$(tl_repo); mkdir -p "$r2/agentic/projeto" "$r2/tests"
+r2=$(repo); mkdir -p "$r2/agentic/projeto" "$r2/tests"
 printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\n' > "$r2/agentic/config"; echo 'exit 0' > "$r2/tests/stack.sh"
 printf '# Decisões\n\n### D1 — t\n' > "$r2/agentic/projeto/decisoes.md"
 git -C "$r2" add -A; git -C "$r2" commit -q -m "base"; git -C "$r2" checkout -q -b chore/d
 printf 'Ver D2.\n' > "$r2/agentic/projeto/nota.md"; git -C "$r2" add -A; git -C "$r2" commit -q -m "nota"
 tl_espera 1 "falha quando há referência a decisão inexistente" sh -c "cd '$r2' && sh '$dir/verify.sh'"
 tl_contem "VERIFY: FALHOU em: decisoes" "nomeia a etapa decisoes"
+
+# etapa hooks: clone sem core.hooksPath (outra máquina, agente de nuvem) tem os githooks desligados
+git -C "$r" config --unset core.hooksPath
+tl_espera 1 "falha quando os githooks estão desligados no clone" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "VERIFY: FALHOU em: hooks" "nomeia a etapa hooks"
+tl_contem "git config core.hooksPath agentic/mecanismos/githooks" "mostra o comando que liga os githooks"
+git -C "$r" config core.hooksPath .outro
+tl_espera 1 "falha quando core.hooksPath aponta para outro lugar" sh -c "cd '$r' && sh '$dir/verify.sh'"
+git -C "$r" config core.hooksPath agentic/mecanismos/githooks
+
+# Produto que impõe o próprio nome de branch (ex.: copilot/…): a task vem por --task e o escopo vale.
+git -C "$r" checkout -q -b copilot/tarefa-qualquer
+tl_espera 0 "branch sem task associada: escopo pulado com aviso" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "aviso: nenhuma task com **Branch:** copilot/tarefa-qualquer" "avisa que o escopo não foi verificado"
+tl_espera 0 "com --task, o escopo é verificado em qualquer branch" sh -c "cd '$r' && sh '$dir/verify.sh' --task agentic/projeto/specs/x/tasks/001-t.md"
+tl_contem "escopo: OK" "--task: escopo verificado"
+echo z > "$r/fora.txt"
+tl_espera 1 "com --task, arquivo fora do escopo é bloqueado" sh -c "cd '$r' && sh '$dir/verify.sh' --task agentic/projeto/specs/x/tasks/001-t.md"
+rm "$r/fora.txt"
+git -C "$r" checkout -q x/001
+
+# Clone novo de CI ou de agente de nuvem: só existe origin/main, sem a principal local.
+c=$(mktemp -d); git clone -q "$r" "$c"; git -C "$c" checkout -q x/001; git -C "$c" branch -q -D main
+git -C "$c" config core.hooksPath agentic/mecanismos/githooks
+tl_espera 0 "clone sem a principal local: usa origin/main como base" sh -c "cd '$c' && sh '$dir/verify.sh'"
+tl_contem "escopo: OK" "clone sem a principal local: escopo verificado contra origin/main"
 
 echo z > "$r/fora.txt"
 tl_espera 1 "falha quando o escopo é violado" sh -c "cd '$r' && sh '$dir/verify.sh'"
@@ -50,7 +79,7 @@ tl_contem "pulado" "declara a etapa pulada"
 tl_contem "aviso: nenhuma task com **Branch:** main" "avisa que o escopo não foi verificado (há tasks)"
 
 # Trilha enxuta: o documento único (template real) é achado pela **Branch:** e o escopo vale.
-r=$(tl_repo)
+r=$(repo)
 mkdir -p "$r/agentic/.estado" "$r/tests" "$r/src" "$r/agentic/projeto/specs/desc/tasks"
 printf 'CMD_VERIFY_STACK="sh tests/stack.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
 echo 'exit 0' > "$r/tests/stack.sh"

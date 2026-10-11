@@ -79,4 +79,24 @@ tl_espera 1 "kit-conflitos removido no início da execução" test -e "$r/agenti
 tl_espera 2 "recusa alvo que não é git" sh "$dir/instalar.sh" "$(mktemp -d)"
 tl_espera 2 "recusa sem argumento" sh "$dir/instalar.sh"
 
+# Adaptador do Copilot: só com --copilot (sem ele, o teste da raiz acima garante que .github/ não é criado).
+r=$(tl_repo)
+tl_espera 2 "recusa segundo argumento desconhecido" sh "$dir/instalar.sh" "$r" --outro
+tl_espera 0 "instala com --copilot" sh "$dir/instalar.sh" "$r" --copilot
+for f in .github/copilot-instructions.md .github/prompts/nova-task.prompt.md .github/workflows/copilot-setup-steps.yml .claude/agents/revisor.md; do
+  tl_espera 0 "--copilot: copiou $f" test -f "$r/$f"
+done
+for p in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "--copilot: agente do papel $p" test -f "$r/.github/agents/$p.agent.md"
+done
+tl_espera 1 "--copilot: revisor sem a ferramenta edit" grep -qF "'edit'" "$r/.github/agents/revisor.agent.md"
+cat > "$r/.ponteiros.sh" <<'EOS'
+# todo agente e prompt do Copilot aponta (primeiro caminho .md entre crases) para um arquivo instalado
+for f in .github/agents/*.agent.md .github/prompts/*.prompt.md; do
+  alvo=$(grep -o '`[^`]*[.]md`' "$f" | head -n 1 | tr -d '`')
+  [ -f "$alvo" ] || { echo "$f aponta para $alvo, que não existe"; exit 1; }
+done
+EOS
+tl_espera 0 "--copilot: ponteiros dos agentes e prompts levam a arquivos instalados" sh -c "cd '$r' && sh .ponteiros.sh"
+
 tl_fim
