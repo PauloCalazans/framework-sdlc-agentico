@@ -44,6 +44,7 @@ Cada regra do núcleo aponta para a fonte que a justifica. Siglas das referênci
 | CI só depois de provado verde (`entrevista.md`) | prática: projeto de referência controlado (CI declarado e nunca verde) |
 | Plugin de processo desligado (`settings.json.tmpl`, `CLAUDE.md`) | prática: projeto de referência controlado (plugin de processo sobrescrevendo convenções) |
 | Contratos portáveis + adaptador fino (`core/papeis/`, `adapters/`) | prática: projeto de referência controlado (contratos de papéis + adaptadores); [AG] |
+| Perfil do papel separado do contrato (`agentic/projeto/papeis/`, `templates/perfil-papel.md`); manifesto do kit e checagem de contrato editado e de caminho citado (`instalar.sh`, `checa-instancia.sh`) | prática: duas instâncias (reforçar a persona dos papéis com stack e padrões do projeto foi o que mais resolveu; na segunda, o contrato reescrito à mão conflitava a cada atualização do kit, perdeu a regra de divergência do ciclo e citava um doc inexistente) |
 | Oráculo somente leitura com `arquivo:linha` (`papeis/_oraculo.md`) | prática: projeto de referência enxuto e prática: projeto de referência controlado (oráculos de referência somente leitura) |
 | Settings ativado pelo humano (`ativar-protecoes.sh`) | proposta nossa — decorre de P5 |
 | Questionário de bootstrap (`entrevista.md`) | proposta nossa — nenhuma fonte propõe; derivado de [AG], [CI], [RG] |
