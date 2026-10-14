@@ -76,6 +76,50 @@ rm "$r/CLAUDE.md"; rm "$r/.claude/settings.json"
 tl_espera 0 "reinstala sem conflitos" sh "$dir/instalar.sh" "$r"
 tl_espera 1 "kit-conflitos removido no início da execução" test -e "$r/agentic/.estado/kit-conflitos"
 
+# Perfis dos papéis: da instância, criados só se ausentes; o kit nunca os sobrescreve.
+r=$(tl_repo)
+sh "$dir/instalar.sh" "$r" >/dev/null
+tl_espera 0 "copia o template de perfil" test -f "$r/agentic/processo/templates/perfil-papel.md"
+for p in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "cria o perfil do papel $p" test -f "$r/agentic/projeto/papeis/$p.md"
+  tl_espera 0 "perfil $p aponta para o próprio contrato" grep -qF "agentic/processo/papeis/$p.md" "$r/agentic/projeto/papeis/$p.md"
+  tl_espera 1 "contrato $p sem {{CONTEXTO_STACK}}" grep -qF "{{CONTEXTO_STACK}}" "$r/agentic/processo/papeis/$p.md"
+  tl_espera 0 "contrato $p manda ler o perfil" grep -qF "agentic/projeto/papeis/$p.md" "$r/agentic/processo/papeis/$p.md"
+done
+echo "perfil do projeto" > "$r/agentic/projeto/papeis/dev.md"
+tl_espera 0 "reinstala com perfil preenchido" sh "$dir/instalar.sh" "$r"
+tl_espera 0 "nunca sobrescreve o perfil" grep -qx "perfil do projeto" "$r/agentic/projeto/papeis/dev.md"
+tl_espera 1 "perfil preenchido não é conflito" test -f "$r/agentic/.estado/conflitos-instalacao.txt"
+
+# Manifesto: hash (sha256 do conteúdo sem \r) de cada arquivo do kit, para detectar edição na instância.
+r=$(tl_repo)
+sh "$dir/instalar.sh" "$r" >/dev/null
+m="$r/agentic/processo/.kit-manifesto"
+tl_espera 0 "grava o manifesto do kit" test -f "$m"
+tl_espera 0 "manifesto tem o contrato do dev" grep -q "^[0-9a-f]\{64\}  agentic/processo/papeis/dev.md$" "$m"
+tl_espera 0 "manifesto tem os mecanismos" grep -q "  agentic/mecanismos/scripts/verify.sh$" "$m"
+tl_espera 1 "manifesto não lista perfis da instância" grep -q "agentic/projeto/" "$m"
+tl_espera 1 "manifesto não lista agentic/.estado" grep -q "agentic/.estado/" "$m"
+tl_espera 0 "hash do manifesto confere com o arquivo instalado" sh -c "cd '$r' && grep '  agentic/processo/ciclo.md\$' '$m' | sha256sum -c --status"
+cp "$m" "$r/.manifesto-antes"
+sh "$dir/instalar.sh" "$r" >/dev/null
+tl_espera 0 "reinstalar não muda o manifesto" cmp -s "$m" "$r/.manifesto-antes"
+
+# Atualização sem merge: arquivo intacto desde a instalação anterior (hash = manifesto) recebe a versão nova do kit.
+printf 'versão antiga do kit\n' > "$r/agentic/processo/ciclo.md"
+h=$(sha256sum < "$r/agentic/processo/ciclo.md" | cut -d' ' -f1)
+sed -i "s|^[0-9a-f]*  agentic/processo/ciclo.md\$|$h  agentic/processo/ciclo.md|" "$m"
+printf 'editado na instância\n' > "$r/agentic/processo/papeis/dev.md"
+tl_espera 0 "reinstala sobre versão antiga" sh "$dir/instalar.sh" "$r"
+tl_contem "agentic/processo/ciclo.md" "lista o arquivo atualizado"
+tl_espera 0 "arquivo intacto recebe a versão nova" cmp -s "$dir/../core/processo/ciclo.md" "$r/agentic/processo/ciclo.md"
+tl_espera 0 "arquivo editado na instância é preservado" grep -qx "editado na instância" "$r/agentic/processo/papeis/dev.md"
+tl_espera 0 "arquivo editado vira conflito" grep -qx "agentic/processo/papeis/dev.md" "$r/agentic/.estado/conflitos-instalacao.txt"
+tl_espera 1 "arquivo atualizado não é conflito" grep -qx "agentic/processo/ciclo.md" "$r/agentic/.estado/conflitos-instalacao.txt"
+
+r=$(tl_repo); printf 'a\r\nb\r\n' > "$r/x"; printf 'a\nb\n' > "$r/y"
+tl_espera 0 "hash ignora CRLF (checkout no Windows)" sh -c ". '$dir/lib-kit.sh'; [ \"\$(kit_hash '$r/x')\" = \"\$(kit_hash '$r/y')\" ]"
+
 tl_espera 2 "recusa alvo que não é git" sh "$dir/instalar.sh" "$(mktemp -d)"
 tl_espera 2 "recusa sem argumento" sh "$dir/instalar.sh"
 
