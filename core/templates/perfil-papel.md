@@ -3,7 +3,7 @@
 Do projeto: o kit nunca sobrescreve este arquivo. Acrescenta regras ao contrato `agentic/processo/papeis/{{PAPEL}}.md`; não revoga nenhuma.
 
 <!-- Como preencher (apague este comentário):
-- Meta: 30 a 40 linhas. O perfil é lido a cada despacho do papel e custa tokens toda vez.
+- Meta: 30 a 40 linhas.
 - Texto longo (árvore de pastas, convenções de teste detalhadas) vai para um doc do projeto, citado em "Leia sob demanda".
 - Todo caminho entre crases precisa existir no repositório (o checa-instancia.sh confere).
 - Padrão de stack que já falhou duas vezes sai daqui e vira checagem no CMD_VERIFY_STACK de agentic/config (princípio 2).

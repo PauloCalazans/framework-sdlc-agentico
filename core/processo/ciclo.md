@@ -22,13 +22,13 @@ Na dúvida, trilha padrão.
 | 4 | GREEN + REFACTOR | `dev` | commits `feat(green): …` e `refactor: …` | `verify.sh` |
 | 5 | Revisão | `revisor` modo `diff` | parecer com achados Crítico / Importante / Menor | — |
 | 6 | Publicação | orquestrador | push + PR pelo template `agentic/processo/templates/pr.md` | — |
-| G2 | **Gate 2** | humano | merge **sem squash** (preserva a evidência RED/GREEN) | merge negado ao agente |
+| G2 | **Gate 2** | humano | merge **sem squash** | merge negado ao agente |
 
 - Achado **Crítico** ou **Importante** devolve o trabalho ao papel autor; a revisão roda de novo no diff corrigido.
 - Achados **Menores** ficam registrados e são tratados na revisão final da branch, antes da publicação.
-- **Gate 1 não aceita hipótese:** toda regra da spec chega ao Gate 1 com estado `confirmada`. O questionário de decisão existe para que o humano resolva todas as dúvidas de uma vez, antes da implementação.
-- **Registro do Gate 1:** depois da aprovação humana, o orquestrador cria a branch e o worktree da primeira task, e o primeiro commit da branch é `docs(spec): <nome> aprovada (Gate 1)`, com intent, spec, design e tasks (`**Status:** aprovado` em intent, spec e design). A principal é protegida para todos, então o registro vive na branch, não nela. As tasks seguintes da mesma spec saem da principal depois que a primeira é integrada.
-- **Gate 2 sem plataforma de PR:** o orquestrador deixa a branch rebaseada na principal; o humano integra com `git merge --ff-only <branch>` (fast-forward não cria commit de merge, não dispara hooks e preserva os commits RED/GREEN).
+- **Gate 1 não aceita hipótese:** toda regra da spec chega ao Gate 1 com estado `confirmada`.
+- **Registro do Gate 1:** depois da aprovação humana, o orquestrador cria a branch e o worktree da primeira task, e o primeiro commit da branch é `docs(spec): <nome> aprovada (Gate 1)`, com intent, spec, design e tasks (`**Status:** aprovado` em intent, spec e design). As tasks seguintes da mesma spec saem da principal depois que a primeira é integrada.
+- **Gate 2 sem plataforma de PR:** o orquestrador deixa a branch rebaseada na principal; o humano integra com `git merge --ff-only <branch>`.
 
 ## Trilha enxuta
 
@@ -37,7 +37,7 @@ Mantém RED provado, revisor independente, escopo verificado e os dois gates hum
 `/mudanca <descrição>` → `arquiteto` em modo enxuto escreve o documento → **Gate 1** (o humano aprova o documento; nenhuma hipótese) → `testes` RED → `dev` GREEN/REFACTOR → `verify` → `revisor` modo `diff` (revisa o código **e** confere se a trilha enxuta cabia) → publicação → **Gate 2** → worktree removido.
 
 - **Elegibilidade:** a mudança cabe numa única task e não aciona nenhum gatilho N3. Na dúvida, trilha padrão.
-- **Registro do Gate 1:** o commit `docs(mudanca): <nome> aprovada (Gate 1)` com o documento, primeiro commit da branch (criada com o worktree depois da aprovação). Sem ele a branch não carrega o documento e o `verify` não verifica o escopo.
+- **Registro do Gate 1:** o commit `docs(mudanca): <nome> aprovada (Gate 1)` com o documento, primeiro commit da branch (criada com o worktree depois da aprovação).
 - **Promoção:** se surgir gatilho N3 ou o `revisor` julgar a classificação errada, pare; o trabalho sobe para a trilha padrão e o documento enxuto vira rascunho do intent. Registre uma Ruling.
 
 ## Escalonamento N3
@@ -52,13 +52,13 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 
 **Itens N3 previstos no design:** o `arquiteto` lista em `design.md` ("Itens N3 (aprovação no Gate 1)") todo gatilho N3 já visível no desenho, e o humano aprova cada item explicitamente no Gate 1. A task cita em "N3 aprovados no Gate 1" os itens que usa. Item previsto no design e aprovado no Gate 1 não exige nova parada; só N3 novo (fora da lista) interrompe a execução.
 
-`Verificado por:` revisão (o `revisor` em modo `design` confere que todo gatilho N3 visível está na lista; em modo `diff`, que toda mudança N3 do diff está em "N3 aprovados no Gate 1" da task). Nenhum mecanismo impede o agente de seguir sem escalar — esta é uma limitação declarada.
+`Verificado por:` revisão (o `revisor` em modo `design` confere que todo gatilho N3 visível está na lista; em modo `diff`, que toda mudança N3 do diff está em "N3 aprovados no Gate 1" da task).
 
 ## Regras de fluxo
 
-- **Isolamento:** um worktree por sessão/trilha, dentro do repositório: `git worktree add agentic/.estado/worktrees/<nome> -b <branch>`, onde `<nome>` é a branch com `/` trocado por `-` (ex.: `pedidos/001-criar` → `agentic/.estado/worktrees/pedidos-001-criar`). O diretório é ignorado pelo `.gitignore` e as regras `deny` valem nele (variantes `**/`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree. Depois que o humano integrar (Gate 2), o orquestrador remove o worktree com `git worktree remove agentic/.estado/worktrees/<nome>` e a branch com `git branch -d <branch>` (só `-d`, nunca `-D`). O estado `integrada` não é escrito: deriva do git (branch contida na principal / removida). Se o `-d` recusar, atualize antes a principal local — nunca `-D`.
-- **Branches:** só o orquestrador cria branch e worktree, uma branch por task (ou por mudança da trilha rápida), com o nome exato do `**Branch:**` da task; nenhum papel cria branch. Ferramenta que impõe o próprio nome de branch (ex.: agente de nuvem que abre `copilot/…`) roda o verify com `--task <task.md>`: sem isso o escopo não é verificado.
-- **Escopo:** cada task declara `## Arquivos`. `verify.sh` falha se a branch tocar arquivo fora da lista. Ampliar o escopo exige atualizar a lista num commit `docs(task): …` — visível na revisão e no Gate 2.
+- **Isolamento:** um worktree por sessão/trilha, dentro do repositório: `git worktree add agentic/.estado/worktrees/<nome> -b <branch>`, onde `<nome>` é a branch com `/` trocado por `-` (ex.: `pedidos/001-criar` → `agentic/.estado/worktrees/pedidos-001-criar`). Nunca duas sessões no mesmo diretório. Subagentes recebem caminhos absolutos do worktree. Depois que o humano integrar (Gate 2), o orquestrador remove o worktree com `git worktree remove agentic/.estado/worktrees/<nome>` e a branch com `git branch -d <branch>` (só `-d`, nunca `-D`). O estado `integrada` não é escrito: deriva do git (branch contida na principal / removida). Se o `-d` recusar, atualize antes a principal local — nunca `-D`.
+- **Branches:** só o orquestrador cria branch e worktree, uma branch por task (ou por mudança da trilha rápida), com o nome exato do `**Branch:**` da task; nenhum papel cria branch. Ferramenta que impõe o próprio nome de branch (ex.: agente de nuvem que abre `copilot/…`) roda o verify com `--task <task.md>`.
+- **Escopo:** cada task declara `## Arquivos`. `verify.sh` falha se a branch tocar arquivo fora da lista. Ampliar o escopo exige atualizar a lista num commit `docs(task): …`.
 - **Divergência spec × código:** pare, registre em "Questões em aberto" da spec e corrija via commit `docs(spec): …` no mesmo PR.
 - **Verificação:** `sh agentic/mecanismos/scripts/verify.sh` é o ponto único. Ninguém afirma sucesso sem ter visto a saída.
 - **Commits:** `test(red):`, `feat(green):`, `refactor:`, `fix:`, `docs(spec):`, `docs(task):`, `chore:`. Um commit por passo do ciclo.
@@ -70,8 +70,8 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador externo, com e sem subagentes) está em `AGENTS.md`, "Quem é você neste repositório". Ele:
 1. lê `status-projeto` (injetado no início da sessão) e escolhe a próxima task;
 2. cria o worktree e o registro de execução em `agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/`:
-   - `progress.md` — task atual, SHA base, próximo passo (permite retomar uma sessão interrompida);
-   - `task-N-brief.md` — o que o papel recebe; começa com `Papel: <papel>` e traz os caminhos absolutos do contrato do papel (`agentic/processo/papeis/<papel>.md`) e do perfil (`agentic/projeto/papeis/<papel>.md`), a task, o contrato executável, os caminhos absolutos do worktree e os comandos. O perfil vai no brief mesmo que o contrato já o cite: assim ele chega ao papel também em ferramenta sem subagentes;
+   - `progress.md` — task atual, SHA base, próximo passo;
+   - `task-N-brief.md` — o que o papel recebe; começa com `Papel: <papel>` e traz os caminhos absolutos do contrato do papel (`agentic/processo/papeis/<papel>.md`) e do perfil (`agentic/projeto/papeis/<papel>.md`), a task, o contrato executável, os caminhos absolutos do worktree e os comandos. O perfil vai no brief mesmo que o contrato já o cite;
    - `task-N-relatorio.md` — o que o papel devolveu (`FEITO` / `FEITO_COM_RESSALVAS` / `BLOQUEADO`) e o parecer do revisor;
 3. despacha cada papel com o brief; nunca implementa ele mesmo;
 4. registra uma **Ruling** em `progress.md` sempre que decide algo não previsto no plano (o quê, por quê, alternativa descartada);
