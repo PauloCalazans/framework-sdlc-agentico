@@ -4,8 +4,8 @@ Referência reutilizável de SDLC agêntico: papéis de agentes, artefatos, gate
 
 ## Início rápido
 
-1. `sh bootstrap/instalar.sh <caminho-do-projeto>` — copia o kit (não pergunta nada, não sobrescreve nada). Com `--copilot`, acrescenta o adaptador do GitHub Copilot em `.github/` (veja `docs/portabilidade.md`).
-2. No projeto, abra o Claude Code e rode `/bootstrap` — entrevista sobre contexto e stack; instancia agentes e controles.
+1. `sh bootstrap/instalar.sh <caminho-do-projeto>` — copia o kit (não pergunta nada, não sobrescreve edição do projeto; arquivo do kit intacto é atualizado pelo manifesto). Com `--copilot`, acrescenta o adaptador do GitHub Copilot em `.github/` (veja `docs/portabilidade.md`).
+2. No projeto, abra o Claude Code e rode `/bootstrap` — entrevista sobre contexto e stack; preenche os perfis dos papéis e instancia os controles.
 3. Ative as proteções (ação humana): `sh agentic/mecanismos/scripts/ativar-protecoes.sh`.
 4. Comece pelo primeiro intent: `/intent` (ou `/mudanca <descrição>` para uma mudança pequena).
 
@@ -21,9 +21,9 @@ CLAUDE.md              ponte mínima para o Claude Code
 .claude/               agentes, comandos, hooks e settings.json (proteções)
 agentic/
   config, auto-mode    política da instância (só o humano edita)
-  processo/            do kit: princípios, ciclo, entrevista, papéis, templates
+  processo/            do kit: princípios, ciclo, entrevista, contratos dos papéis, templates, .kit-manifesto
   mecanismos/          do kit: githooks/ (core.hooksPath) e scripts/
-  projeto/             do projeto: bootstrap.md, decisoes.md, intent/, specs/
+  projeto/             do projeto: papeis/ (perfis), bootstrap.md, decisoes.md, intent/, specs/
   .estado/             efêmero, ignorado pelo git: execução, worktrees, conflitos
 ```
 

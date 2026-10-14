@@ -12,6 +12,18 @@ O núcleo (`core/`, `mecanismos/`) é neutro. O que muda de uma ferramenta para 
 
 `deny`, hooks de sessão e a lista de ferramentas por agente são específicos de cada produto. No Claude Code, quem os instala é o `adapters/claude-code/`. Nas outras ferramentas, onde não houver equivalente, a regra fica "por revisão".
 
+## Onde mora a persona de cada papel
+
+| Camada | Arquivo | Dono |
+|---|---|---|
+| Contrato | `agentic/processo/papeis/<papel>.md` | kit; não se edita na instância |
+| Perfil | `agentic/projeto/papeis/<papel>.md` | projeto; o kit nunca toca: especialização, stack, padrões, proibições |
+| Adaptador | `.claude/agents/<papel>.md`, `.github/agents/<papel>.agent.md` | kit; ponteiro fino para o contrato |
+
+A persona nunca vai para o adaptador. Assim toda ferramenta segue o mesmo caminho, AGENTS.md → contrato → perfil, e o projeto escreve a persona uma vez só. O contrato manda ler o perfil, e o brief (`task-N-brief.md`) traz os dois caminhos, o que vale também em ferramenta sem subagentes.
+
+Separar por dono também resolve a atualização: o `instalar.sh` grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo do kit) e, na reinstalação, troca sem merge o arquivo que ainda bate com o manifesto. O `checa-instancia.sh` acusa contrato editado na instância e caminho citado num perfil que não existe.
+
 ## Como cada ferramenta encontra as instruções
 
 | Ferramenta | Arquivo que lê sem pedir | Adaptador no kit |
