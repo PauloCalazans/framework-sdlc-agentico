@@ -1,6 +1,6 @@
 # Ciclo de desenvolvimento agêntico
 
-Leia antes de qualquer trabalho. Princípios: `agentic/processo/principios.md`. Papéis: `agentic/processo/papeis/`.
+Leia antes de qualquer trabalho. Princípios: `agentic/processo/principios.md`. Papéis: contratos do kit em `agentic/processo/papeis/`, perfis do projeto em `agentic/projeto/papeis/`.
 
 ## Escolha a trilha
 
@@ -71,7 +71,7 @@ O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador exter
 1. lê `status-projeto` (injetado no início da sessão) e escolhe a próxima task;
 2. cria o worktree e o registro de execução em `agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/`:
    - `progress.md` — task atual, SHA base, próximo passo (permite retomar uma sessão interrompida);
-   - `task-N-brief.md` — o que o papel recebe; começa com `Papel: <papel>` e traz task, contrato, caminhos absolutos e comandos;
+   - `task-N-brief.md` — o que o papel recebe; começa com `Papel: <papel>` e traz os caminhos absolutos do contrato do papel (`agentic/processo/papeis/<papel>.md`) e do perfil (`agentic/projeto/papeis/<papel>.md`), a task, o contrato executável, os caminhos absolutos do worktree e os comandos. O perfil vai no brief mesmo que o contrato já o cite: assim ele chega ao papel também em ferramenta sem subagentes;
    - `task-N-relatorio.md` — o que o papel devolveu (`FEITO` / `FEITO_COM_RESSALVAS` / `BLOQUEADO`) e o parecer do revisor;
 3. despacha cada papel com o brief; nunca implementa ele mesmo;
 4. registra uma **Ruling** em `progress.md` sempre que decide algo não previsto no plano (o quê, por quê, alternativa descartada);
