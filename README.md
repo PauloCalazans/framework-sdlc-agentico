@@ -13,16 +13,15 @@ No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); 
 
 ## Enriqueça os perfis dos papéis
 
-Os contratos do kit dizem o que cada papel faz e nunca faz, mas são genéricos de propósito. Sem dados do projeto, o papel acerta o processo e erra a stack. Nas duas instâncias em que o kit foi usado, o que mais resolveu problema foi reforçar a persona de cada papel com a stack e os padrões do projeto.
+O contrato diz o que o papel faz e nunca faz; o perfil (`agentic/projeto/papeis/<papel>.md`) diz como fazer neste projeto. Sem perfil preenchido, o papel é genérico. O `/bootstrap` cria a primeira versão; o kit nunca a sobrescreve.
 
-Esse reforço vai em `agentic/projeto/papeis/<papel>.md`, um perfil por papel que o kit nunca sobrescreve. O `/bootstrap` cria a primeira versão. Depois, o perfil acompanha o projeto:
 - **Especialização concreta:** "dev full-stack CAP TypeScript e Fiori elements", não "desenvolvedor".
-- **Fatos do código, conferidos:** caminhos, nomes de entidade, papéis de segurança, comandos e decisões (`D<n>`) que o papel aplica. Persona com fato errado é pior que persona genérica. Na primeira migração, as personas citavam pastas, actions e papéis que não existiam no código.
+- **Fatos conferidos no código:** caminhos, entidades, papéis de segurança, comandos e decisões (`D<n>`) que o papel aplica. Fato errado é pior que fato ausente.
 - **Proibições do projeto:** só acréscimos ao "Nunca faz" do contrato.
-- **Curto:** de 30 a 40 linhas. O perfil é lido a cada despacho. O texto longo fica num documento do projeto, citado em "Leia sob demanda".
-- **Erro que se repete vira mecanismo:** padrão que já falhou duas vezes sai do perfil e vira checagem no `CMD_VERIFY_STACK` (princípio 2).
+- **Curto:** 30 a 40 linhas; texto longo vai para um documento do projeto, citado em "Leia sob demanda".
+- **Erro repetido vira checagem** no `CMD_VERIFY_STACK` (princípio 2).
 
-Atualize o perfil sempre que o revisor devolver duas vezes pelo mesmo motivo de stack. Atualize também quando uma decisão nova mudar o que o papel faz.
+Atualize o perfil quando o revisor devolver duas vezes pelo mesmo motivo de stack ou quando uma decisão nova mudar o trabalho do papel.
 
 ## O que é instalado no projeto
 
@@ -52,7 +51,7 @@ Mais uma linha em `.gitignore` (`agentic/.estado/`) e em `.gitattributes` (LF no
 | `adapters/copilot/` | Adaptador fino para GitHub Copilot (opcional, `--copilot`): instruções, agentes, prompts, setup do agente de nuvem |
 | `bootstrap/` | Instalador, entrevista, checagem estrutural |
 | `exemplos/` | Projetos usados para validar o agnosticismo |
-| `docs/` | Spec, plano, origem de cada regra, validação, portabilidade entre ferramentas |
+| `docs/` | Spec, plano, validação, portabilidade entre ferramentas |
 
 ## Verificação do framework
 

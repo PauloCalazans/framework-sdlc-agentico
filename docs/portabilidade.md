@@ -4,7 +4,7 @@ O núcleo (`core/`, `mecanismos/`) é neutro. O que muda de uma ferramenta para 
 
 ## O que vale em qualquer ferramenta
 
-| Controle | Por quê vale em todas |
+| Controle | Como funciona |
 |---|---|
 | Githooks (`agentic/mecanismos/githooks`) | O git os executa para qualquer autor. Num clone novo ficam desligados (`core.hooksPath` é configuração local), e por isso a etapa `hooks` do `verify` falha até alguém ligá-los. |
 | `verify.sh` | Script `sh`. Numa branch com nome imposto pela ferramenta, `--task <task.md>` informa a task. Sem a principal local (clone de CI ou de nuvem), a base é `origin/<principal>`. |
@@ -20,9 +20,9 @@ O núcleo (`core/`, `mecanismos/`) é neutro. O que muda de uma ferramenta para 
 | Perfil | `agentic/projeto/papeis/<papel>.md` | projeto; o kit nunca toca: especialização, stack, padrões, proibições |
 | Adaptador | `.claude/agents/<papel>.md`, `.github/agents/<papel>.agent.md` | kit; ponteiro fino para o contrato |
 
-A persona nunca vai para o adaptador. Assim toda ferramenta segue o mesmo caminho, AGENTS.md → contrato → perfil, e o projeto escreve a persona uma vez só. O contrato manda ler o perfil, e o brief (`task-N-brief.md`) traz os dois caminhos, o que vale também em ferramenta sem subagentes.
+A persona nunca vai para o adaptador. Toda ferramenta segue o mesmo caminho: AGENTS.md → contrato → perfil. O contrato manda ler o perfil, e o brief (`task-N-brief.md`) traz os dois caminhos.
 
-Separar por dono também resolve a atualização: o `instalar.sh` grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo do kit) e, na reinstalação, troca sem merge o arquivo que ainda bate com o manifesto. O `checa-instancia.sh` acusa contrato editado na instância e caminho citado num perfil que não existe.
+O `instalar.sh` grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo do kit) e, na reinstalação, troca sem merge o arquivo que ainda bate com o manifesto. O `checa-instancia.sh` acusa contrato editado na instância e caminho citado num perfil que não existe.
 
 ## Como cada ferramenta encontra as instruções
 
@@ -30,7 +30,7 @@ Separar por dono também resolve a atualização: o `instalar.sh` grava `agentic
 |---|---|---|
 | Claude Code | `CLAUDE.md` (aponta para o `AGENTS.md`) | `adapters/claude-code/` (sempre instalado) |
 | GitHub Copilot | `.github/copilot-instructions.md`; o `AGENTS.md` depende da superfície e da versão | `adapters/copilot/` (`instalar.sh <projeto> --copilot`) |
-| Kiro, Antigravity | não verificado; entenderam o projeto sem explicação (relatado pelo humano) | nenhum |
+| Outras | depende da ferramenta; confirme com o teste abaixo | nenhum |
 
 O adaptador do Copilot traz:
 - `.github/copilot-instructions.md`: aponta para o `AGENTS.md` e repete só as regras invioláveis.
@@ -38,7 +38,7 @@ O adaptador do Copilot traz:
 - `.github/prompts/*.prompt.md`: os comandos do ciclo, apontando para `.claude/commands/`.
 - `.github/workflows/copilot-setup-steps.yml`: prepara o agente de nuvem com histórico completo, `gitleaks` e githooks ligados. O passo da stack é completado no `/bootstrap`.
 
-**A validar na primeira rodada com o Copilot:** os nomes de arquivo e os campos `name`, `description` e `tools` (`read`, `search`, `edit`, `execute`) vêm do changelog e de guias do GitHub. A documentação oficial não foi consultada diretamente.
+**A confirmar na documentação do GitHub:** nomes de arquivo e campos `name`, `description` e `tools` (`read`, `search`, `edit`, `execute`).
 
 ## Teste de portabilidade (5 minutos por ferramenta)
 
@@ -50,10 +50,4 @@ Abra uma sessão nova na ferramenta, num projeto instanciado, **sem explicar nad
 4. Em que branch você faria a task `<uma task existente>`? Quem cria essa branch?
 5. Se eu pedir "faça o RED da task `<a mesma>`", qual é o seu papel e o que você nunca faz? E sem brief nenhum, quem é você nesta sessão?
 
-**Passa** se a ferramenta acerta as cinco perguntas a partir dos arquivos do projeto. **Falha** se precisou ser mandada ler o `AGENTS.md`, ou se inventou regra. Registre o resultado abaixo, com a data e a versão da ferramenta.
-
-| Ferramenta | Data | Resultado | Observação |
-|---|---|---|---|
-| Kiro | 2026-10 | passou (relatado pelo humano) | teste direto no `action-plan` |
-| Antigravity | 2026-10 | passou (relatado pelo humano) | teste direto no `action-plan` |
-| GitHub Copilot | 2026-10 | falhou (relato de terceiro) | só entendeu o contexto depois de mandado ler o `AGENTS.md`; criou várias branches. Anterior ao `adapters/copilot/` |
+**Passa** se a ferramenta acerta as cinco perguntas a partir dos arquivos do projeto. **Falha** se precisou ser mandada ler o `AGENTS.md` ou se inventou regra.
