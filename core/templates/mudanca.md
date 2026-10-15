@@ -25,3 +25,8 @@
 
 ## Questões em aberto
 - <…> (Gate 1 só aceita este campo vazio)
+
+## Rulings
+<!-- Decisões do orquestrador não previstas neste documento (agentic/processo/ciclo.md, "Rulings"). -->
+- R-1 (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>
+<!-- ou: - Nenhuma. -->

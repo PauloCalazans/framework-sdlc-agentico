@@ -38,7 +38,7 @@ Mantém RED provado, revisor independente, escopo verificado e os dois gates hum
 
 - **Elegibilidade:** a mudança cabe numa única task e não aciona nenhum gatilho N3. Na dúvida, trilha padrão.
 - **Registro do Gate 1:** o commit `docs(mudanca): <nome> aprovada (Gate 1)` (delegado: `docs(mudanca): <nome> aprovada (Gate 1 delegado, D<n>)`) com o documento, primeiro commit da branch (criada com o worktree depois da aprovação).
-- **Promoção:** se surgir gatilho N3 ou o `revisor` julgar a classificação errada, pare; o trabalho sobe para a trilha padrão e o documento enxuto vira rascunho do intent. Registre uma Ruling.
+- **Promoção:** se surgir gatilho N3 ou o `revisor` julgar a classificação errada, pare; o trabalho sobe para a trilha padrão e o documento enxuto vira rascunho do intent. Registre uma Ruling (seção "Rulings").
 
 ## Gate 1 delegado
 
@@ -89,8 +89,20 @@ O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador exter
    - `task-N-brief.md` — o que o papel recebe; começa com `Papel: <papel>` e traz os caminhos absolutos do contrato do papel (`agentic/processo/papeis/<papel>.md`) e do perfil (`agentic/projeto/papeis/<papel>.md`), a task, o contrato executável, os caminhos absolutos do worktree e os comandos. O perfil vai no brief mesmo que o contrato já o cite;
    - `task-N-relatorio.md` — o que o papel devolveu (`FEITO` / `FEITO_COM_RESSALVAS` / `BLOQUEADO`) e o parecer do revisor;
 3. despacha cada papel com o brief; nunca implementa ele mesmo;
-4. registra uma **Ruling** em `progress.md` sempre que decide algo não previsto no plano (o quê, por quê, alternativa descartada);
+4. registra uma **Ruling** sempre que decide algo não previsto na spec, no design ou na task (seção "Rulings");
 5. escolhe o modelo de cada papel por `agentic/processo/modelos.md` (nível de partida, ajuste por dado, composição do time com mais de um produto).
+
+## Rulings
+
+Ruling é a decisão do orquestrador que a spec, o design e a task não previam: ordem ou divisão das tasks, empilhamento de branches, devolução a um papel, escolha entre pareceres, promoção de trilha.
+
+- **Onde:** seção `## Rulings` do documento da task (`agentic/projeto/specs/<nome>/tasks/NNN-<nome>.md`), uma linha por decisão: `R-<n> (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>`. Entra no commit seguinte da branch (`docs(task): …`). O `progress.md` guarda só o estado da execução.
+- **Limite:** Ruling não muda regra de negócio nem aprova item N3: regra de negócio segue a regra de divergência; item N3 é aprovado no Gate 1 (humano ou delegado), e N3 fora da lista para a execução.
+- **PR:** a seção "Decisões do orquestrador" do template lista as Rulings da task (ou `nenhuma`). No último PR de uma série empilhada, lista também as das tasks anteriores da mesma spec.
+- **Relatório ao humano:** ao publicar, o orquestrador lista as Rulings da task e aponta as que pedem confirmação.
+- **Promoção:** Ruling que vale além da task vira `D<n>` em `agentic/projeto/decisoes.md` e a linha da Ruling cita a decisão. Com o Gate 1 delegado, o orquestrador registra a decisão citando a delegação; sem ela, propõe ao humano.
+
+`Verificado por:` revisão (o `revisor` em modo `diff` confere cada Ruling contra a spec e o design; nenhum mecanismo detecta decisão não registrada).
 
 ## Interfaces para versões futuras (não implementadas)
 

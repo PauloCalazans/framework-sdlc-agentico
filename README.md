@@ -77,6 +77,8 @@ O humano também pode delegar o Gate 1, por exemplo depois de escrever um plano 
 2. o humano grava `gate1: D<n>` em `agentic/auto-mode` (arquivo que o agente não edita);
 3. cada aprovação vira o commit `docs(spec): <nome> aprovada (Gate 1 delegado, D<n>)`.
 
+Toda decisão que o orquestrador toma fora da spec e do design é uma **Ruling**: fica na seção `## Rulings` da task (versionada na branch), aparece no PR em "Decisões do orquestrador", é conferida pelo `revisor` e é listada ao humano ao publicar. A que vale além da task vira `D<n>` em `decisoes.md`.
+
 O `verifica-decisoes.sh` bloqueia `gate1:` apontando para decisão revogada ou inexistente, e commit de Gate 1 delegado sem delegação vigente. O Gate 2 nunca é delegado: o merge continua com o humano.
 
 ## Exemplo real: serviço de preços em Node.js
