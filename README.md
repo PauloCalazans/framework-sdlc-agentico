@@ -8,7 +8,7 @@ Este repositório é a **fonte do kit**. Ele não contém código de produto, n�
 
 - **5 papéis** com contrato fixo: `dominio`, `arquiteto`, `testes`, `dev` e `revisor`;
 - **artefatos** em Markdown: intent, spec, design, task, decisões;
-- **2 gates humanos**: o humano aprova o que será feito (Gate 1) e faz o merge (Gate 2);
+- **2 gates**: o humano aprova o que será feito (Gate 1, que ele pode delegar ao orquestrador) e faz o merge (Gate 2, sempre humano);
 - **mecanismos determinísticos**: githooks e scripts `sh` que dizem "não" quando o agente sai do processo.
 
 Serve para **qualquer stack** (Java, Python, Node, .NET, front-end…) e para projeto novo ou existente. A stack entra pela entrevista do `/bootstrap`, sem editar o núcleo do kit.
@@ -35,7 +35,7 @@ Regra que nenhum mecanismo garante aparece como "por revisão", nunca como garan
 flowchart TB
     subgraph E1 ["1. Especificar"]
         direction LR
-        P([Pedido]) --> I["Intent<br/><i>dominio</i>"] --> S["Spec<br/><i>dominio</i>"] --> D["Design + tasks<br/><i>arquiteto</i>"] --> G1{{"GATE 1<br/>humano aprova"}}
+        P([Pedido]) --> I["Intent<br/><i>dominio</i>"] --> S["Spec<br/><i>dominio</i>"] --> D["Design + tasks<br/><i>arquiteto</i>"] --> G1{{"GATE 1<br/>humano aprova<br/>(ou orquestrador, se delegado)"}}
     end
     subgraph E2 ["2. Executar cada task"]
         direction LR
@@ -66,6 +66,18 @@ Três trilhas, pelo tamanho da mudança:
 | **Rápida** | `chore`, `docs`, ferramental, correção sem mudança de comportamento | branch → `verify` → PR → Gate 2 |
 
 Regras completas: `core/processo/ciclo.md`.
+
+### Modo automático e Gate 1 delegado
+
+Com `enabled: true` em `agentic/auto-mode`, o orquestrador encadeia as tasks e publica os PRs sem pedir confirmação. Quando a task anterior ainda não foi integrada, a seguinte sai da branch dela: a task declara `**Base:** <branch anterior>` e o `verify.sh` compara com essa branch até ela entrar na principal.
+
+O humano também pode delegar o Gate 1, por exemplo depois de escrever um plano longo. O orquestrador passa a aprovar intent, spec e design com base no plano e nos pareceres do `revisor`, e só chama o humano para o que a delegação não cobre. A delegação é uma decisão registrada e vale até ser revogada:
+
+1. o humano registra `D<n> — Delegação do Gate 1` em `agentic/projeto/decisoes.md`: plano, specs cobertas e itens N3 que o orquestrador pode aprovar;
+2. o humano grava `gate1: D<n>` em `agentic/auto-mode` (arquivo que o agente não edita);
+3. cada aprovação vira o commit `docs(spec): <nome> aprovada (Gate 1 delegado, D<n>)`.
+
+O `verifica-decisoes.sh` bloqueia `gate1:` apontando para decisão revogada ou inexistente, e commit de Gate 1 delegado sem delegação vigente. O Gate 2 nunca é delegado: o merge continua com o humano.
 
 ## Exemplo real: serviço de preços em Node.js
 

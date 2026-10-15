@@ -4,6 +4,7 @@
 **Status:** pendente
 <!-- pendente | em-andamento | em-revisão | publicada  (integrada não é escrito: deriva do git) -->
 **Branch:** <spec>/<NNN>-<nome>
+<!-- Branch empilhada (modo automático, task anterior ainda não integrada): acrescente a linha **Base:** <branch da task anterior>. -->
 
 ## Objetivo
 <uma frase>
