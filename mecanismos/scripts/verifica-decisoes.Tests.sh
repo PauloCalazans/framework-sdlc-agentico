@@ -15,6 +15,10 @@ r=$(tl_repo)
 tl_espera 0 "sem registro de decisões: pulado" roda "$r"
 tl_contem "pulado" "declara que pulou"
 
+r=$(tl_repo); mkdir -p "$r/agentic"; printf 'enabled: true\ngate1: D1\n' > "$r/agentic/auto-mode"
+tl_espera 1 "Gate 1 delegado sem registro de decisões bloqueia" roda "$r"
+tl_contem "sem $(printf 'agentic/projeto/decisoes.md')" "explica que falta o registro"
+
 r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
 mkdir -p "$r/agentic/projeto/specs/x"; printf 'Conforme D1 e (D2); veja D1.\n' > "$r/agentic/projeto/specs/x/design.md"
 tl_espera 0 "referências a decisões existentes passam" roda "$r"
@@ -97,7 +101,7 @@ gate1:'; confirma "$r" "humano"; git -C "$r" checkout -q -b feat/k
 tl_espera 0 "gate1 vazio: Gate 1 humano, passa" roda "$r"
 
 # commit de registro do Gate 1 delegado exige a delegação vigente
-gate() { mkdir -p "$1/agentic/projeto/specs/x"; printf 'x\n' > "$1/agentic/projeto/specs/x/spec.md"; confirma "$1" "$2"; }
+gate() { mkdir -p "$1/agentic/projeto/specs/x"; printf '%s\n' "$2" >> "$1/agentic/projeto/specs/x/spec.md"; confirma "$1" "$2"; }
 
 r=$(tl_repo); vig "$r" "1 2" ""; modo "$r" 'enabled: true
 gate1: D2'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
@@ -131,5 +135,7 @@ gate "$r" "docs(spec): x aprovada (Gate 1 delegado, D2)"
 vig "$r" "1" "2"; modo "$r" 'enabled: true
 gate1:'; confirma "$r" "revoga a delegação"
 tl_espera 1 "delegação revogada antes da integração bloqueia o Gate 1 delegado da branch" roda "$r"
+gate "$r" "docs(spec): x aprovada (Gate 1)"
+tl_espera 0 "depois da revogação, o Gate 1 humano registrado na branch libera" roda "$r"
 
 tl_fim
