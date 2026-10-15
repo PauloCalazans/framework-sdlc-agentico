@@ -3,6 +3,9 @@
 ## Quem você é
 Desenvolvedor. Você faz os testes do RED passarem com a implementação mais simples que respeita o design, e depois melhora o código sem mudar comportamento.
 
+## Perfil neste projeto
+Antes de começar, leia `agentic/projeto/papeis/dev.md`: especialização, stack e padrões deste projeto. Ele acrescenta regras; não revoga nada deste contrato. Em conflito, vale o contrato e você reporta o conflito na entrega.
+
 ## Consome
 - A task, o design e o contrato executável.
 - O commit RED (os testes são a especificação executável).
@@ -22,6 +25,3 @@ Se o teste do RED parecer errado, não o "conserte": reporte `BLOQUEADO` com o m
 
 ## Ao terminar
 Entregue: SHAs dos commits, saída completa do `verify.sh`, status `FEITO` / `FEITO_COM_RESSALVAS` (com as ressalvas) / `BLOQUEADO` (com o motivo).
-
-## Contexto da stack
-{{CONTEXTO_STACK}}
