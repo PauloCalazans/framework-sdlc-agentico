@@ -1,9 +1,12 @@
 #!/bin/sh
 # instalar.sh <projeto-alvo> [--copilot] — copia o kit do framework para o projeto.
 # --copilot acrescenta o adaptador do GitHub Copilot em .github/ (instruções, agentes, prompts, setup do agente de nuvem).
-# Não pergunta nada e não sobrescreve nada: conflitos vão para agentic/.estado/conflitos-instalacao.txt
-# e são resolvidos no /bootstrap.
+# Não pergunta nada e não sobrescreve edição da instância: conflitos vão para agentic/.estado/conflitos-instalacao.txt
+# e são resolvidos no /bootstrap. Arquivo do kit intacto desde a instalação anterior (hash igual ao do
+# manifesto agentic/processo/.kit-manifesto) recebe a versão nova sem merge.
+# Os perfis em agentic/projeto/papeis/ são da instância: criados do template só se ausentes, nunca sobrescritos.
 fw=$(cd "$(dirname "$0")/.." && pwd)
+. "$fw/bootstrap/lib-kit.sh"
 alvo=${1:-}
 copilot=""
 case "${2:-}" in
@@ -17,14 +20,23 @@ alvo=$(cd "$alvo" && pwd)
 rm -f "$alvo/agentic/.estado/conflitos-instalacao.txt" # o arquivo reflete só a execução atual
 rm -rf "$alvo/agentic/.estado/kit-conflitos"
 conflitos=$(mktemp)
+atualizados=$(mktemp)
+manifesto=agentic/processo/.kit-manifesto
+manifesto_novo=$(mktemp)
 
 guarda_kit() { # guarda_kit <origem> <caminho relativo> — versão do kit para o /bootstrap comparar
   mkdir -p "$(dirname "$alvo/agentic/.estado/kit-conflitos/$2")"
   cp "$1" "$alvo/agentic/.estado/kit-conflitos/$2"
 }
 copia() { # copia <origem> <destino relativo ao alvo>
+  case "$2" in agentic/.estado/*) ;; *) printf '%s  %s\n' "$(kit_hash "$1")" "$2" >> "$manifesto_novo" ;; esac
   if [ -e "$alvo/$2" ]; then
-    if ! cmp -s "$1" "$alvo/$2"; then
+    cmp -s "$1" "$alvo/$2" && return 0
+    anterior=$(kit_hash_manifesto "$alvo/$manifesto" "$2")
+    if [ -n "$anterior" ] && [ "$anterior" = "$(kit_hash "$alvo/$2")" ]; then
+      cp "$1" "$alvo/$2" # intacto desde a instalação anterior: atualiza sem merge
+      printf '%s\n' "$2" >> "$atualizados"
+    else
       printf '%s\n' "$2" >> "$conflitos"
       guarda_kit "$1" "$2"
     fi
@@ -72,6 +84,14 @@ if [ -n "$copilot" ]; then
   copia "$fw/adapters/copilot/copilot-setup-steps.yml" .github/workflows/copilot-setup-steps.yml
 fi
 
+for p in dominio arquiteto testes dev revisor; do
+  [ -e "$alvo/agentic/projeto/papeis/$p.md" ] && continue
+  mkdir -p "$alvo/agentic/projeto/papeis"
+  sed "s/{{PAPEL}}/$p/g" "$fw/core/templates/perfil-papel.md" > "$alvo/agentic/projeto/papeis/$p.md"
+done
+LC_ALL=C sort "$manifesto_novo" > "$alvo/$manifesto"
+rm -f "$manifesto_novo"
+
 acrescenta .gitignore "agentic/.estado/"
 acrescenta .gitattributes "*.sh text eol=lf"
 acrescenta .gitattributes "agentic/mecanismos/githooks/* text eol=lf"
@@ -89,6 +109,10 @@ if [ -s "$conflitos" ]; then
   echo "Arquivos já existentes e diferentes (NÃO sobrescritos) — listados em agentic/.estado/conflitos-instalacao.txt:"
   sed 's/^/  /' "$conflitos"
 fi
-rm -f "$conflitos"
+if [ -s "$atualizados" ]; then
+  echo "Arquivos do kit atualizados (intactos desde a instalação anterior, conforme $manifesto):"
+  sed 's/^/  /' "$atualizados"
+fi
+rm -f "$conflitos" "$atualizados"
 echo "Kit instalado em $alvo."
 echo "Próximo passo: abra o Claude Code no projeto e rode /bootstrap."
