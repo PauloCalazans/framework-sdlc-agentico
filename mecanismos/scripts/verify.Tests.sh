@@ -101,4 +101,25 @@ tl_contem "aviso: nenhuma task com **Branch:** desc/002-sem-doc" "trilha enxuta:
 r=$(tl_repo)
 tl_espera 1 "falha se CMD_VERIFY_STACK não está configurado" sh -c "cd '$r' && sh '$dir/verify.sh'"
 
+# Branches empilhadas: a task declara **Base:** com a branch da task anterior ainda não integrada.
+r=$(prepara)
+printf 'a\n' > "$r/tests/a.txt"
+printf '# T2\n**Status:** em-andamento\n**Branch:** x/002\n**Base:** x/001\n\n## Arquivos\n- src/*\n' > "$r/agentic/projeto/specs/x/tasks/002-t.md"
+git -C "$r" add -A; git -C "$r" commit -q -m "task 1"
+git -C "$r" checkout -q -b x/002
+mkdir -p "$r/src"; printf 'b\n' > "$r/src/b.txt"; git -C "$r" add -A; git -C "$r" commit -q -m "task 2"
+tl_espera 0 "branch empilhada: escopo comparado com a ponta da **Base:**" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "escopo: OK" "empilhada: escopo verificado"
+tl_contem "base: x/001 (branch empilhada" "declara a base empilhada"
+sed -i.bak '/^\*\*Base:\*\*/d' "$r/agentic/projeto/specs/x/tasks/002-t.md"; rm -f "$r/agentic/projeto/specs/x/tasks/002-t.md.bak"
+tl_espera 1 "empilhada sem **Base:**: arquivos da task anterior ficam fora do escopo" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "tests/a.txt" "aponta o arquivo da task anterior"
+git -C "$r" checkout -q -- agentic/projeto/specs/x/tasks/002-t.md
+git -C "$r" checkout -q main; git -C "$r" merge -q --no-ff x/001 -m "integra x/001" >/dev/null 2>&1; git -C "$r" checkout -q x/002
+tl_espera 0 "**Base:** já integrada: volta a comparar com a principal" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "já integrada ou ausente" "declara a volta à principal"
+git -C "$r" branch -q -d x/001
+tl_espera 0 "**Base:** removida depois da integração: compara com a principal" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "escopo: OK" "base removida: escopo verificado"
+
 tl_fim
