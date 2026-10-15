@@ -1,5 +1,7 @@
 #!/bin/sh
 # verify.sh [--task <task.md>] — ponto único de verificação do projeto. Só reporta; nunca conserta.
+# Task com **Base:** <branch> (branch empilhada): enquanto essa branch não estiver na principal, as etapas
+# comparam com ela; depois, com a principal.
 # Etapas: hooks → stack (CMD_VERIFY_STACK) → escopo → skip → red → decisões.
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/lib-agentic.sh"
@@ -47,6 +49,20 @@ if [ -z "$task" ]; then
   [ -n "$branch" ] && task=$(grep -l "^\*\*Branch:\*\*[[:space:]]*$branch[[:space:]]*$" agentic/projeto/specs/*/tasks/*.md 2>/dev/null | head -n 1)
 fi
 if [ -n "$task" ]; then
+  base_task=$(sed -n 's/^\*\*Base:\*\*[[:space:]]*//p' "$task" | head -n 1 | tr -d '\r`' | sed 's/[[:space:]]*$//')
+  if [ -n "$base_task" ]; then
+    ref=""
+    for c in "$base_task" "origin/$base_task"; do
+      git rev-parse --verify -q "$c^{commit}" >/dev/null && { ref=$c; break; }
+    done
+    principal=$(agentic_principal_ref)
+    if [ -n "$ref" ] && ! { [ -n "$principal" ] && git merge-base --is-ancestor "$ref" "$principal"; }; then
+      AGENTIC_BASE=$ref; export AGENTIC_BASE
+      echo; echo "base: $ref (branch empilhada, **Base:** da task)"
+    else
+      echo; echo "base: principal (**Base:** $base_task já integrada ou ausente)"
+    fi
+  fi
   etapa escopo sh "$dir/verifica-escopo.sh" "$task"
 else
   if [ -n "$(ls agentic/projeto/specs/*/tasks/*.md 2>/dev/null | head -n 1)" ]; then
