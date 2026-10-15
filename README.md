@@ -31,10 +31,22 @@ Regra que nenhum mecanismo garante aparece como "por revisão", nunca como garan
 
 ## Como funciona
 
-```
-pedido ─▶ intent ─▶ spec ─▶ design + tasks ─▶ GATE 1 ─▶ RED ─▶ GREEN ─▶ revisão ─▶ PR ─▶ GATE 2
-          dominio   dominio  arquiteto        humano    testes  dev     revisor          humano
-                                              aprova    (falha)                        faz o merge
+```mermaid
+flowchart TB
+    subgraph E1 ["1. Especificar"]
+        direction LR
+        P([Pedido]) --> I["Intent<br/><i>dominio</i>"] --> S["Spec<br/><i>dominio</i>"] --> D["Design + tasks<br/><i>arquiteto</i>"] --> G1{{"GATE 1<br/>humano aprova"}}
+    end
+    subgraph E2 ["2. Executar cada task"]
+        direction LR
+        R["RED<br/>testes falhando<br/><i>testes</i>"] --> G["GREEN + refactor<br/><i>dev</i>"] --> V["Revisão<br/><i>revisor</i>"]
+        V -- "Crítico ou<br/>Importante" --> G
+        V -- "aprovado" --> PR["PR<br/><i>orquestrador</i>"] --> G2{{"GATE 2<br/>humano faz o merge"}}
+    end
+    E1 -- "aprovado no Gate 1" --> E2
+
+    classDef humano fill:#fde68a,stroke:#b45309,color:#1f2937
+    class G1,G2 humano
 ```
 
 | Papel | Faz | Nunca faz |
