@@ -17,6 +17,11 @@
 - Caminhos sensíveis tocados: <nenhum | lista>
 - Supressões novas (`agentic:permitir-segredo`, skips no baseline…): <nenhuma | lista com justificativa>
 
+## Decisões do orquestrador
+<!-- Rulings da seção "## Rulings" da task. No último PR de uma série empilhada, inclua as das tasks anteriores da mesma spec. -->
+- R-<n> (<fase>): <o quê> — por quê: <…> — descartado: <…> <!-- promovida: D<n> -->
+<!-- ou: - Nenhuma. -->
+
 ## Parecer do revisor
 - Veredito: <APROVADO>
 - Achados menores registrados: <lista ou nenhum>

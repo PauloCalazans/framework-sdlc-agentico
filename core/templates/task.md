@@ -28,3 +28,8 @@
 
 ## Questões em aberto
 - <…>
+
+## Rulings
+<!-- Decisões do orquestrador não previstas na spec, no design ou nesta task (agentic/processo/ciclo.md, "Rulings"). -->
+- R-1 (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>
+<!-- ou: - Nenhuma. -->
