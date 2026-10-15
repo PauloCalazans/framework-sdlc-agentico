@@ -11,7 +11,7 @@
 ## Regras
 | # | Regra | Fonte |
 |---|---|---|
-| R1 | <regra, só `confirmada`> | humano:<AAAA-MM-DD> \| oráculo:<arquivo>:<linha> \| decisão:D<n> |
+| R1 | <regra, só `confirmada`> | humano:<AAAA-MM-DD> \| oráculo:<arquivo>:<linha> \| plano:<arquivo>:<linha> \| decisão:D<n> |
 
 ## Critérios de aceite
 - CA1 (R1): dado <contexto>, quando <ação>, então <resultado observável>
@@ -25,3 +25,8 @@
 
 ## Questões em aberto
 - <…> (Gate 1 só aceita este campo vazio)
+
+## Rulings
+<!-- Decisões do orquestrador não previstas neste documento (agentic/processo/ciclo.md, "Rulings"). -->
+- R-1 (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>
+<!-- ou: - Nenhuma. -->

@@ -18,6 +18,7 @@ tl_contem "agentic/projeto/intent/001-pedidos.md: aprovado" "lista status de int
 tl_contem "agentic/projeto/specs/pedidos/tasks/001-criar.md: em-andamento" "lista status de task"
 tl_contem "pedidos/001: 1 commit(s)" "mostra branch à frente da principal"
 tl_contem "Modo automático: ligado" "lê o auto-mode"
+tl_contem "Gate 1: humano" "sem gate1, o Gate 1 é humano"
 copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
 tl_espera 1 "ignora arquivos _modelo" grep -q "_template" "$copia_saida"
 
@@ -25,5 +26,13 @@ tl_espera 1 "ignora arquivos _modelo" grep -q "_template" "$copia_saida"
 r2=$(mktemp -d); git -C "$r2" init -q -b trabalho
 tl_espera 0 "não quebra sem a branch principal e sem commits" sh -c "cd '$r2' && sh '$dir/status-projeto.sh'"
 tl_contem "Modo automático: desligado" "auto-mode ausente = desligado"
+tl_contem "Gate 1: humano" "auto-mode ausente = Gate 1 humano"
+
+printf 'enabled: true\ngate1: D4\n' > "$r/agentic/auto-mode"
+tl_espera 0 "status com Gate 1 delegado sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
+tl_contem "Gate 1: delegado ao orquestrador (D4)" "mostra a decisão que delega o Gate 1"
+printf 'enabled: false\ngate1: D4\n' > "$r/agentic/auto-mode"
+tl_espera 0 "status com modo automático desligado sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
+tl_contem "Gate 1: humano" "delegação só vale com o modo automático ligado"
 
 tl_fim

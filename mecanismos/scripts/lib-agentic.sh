@@ -36,7 +36,20 @@ agentic_falha() {
 }
 
 # agentic_base: ponto de divergência entre HEAD e a branch principal. Sem a principal local (clone de CI
-# ou de agente de nuvem, que só traz origin/<principal>), usa a remota.
+# ou de agente de nuvem, que só traz origin/<principal>), usa a remota. Com AGENTIC_BASE (branch empilhada,
+# definido pelo verify.sh a partir do **Base:** da task), o ponto de divergência é com essa branch.
 agentic_base() {
+  if [ -n "${AGENTIC_BASE:-}" ]; then
+    git merge-base HEAD "$AGENTIC_BASE" 2>/dev/null
+    return
+  fi
   git merge-base HEAD "$BRANCH_PRINCIPAL" 2>/dev/null || git merge-base HEAD "origin/$BRANCH_PRINCIPAL" 2>/dev/null
+}
+
+# agentic_principal_ref: a branch principal local ou, sem ela, a remota. Vazio se nenhuma existir.
+agentic_principal_ref() {
+  for agentic_p in "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL"; do
+    git rev-parse --verify -q "$agentic_p^{commit}" >/dev/null && { printf '%s\n' "$agentic_p"; return 0; }
+  done
+  return 1
 }

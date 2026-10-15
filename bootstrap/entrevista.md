@@ -23,7 +23,7 @@ Pergunte um bloco por vez; prefira múltipla escolha com uma recomendação.
 | Estrutura | Camadas/módulos e suas fronteiras? Diretórios de teste? Que ferramenta verifica fronteiras (ex.: ArchUnit, dependency-cruiser, import-linter)? |
 | Risco | Caminhos protegidos? Gatilhos de escalonamento específicos da stack/domínio? Dependências sensíveis? |
 | Fontes externas | Há sistema legado, API externa ou norma que os agentes devem consultar? Onde está e como se acessa (somente leitura)? |
-| Operação | Branch principal? Plataforma de PR (GitHub, GitLab, Azure…)? Existe CI? Quem aprova o Gate 1 e o Gate 2? Modo automático começa ligado? |
+| Operação | Branch principal? Plataforma de PR (GitHub, GitLab, Azure…)? Existe CI? Quem aprova o Gate 1 e o Gate 2? Modo automático começa ligado? O humano delega o Gate 1 ao orquestrador (com que plano, para quais specs, com quais itens N3)? |
 | Time | Os papéis rodam num só produto ou num orquestrador externo com vários produtos? Quais produtos e modelos estão disponíveis, com que cota ou licença? Algum é o GitHub Copilot? |
 
 ## Passo 3 — Registro
@@ -42,6 +42,8 @@ Grave `agentic/projeto/bootstrap.md` com todas as respostas, cada uma marcada `c
 6. Ajuste `agentic/.estado/settings.pendente.json`: acrescente ao `permissions.allow` os comandos `CMD_*` da stack (ex.: `"Bash(npm test:*)"`), e, se a plataforma de PR não for GitHub, troque `gh pr create`/`gh pr view`/`gh pr merge` pelos equivalentes. As regras de deny de merge nunca são removidas: se a plataforma for outra ou não houver plataforma de PR, ACRESCENTE os equivalentes (ex.: `Bash(git merge:*)` para integração local) e mantenha `Bash(gh pr merge:*)`.
 7. Se o projeto tem CI: gere o workflow da plataforma chamando `git config core.hooksPath agentic/mecanismos/githooks` e depois `sh agentic/mecanismos/scripts/verify.sh`, e registre em `agentic/projeto/decisoes.md` que ele só vale depois de **provado verde num PR de teste**.
 8. Time: com orquestrador externo ou mais de um produto, monte a proposta pela seção "Orquestrador externo ou mais de um produto" de `agentic/processo/modelos.md` e grave em `decisoes.md` a composição que o humano escolher. Com um só produto, confira o `model:` de `.claude/agents/*.md` contra a tabela de níveis do mesmo arquivo. Se o GitHub Copilot faz parte do time e `.github/copilot-instructions.md` não existe, peça ao humano que rode `sh <kit>/bootstrap/instalar.sh . --copilot` e complete o passo da stack em `.github/workflows/copilot-setup-steps.yml`.
+
+9. Gate 1 delegado: se o humano delegar, grave em `agentic/projeto/decisoes.md` a decisão `D<n> — Delegação do Gate 1` pelo modelo comentado do template (plano em `agentic/projeto/planos/`, escopo, itens N3) e proponha ao humano `enabled: true` e `gate1: D<n>` em `agentic/auto-mode` (ação humana). Sem delegação, `gate1:` fica vazio.
 
 ## Passo 5 — Conflitos
 O instalador grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo do kit instalado). Numa reinstalação, arquivo do kit intacto desde a instalação anterior recebe a versão nova sem merge; só o que foi editado na instância vira conflito.

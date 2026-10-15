@@ -15,6 +15,10 @@ r=$(tl_repo)
 tl_espera 0 "sem registro de decisões: pulado" roda "$r"
 tl_contem "pulado" "declara que pulou"
 
+r=$(tl_repo); mkdir -p "$r/agentic"; printf 'enabled: true\ngate1: D1\n' > "$r/agentic/auto-mode"
+tl_espera 1 "Gate 1 delegado sem registro de decisões bloqueia" roda "$r"
+tl_contem "sem $(printf 'agentic/projeto/decisoes.md')" "explica que falta o registro"
+
 r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
 mkdir -p "$r/agentic/projeto/specs/x"; printf 'Conforme D1 e (D2); veja D1.\n' > "$r/agentic/projeto/specs/x/design.md"
 tl_espera 0 "referências a decisões existentes passam" roda "$r"
@@ -69,5 +73,69 @@ tl_contem "base inválida" "explica base inválida"
 r=$(tl_repo); reg "$r" 1; confirma "$r" "registro"; git -C "$r" branch -m main trunk
 tl_espera 0 "sem principal: degradado, não falha" roda "$r"
 tl_contem "degradado" "declara a verificação degradada"
+
+# Gate 1 delegado: gate1: D<n> no auto-mode aponta uma decisão vigente
+vig() { # vig <repo> "<vigentes>" "<revogadas>"
+  r=$1; mkdir -p "$r/agentic/projeto"
+  { printf '# Registro\n\n## Vigentes\n\n'; for n in $2; do printf '### D%s — t\n\n' "$n"; done
+    printf '## Decisões revogadas\n\n'; for n in $3; do printf '### D%s — t (revogada em 2026-10-10: motivo)\n\n' "$n"; done; } > "$r/agentic/projeto/decisoes.md"
+}
+modo() { printf '%s\n' "$2" > "$1/agentic/auto-mode"; }
+
+r=$(tl_repo); vig "$r" "1 2" ""; modo "$r" 'enabled: true
+gate1: D2'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
+tl_espera 0 "Gate 1 delegado por decisão vigente passa" roda "$r"
+
+r=$(tl_repo); vig "$r" "1" "2"; modo "$r" 'enabled: true
+gate1: D2'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
+tl_espera 1 "Gate 1 delegado por decisão revogada bloqueia" roda "$r"
+tl_contem "D2, que não está vigente" "explica que a delegação perdeu a vigência"
+
+r=$(tl_repo); vig "$r" "1" ""; modo "$r" 'enabled: true
+gate1: sim'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
+tl_espera 1 "gate1 sem D<n> bloqueia" roda "$r"
+tl_contem "gate1: em agentic/auto-mode" "explica o formato de gate1"
+
+r=$(tl_repo); vig "$r" "1" ""; modo "$r" 'enabled: true
+gate1:'; confirma "$r" "humano"; git -C "$r" checkout -q -b feat/k
+tl_espera 0 "gate1 vazio: Gate 1 humano, passa" roda "$r"
+
+# commit de registro do Gate 1 delegado exige a delegação vigente
+gate() { mkdir -p "$1/agentic/projeto/specs/x"; printf '%s\n' "$2" >> "$1/agentic/projeto/specs/x/spec.md"; confirma "$1" "$2"; }
+
+r=$(tl_repo); vig "$r" "1 2" ""; modo "$r" 'enabled: true
+gate1: D2'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
+gate "$r" "docs(spec): x aprovada (Gate 1 delegado, D2)"
+tl_espera 0 "commit de Gate 1 delegado com delegação vigente passa" roda "$r"
+
+r=$(tl_repo); vig "$r" "1 2" ""; modo "$r" 'enabled: false
+gate1: D2'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
+gate "$r" "docs(spec): x aprovada (Gate 1 delegado, D2)"
+tl_espera 1 "commit de Gate 1 delegado com o modo automático desligado bloqueia" roda "$r"
+tl_contem "registra Gate 1 delegado sem delegação vigente" "explica o bloqueio do commit"
+
+r=$(tl_repo); vig "$r" "1 2" ""; modo "$r" 'enabled: true
+gate1:'; confirma "$r" "humano"; git -C "$r" checkout -q -b feat/k
+gate "$r" "docs(mudanca): x aprovada (Gate 1 delegado, D2)"
+tl_espera 1 "commit de Gate 1 delegado sem gate1 no auto-mode bloqueia" roda "$r"
+
+r=$(tl_repo); vig "$r" "1 2" ""; modo "$r" 'enabled: true
+gate1: D2'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
+gate "$r" "docs(spec): x aprovada (Gate 1 delegado, D1)"
+tl_espera 1 "commit de Gate 1 delegado citando outra decisão bloqueia" roda "$r"
+
+r=$(tl_repo); vig "$r" "1 2" ""; modo "$r" 'enabled: true
+gate1: D2'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
+gate "$r" "docs(spec): x aprovada (Gate 1 delegado)"
+tl_espera 1 "commit de Gate 1 delegado sem D<n> bloqueia" roda "$r"
+
+r=$(tl_repo); vig "$r" "1 2" ""; modo "$r" 'enabled: true
+gate1: D2'; confirma "$r" "delega"; git -C "$r" checkout -q -b feat/k
+gate "$r" "docs(spec): x aprovada (Gate 1 delegado, D2)"
+vig "$r" "1" "2"; modo "$r" 'enabled: true
+gate1:'; confirma "$r" "revoga a delegação"
+tl_espera 1 "delegação revogada antes da integração bloqueia o Gate 1 delegado da branch" roda "$r"
+gate "$r" "docs(spec): x aprovada (Gate 1)"
+tl_espera 0 "depois da revogação, o Gate 1 humano registrado na branch libera" roda "$r"
 
 tl_fim

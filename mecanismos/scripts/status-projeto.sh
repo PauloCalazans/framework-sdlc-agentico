@@ -34,4 +34,10 @@ echo
 modo="desligado"
 grep -q '^enabled:[[:space:]]*true' agentic/auto-mode 2>/dev/null && modo="ligado"
 echo "Modo automático: $modo"
+gate1=$(sed -n 's/^gate1:[[:space:]]*//p' agentic/auto-mode 2>/dev/null | head -n 1 | tr -d '\r' | sed 's/[[:space:]]*$//')
+if [ "$modo" = "ligado" ] && [ -n "$gate1" ]; then
+  echo "Gate 1: delegado ao orquestrador ($gate1)"
+else
+  echo "Gate 1: humano"
+fi
 exit 0

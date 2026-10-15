@@ -30,7 +30,7 @@ A medição são as devoluções e rodadas registradas no `progress.md`.
 - **Subir um nível:** o papel teve Crítico ou Importante em duas rodadas da mesma task, ou em duas tasks seguidas.
 - **Descer um nível, como experimento:** o papel foi aprovado na primeira rodada em três tasks seguidas. Volte se a regra de subir disparar.
 - **Antes de trocar o modelo, baixe o esforço de raciocínio,** quando o produto permitir.
-- **Nunca rebaixe o `revisor`.**
+- **Nunca rebaixe o `revisor`.** Com o Gate 1 delegado, ele fica no nível forte também em time misto.
 - Toda troca é decisão humana: registre-a como ajuste da decisão de composição do time, com o dado que a motivou.
 
 ## Orquestrador externo ou mais de um produto
