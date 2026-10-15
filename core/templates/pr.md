@@ -1,6 +1,8 @@
 ## Origem
 - Intent: <agentic/projeto/intent/NNN-nome.md>
 - Task: <agentic/projeto/specs/<nome>/tasks/NNN-nome.md>
+- Gate 1: <humano | delegado, D<n>>
+- Empilhado sobre: <nenhum | PR anterior — integre nesta ordem>
 
 ## Evidência
 - RED: <sha> — saída mostrando a falha (resumo)

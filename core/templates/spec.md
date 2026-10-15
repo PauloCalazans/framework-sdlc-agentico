@@ -6,7 +6,7 @@
 ## Regras
 | # | Regra | Fonte | Estado |
 |---|---|---|---|
-| R1 | <regra de negócio> | <humano:AAAA-MM-DD \| oráculo:arquivo:linha \| decisão:Dn> | <confirmada \| hipótese> |
+| R1 | <regra de negócio> | <humano:AAAA-MM-DD \| oráculo:arquivo:linha \| plano:arquivo:linha \| decisão:Dn> | <confirmada \| hipótese> |
 
 ## Critérios de aceite
 - CA1 (R1): <dado … quando … então …>
@@ -19,6 +19,7 @@
 
 ## Questionário de decisão
 1. <pergunta objetiva derivada de uma hipótese> — opções: (a) <…> (b) <…>. Recomendação: <…>, porque <…>.
+   <!-- Gate 1 delegado: Resposta (Gate 1 delegado, D<n>): <opção> — <motivo>. A regra passa a confirmada com Fonte decisão:D<n>. -->
 
 ## Questões em aberto
 - <dúvida surgida durante a execução — registrar data e quem resolveu>

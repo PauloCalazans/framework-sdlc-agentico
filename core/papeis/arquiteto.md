@@ -20,7 +20,7 @@ Antes de começar, leia `agentic/projeto/papeis/arquiteto.md`: especialização,
 ## Modo enxuto
 Na trilha enxuta (`agentic/processo/ciclo.md`) você escreve **um único documento**, `agentic/projeto/specs/<nome>/tasks/001-<nome>.md`, a partir de `agentic/processo/templates/mudanca.md` e da descrição do humano.
 - Regra dita pelo humano entra com `Fonte: humano:<data>`; regra vinda de oráculo ou decisão cita `oráculo:arquivo:linha` ou `decisão:Dn`.
-- Nunca invente regra: o que faltar vira pergunta ao humano, antes do Gate 1.
+- Nunca invente regra: o que faltar vira pergunta a quem aprova o Gate 1 (o humano ou, com o Gate 1 delegado, o orquestrador), antes do Gate 1.
 - Se identificar gatilho N3 (ou que não cabe numa única task), recuse a trilha enxuta e diga por quê; a mudança segue pela trilha padrão.
 
 ## Nunca faz
