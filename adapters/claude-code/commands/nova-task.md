@@ -3,7 +3,7 @@ description: Inicia a execução de uma task aprovada no Gate 1 (RED → GREEN �
 ---
 Task: $ARGUMENTS
 
-Trilha enxuta: o /mudanca já criou a branch, o worktree e o commit docs(mudanca): — pule os passos 1 e 2 e continue no worktree existente.
+Trilha enxuta: o /mudanca já criou a branch, o worktree, o commit docs(mudanca): e, se houver contrato executável, o chore: — pule os passos 1 e 2 e continue no worktree existente.
 
 1. Trilha padrão: confira que o commit `docs(spec): <nome> aprovada (Gate 1)` (ou `… aprovada (Gate 1 delegado, D<n>)`) existe, na branch da task ou já integrado na principal (`git log --grep` na branch/principal), e que spec e design estão com `**Status:** aprovado` nele; `**Status:**` só na árvore de trabalho não basta. Se o documento tem `**Trilha:** enxuta`, confira em vez disso que o commit `docs(mudanca):` existe na branch (registro do Gate 1). Se não, pare e diga o que falta.
 2. Leia o `**Branch:**` da task e crie o worktree dentro do repositório: `git worktree add agentic/.estado/worktrees/<nome> -b <branch>`, com `<nome>` = branch com `/` trocado por `-`. Branch empilhada (modo automático, task anterior da mesma spec ainda não integrada): crie a partir da branch anterior (`git worktree add agentic/.estado/worktrees/<nome> -b <branch> <branch anterior>`) e acrescente `**Base:** <branch anterior>` à task (`agentic/processo/ciclo.md`, "Branches empilhadas").
