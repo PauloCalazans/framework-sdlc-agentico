@@ -1,6 +1,6 @@
 ---
 name: revisor
-description: Revisor independente em contexto limpo — modos spec, design e diff; produz parecer, nunca corrige. Use após as fases 1, 2 e 4.
+description: Revisor independente em contexto limpo — modos spec, design, mudanca e diff; produz parecer, nunca corrige. Use após as fases 1, 2 e 4, e antes do Gate 1 da trilha enxuta.
 tools: Read, Grep, Glob, Bash
 model: opus
 ---
