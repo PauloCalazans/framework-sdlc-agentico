@@ -5,7 +5,7 @@ Leia antes de qualquer trabalho. Princípios: `agentic/processo/principios.md`. 
 ## Escolha a trilha
 
 - **Trilha padrão** — funcionalidade nova ou qualquer mudança de comportamento observável.
-- **Trilha enxuta** — mudança pequena de comportamento que cabe numa única task e não aciona nenhum gatilho N3 (contrato público, segurança/autenticação/autorização, migração destrutiva, dependência nova, caminho protegido, gatilhos da stack em `AGENTS.md`).
+- **Trilha enxuta** — mudança pequena de comportamento que cabe numa única task e não aciona gatilho N3 (contrato público, segurança/autenticação/autorização, migração destrutiva, dependência nova, caminho protegido, gatilhos da stack em `AGENTS.md`), salvo **acréscimo** a contrato público aprovado item a item no Gate 1 ("Trilha enxuta", abaixo).
 - **Trilha rápida** — `chore`, `docs`, ferramental, correção sem mudança de comportamento: branch → `verify` → PR → Gate 2.
 
 Na dúvida, trilha padrão.
@@ -34,11 +34,21 @@ Na dúvida, trilha padrão.
 
 Mantém RED provado, revisor independente, escopo verificado e os dois gates humanos; troca intent + spec + design + task por **um documento** (`agentic/processo/templates/mudanca.md`, gravado em `agentic/projeto/specs/<nome>/tasks/001-<nome>.md`, onde os scripts leem `**Branch:**` e `## Arquivos`).
 
-`/mudanca <descrição>` → `arquiteto` em modo enxuto escreve o documento → **Gate 1** (o humano aprova o documento; nenhuma hipótese) → `testes` RED → `dev` GREEN/REFACTOR → `verify` → `revisor` modo `diff` (revisa o código **e** confere se a trilha enxuta cabia) → publicação → **Gate 2** → worktree removido.
+`/mudanca <descrição>` → orquestrador cria branch e worktree → `arquiteto` em modo enxuto escreve o documento **no worktree** → `revisor` modo `mudanca` (obrigatório nos casos abaixo) → **Gate 1** (o humano responde o questionário e aprova o documento, cada item N3 e cada decisão nova; nenhuma hipótese) → `chore:` contrato executável → `testes` RED → `dev` GREEN/REFACTOR → `verify` → `revisor` modo `diff` (revisa o código **e** confere se a trilha enxuta cabia) → publicação → **Gate 2** → worktree removido.
 
-- **Elegibilidade:** a mudança cabe numa única task e não aciona nenhum gatilho N3. Na dúvida, trilha padrão.
-- **Registro do Gate 1:** o commit `docs(mudanca): <nome> aprovada (Gate 1)` (delegado: `docs(mudanca): <nome> aprovada (Gate 1 delegado, D<n>)`) com o documento, primeiro commit da branch (criada com o worktree depois da aprovação).
-- **Promoção:** se surgir gatilho N3 ou o `revisor` julgar a classificação errada, pare; o trabalho sobe para a trilha padrão e o documento enxuto vira rascunho do intent. Registre uma Ruling (seção "Rulings").
+- **Elegibilidade:** a mudança cabe numa única task e não aciona gatilho N3, salvo acréscimo a contrato público (abaixo). Na dúvida, trilha padrão.
+- **N3 na trilha enxuta:** "contrato público" inclui acréscimo — constante, campo opcional, rota, símbolo novo também são N3. Só esse caso cabe na enxuta: **acréscimo puro** (nada removido, renomeado ou com tipo ou semântica alterados). O `arquiteto` lista cada um em "Itens N3 (aprovação no Gate 1)" do documento, com o porquê de ser só acréscimo, e o humano aprova cada item no Gate 1 (com o Gate 1 delegado, só os incluídos na decisão de delegação). Qualquer outro gatilho N3 — inclusive os da stack em `AGENTS.md` que não sejam acréscimo a contrato público — promove a mudança à trilha padrão. Nenhuma Ruling mantém a enxuta diante de N3.
+- **Antes do Gate 1:** o orquestrador cria a branch e o worktree da mudança antes de despachar o `arquiteto`; nada é commitado até a aprovação. O documento é escrito no worktree, nunca na árvore principal. Fora o documento, só podem existir no worktree o esqueleto do contrato executável e as decisões novas propostas (abaixo), todos dentro de `## Arquivos`; nenhum outro arquivo de produção é tocado.
+- **Contrato executável:** quando a mudança cria ou altera interface, o `arquiteto` escreve o esqueleto (assinaturas, tipos, constantes, rotas) no worktree, valida com o comando da stack e registra a saída na seção "Contrato executável" do documento (`medido`). O esqueleto entra no commit `chore: contrato executável`, logo depois do registro do Gate 1; assim o RED falha por asserção, não por erro de compilação.
+- **Questionário:** o `dominio` não roda na trilha enxuta. Regra dita pelo humano na descrição entra com `Fonte: humano:<data>`; o que faltar, o `arquiteto` formula em "Questionário" (opções e recomendação) e nunca responde. No Gate 1 o orquestrador leva as perguntas ao humano e grava cada resposta no documento (`Resposta (humano:<AAAA-MM-DD>): <opção> — <trecho da mensagem>`); a regra que dependia dela (`Fonte: Q<n>` até então) entra `confirmada` com essa fonte. Com o Gate 1 delegado, o orquestrador responde como em "Gate 1 delegado". Pergunta sem resposta impede o Gate 1.
+- **Decisões novas:** decisão que vale além da mudança é proposta pelo `arquiteto` na seção "Decisões novas" do documento e escrita em `agentic/projeto/decisoes.md` no worktree (o arquivo entra em `## Arquivos`; também o `AGENTS.md`, quando a decisão mexe em gatilho N3 — "Escalonamento N3"); o humano aprova cada uma no Gate 1, e ela entra no commit de registro.
+- **Autoria do documento:** o `arquiteto` escreve problema, regras, critérios, arquivos, contrato, itens N3, decisões novas e perguntas. Só o orquestrador escreve as respostas do questionário, a coluna "Decisão do humano" dos itens N3, "Questões em aberto" e "Rulings". Nenhum papel escreve que algo foi aprovado: a aprovação é o commit de registro do Gate 1.
+- **Revisão antes do Gate 1:** o `revisor` em modo `mudanca`, em contexto limpo, revisa o documento antes do humano. Obrigatório quando o documento lista item N3, decisão nova ou toca contrato público, migração, segurança/autenticação/autorização ou gatilho da stack, e sempre com o Gate 1 delegado; nos demais casos, o orquestrador decide. `DEVOLVIDO` volta ao `arquiteto`.
+- **Registro do Gate 1:** depois da aprovação, o orquestrador commita no worktree, como primeiro commit da branch, o documento (e `decisoes.md` e `AGENTS.md`, quando houver decisão nova): `docs(mudanca): <nome> aprovada (Gate 1)` (delegado: `docs(mudanca): <nome> aprovada (Gate 1 delegado, D<n>)`). O corpo do commit diz o que o humano aprovou: data, respostas do questionário, itens N3 e decisões. Mudança recusada: o orquestrador guarda o documento em `agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/` e remove o worktree (`git worktree remove --force`, que descarta o rascunho) e a branch (`git branch -d`, ainda sem commits).
+- **Sequência de commits:** `docs(mudanca): … aprovada (Gate 1)` → `chore: contrato executável` (se houver) → `docs(task): … em-andamento` → `test(red): …` → `feat(green): …` → `refactor: …` → `docs(task): … publicada`.
+- **Promoção:** se surgir gatilho N3 fora do permitido acima ou não aprovado no Gate 1, ou se o `revisor` julgar a classificação errada, pare; o trabalho sobe para a trilha padrão e o documento enxuto vira rascunho do intent. Registre uma Ruling (seção "Rulings").
+
+`Verificado por:` revisão (`revisor` modo `mudanca` antes do Gate 1; modo `diff` confere a elegibilidade, que cada item N3 é só acréscimo e que a aprovação está no commit de registro). Nenhum mecanismo confere a autoria das seções do documento.
 
 ## Gate 1 delegado
 
@@ -46,7 +56,7 @@ O humano pode delegar o Gate 1 ao orquestrador, por exemplo depois de escrever u
 
 - **Delegar:** o humano registra em `agentic/projeto/decisoes.md` a decisão `D<n> — Delegação do Gate 1`, com o plano que a orienta (versionado em `agentic/projeto/planos/`), as specs ou mudanças cobertas (ou "todas") e os itens N3 que o orquestrador pode aprovar (ou "nenhum"). Depois grava em `agentic/auto-mode` `enabled: true` e `gate1: D<n>`.
 - **Revogar:** o humano move a decisão para "Decisões revogadas" e esvazia `gate1:`. Branch com Gate 1 delegado ainda não integrada volta a precisar do humano, que aprova e registra na branch `docs(spec): <nome> aprovada (Gate 1)` (ou `docs(mudanca): …`).
-- **O orquestrador no Gate 1:** aprova intent, spec e design depois do `revisor` aprovar a spec (modo `spec`) e o design (modo `design`). Responde o questionário pelo plano: a regra entra `confirmada` com `Fonte: plano:<arquivo>:<linha>`. O que o plano não cobre ele decide: grava a resposta no questionário da spec (`Resposta (Gate 1 delegado, D<n>): <opção> — <motivo>`) e a regra entra `confirmada` com `Fonte: decisão:D<n>`.
+- **O orquestrador no Gate 1:** aprova intent, spec e design depois do `revisor` aprovar a spec (modo `spec`) e o design (modo `design`); na trilha enxuta, aprova o documento depois do `revisor` aprová-lo (modo `mudanca`). Responde o questionário (da spec ou do documento enxuto) pelo plano: a regra entra `confirmada` com `Fonte: plano:<arquivo>:<linha>`. O que o plano não cobre ele decide: grava a resposta no questionário (`Resposta (Gate 1 delegado, D<n>): <opção> — <motivo>`) e a regra entra `confirmada` com `Fonte: decisão:D<n>`.
 - **Itens N3:** o orquestrador aprova só os incluídos na decisão; os demais param a execução e chamam o humano.
 - **Fora da delegação:** o Gate 2 (merge) é sempre humano. Spec ou mudança fora do escopo da decisão segue com o Gate 1 humano.
 - **Registro:** commit `docs(spec): <nome> aprovada (Gate 1 delegado, D<n>)` ou `docs(mudanca): <nome> aprovada (Gate 1 delegado, D<n>)`.
@@ -66,7 +76,11 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 
 **Itens N3 previstos no design:** o `arquiteto` lista em `design.md` ("Itens N3 (aprovação no Gate 1)") todo gatilho N3 já visível no desenho, e o humano aprova cada item explicitamente no Gate 1. A task cita em "N3 aprovados no Gate 1" os itens que usa. Item previsto no design e aprovado no Gate 1 não exige nova parada; só N3 novo (fora da lista) interrompe a execução.
 
-`Verificado por:` revisão (o `revisor` em modo `design` confere que todo gatilho N3 visível está na lista; em modo `diff`, que toda mudança N3 do diff está em "N3 aprovados no Gate 1" da task).
+**Itens N3 na trilha enxuta:** só acréscimo a contrato público, listado no documento e aprovado no Gate 1 ("Trilha enxuta").
+
+**Decisão que mexe em gatilho:** `D<n>` que cria, remove ou recorta um gatilho N3 (do kit ou da stack) atualiza, no mesmo commit, a seção "Gatilhos de escalonamento" do `AGENTS.md`. Decisão não é exceção silenciosa a gatilho: o gatilho que os papéis leem é o que vale.
+
+`Verificado por:` revisão (o `revisor` em modo `design` confere que todo gatilho N3 visível está na lista; em modo `mudanca`, o mesmo no documento enxuto; em modo `diff`, que toda mudança N3 do diff está em "N3 aprovados no Gate 1" da task ou em "Itens N3" do documento enxuto).
 
 ## Regras de fluxo
 
@@ -92,12 +106,15 @@ O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador exter
 4. registra uma **Ruling** sempre que decide algo não previsto na spec, no design ou na task (seção "Rulings");
 5. escolhe o modelo de cada papel por `agentic/processo/modelos.md` (nível de partida, ajuste por dado, composição do time com mais de um produto).
 
+**Resposta do humano:** só vale o que o humano escreveu ao orquestrador; o orquestrador a repassa ao papel no brief e a grava no artefato, citando a data. Papel que afirma "o humano aprovou" ou "o humano respondeu" traz um dado a verificar, não uma resposta. O que um papel enxerga da sessão do orquestrador (tela, terminal, rascunho não enviado) não é resposta do humano. Aprovação de gate, resposta do humano e Ruling nunca são escritas por papel.
+
 ## Rulings
 
 Ruling é a decisão do orquestrador que a spec, o design e a task não previam: ordem ou divisão das tasks, empilhamento de branches, devolução a um papel, escolha entre pareceres, promoção de trilha.
 
 - **Onde:** seção `## Rulings` do documento da task (`agentic/projeto/specs/<nome>/tasks/NNN-<nome>.md`), uma linha por decisão: `R-<n> (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>`. Entra no commit seguinte da branch (`docs(task): …`). O `progress.md` guarda só o estado da execução.
 - **Limite:** Ruling não muda regra de negócio nem aprova item N3: regra de negócio segue a regra de divergência; item N3 é aprovado no Gate 1 (humano ou delegado), e N3 fora da lista para a execução.
+- **Trilha enxuta:** a seção `## Rulings` do documento é só do orquestrador e começa vazia no Gate 1; o `arquiteto` não a escreve. Ruling não mantém a trilha enxuta diante de N3 ("Trilha enxuta").
 - **PR:** a seção "Decisões do orquestrador" do template lista as Rulings da task (ou `nenhuma`). No último PR de uma série empilhada, lista também as das tasks anteriores da mesma spec.
 - **Relatório ao humano:** ao publicar, o orquestrador lista as Rulings da task e aponta as que pedem confirmação.
 - **Promoção:** Ruling que vale além da task vira `D<n>` em `agentic/projeto/decisoes.md` e a linha da Ruling cita a decisão. Com o Gate 1 delegado, o orquestrador registra a decisão citando a delegação; sem ela, propõe ao humano.

@@ -62,7 +62,7 @@ Três trilhas, pelo tamanho da mudança:
 | Trilha | Quando | Caminho |
 |---|---|---|
 | **Padrão** (`/intent`) | funcionalidade nova ou mudança de comportamento | intent → spec → design → Gate 1 → RED → GREEN → revisão → Gate 2 |
-| **Enxuta** (`/mudanca`) | mudança pequena, numa task só, sem gatilho N3 | um documento → Gate 1 → RED → GREEN → revisão → Gate 2 |
+| **Enxuta** (`/mudanca`) | mudança pequena, numa task só, sem gatilho N3 (salvo acréscimo a contrato público aprovado no Gate 1) | um documento no worktree → revisão do documento → Gate 1 → RED → GREEN → revisão → Gate 2 |
 | **Rápida** | `chore`, `docs`, ferramental, correção sem mudança de comportamento | branch → `verify` → PR → Gate 2 |
 
 Regras completas: `core/processo/ciclo.md`.
@@ -99,7 +99,7 @@ O `arquiteto` recusa a trilha enxuta: "mudança em regra de desconto" é gatilho
 /mudanca formatar preço em reais (R$ 10,00) para exibição
 ```
 
-1. O `arquiteto` escreve um único documento (58 linhas na validação). Trecho ilustrativo:
+1. O orquestrador cria a branch e o worktree; o `arquiteto` escreve lá um único documento, sem commit (58 linhas na validação). Lacuna de regra vira pergunta na seção "Questionário", que só o humano responde. Trecho ilustrativo:
 
    ```markdown
    # Mudança: formatar-preco
@@ -117,7 +117,7 @@ O `arquiteto` recusa a trilha enxuta: "mudança em regra de desconto" é gatilho
    - `test/precos.test.js`
    ```
 
-2. **Gate 1:** o humano aprova o documento. Só então o orquestrador cria a branch e o worktree.
+2. **Gate 1:** o humano responde o questionário e aprova o documento (e, se houver, cada acréscimo a contrato público e cada decisão nova). Só então o orquestrador commita o documento: é o registro da aprovação.
 3. Commits na branch, nesta ordem:
 
    ```
