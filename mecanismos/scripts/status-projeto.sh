@@ -27,6 +27,18 @@ echo
 echo "### Artefatos"
 find agentic/projeto/intent agentic/projeto/specs -name '*.md' ! -name '_*' 2>/dev/null | sort | while read -r f; do
   s=$(grep -m1 '^\*\*Status:\*\*' "$f" | sed 's/^\*\*Status:\*\*[[:space:]]*//')
+  # integrada não é um Status escrito (ciclo.md, "Status dos artefatos"): deriva do git. Task publicada cuja versão
+  # na principal (local ou, desatualizada ou ausente, a remota) também está publicada foi integrada — o commit
+  # docs(task): … publicada é feito na branch da task e só chega à principal pelo merge.
+  case "$s" in
+    publicada*)
+      for p in "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL"; do
+        case "$(git show "$p:$f" 2>/dev/null | grep -m1 '^\*\*Status:\*\*')" in
+          "**Status:** publicada"*) s="integrada (derivado do git) — $s"; break ;;
+        esac
+      done
+      ;;
+  esac
   [ -n "$s" ] && echo "- $f: $s"
 done
 
