@@ -35,4 +35,31 @@ printf 'enabled: false\ngate1: D4\n' > "$r/agentic/auto-mode"
 tl_espera 0 "status com modo automático desligado sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
 tl_contem "Gate 1: humano" "delegação só vale com o modo automático ligado"
 
+# integrada deriva do git: task publicada cuja versão na principal (local ou origin/) também está publicada.
+r3=$(tl_repo)
+t=agentic/projeto/specs/pedidos/tasks
+mkdir -p "$r3/$t"
+printf '# Task 001\n**Status:** pendente\n' > "$r3/$t/001-integrada.md"
+printf '# Task 002\n**Status:** pendente\n' > "$r3/$t/002-aberta.md"
+printf '# Task 003\n**Status:** em-andamento\n' > "$r3/$t/003-andamento.md"
+printf '# Task 004\n**Status:** pendente\n' > "$r3/$t/004-remota.md"
+git -C "$r3" add -A; git -C "$r3" commit -q -m "Gate 1"
+printf '# Task 001\n**Status:** publicada — PR #1\n' > "$r3/$t/001-integrada.md"
+git -C "$r3" commit -q -am "docs(task): 001 publicada"   # merge na principal
+printf '# Task 004\n**Status:** publicada\n' > "$r3/$t/004-remota.md"
+git -C "$r3" commit -q -am "docs(task): 004 publicada"
+git -C "$r3" update-ref refs/remotes/origin/main HEAD    # 004 integrada no remoto
+git -C "$r3" reset -q --hard HEAD~1                      # main local ainda sem o merge da 004
+git -C "$r3" checkout -q -b pedidos/002
+printf '# Task 002\n**Status:** publicada\n' > "$r3/$t/002-aberta.md"
+printf '# Task 004\n**Status:** publicada\n' > "$r3/$t/004-remota.md"
+git -C "$r3" commit -q -am "docs(task): 002 publicada (PR aberto)"
+tl_espera 0 "status com tasks publicadas sai com 0" sh -c "cd '$r3' && sh '$dir/status-projeto.sh'"
+tl_contem "001-integrada.md: integrada (derivado do git) — publicada — PR #1" "publicada também na principal: integrada"
+tl_contem "002-aberta.md: publicada" "publicada só na branch (PR aberto): continua publicada"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "PR aberto não aparece como integrada" grep -q "002-aberta.md: integrada" "$copia_saida"
+tl_espera 0 "status diferente de publicada não muda" grep -q "003-andamento.md: em-andamento$" "$copia_saida"
+tl_espera 0 "publicada na principal remota (local desatualizada): integrada" grep -q "004-remota.md: integrada (derivado do git) — publicada$" "$copia_saida"
+
 tl_fim
