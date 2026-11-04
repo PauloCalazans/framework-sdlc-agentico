@@ -13,6 +13,8 @@
 ```
 <saída>
 ```
+- Declaração de corpos: <!-- todo corpo do contrato que não é o stub da stack, com o porquê; esperado: vazia ou só acesso trivial a dado -->
+  - Nenhum.
 
 ## Tasks
 | Task | Objetivo | Branch |

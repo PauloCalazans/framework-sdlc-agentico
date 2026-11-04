@@ -30,6 +30,8 @@
 ```
 <saída>
 ```
+- Declaração de corpos: <!-- todo corpo do contrato que não é o stub da stack, com o porquê; esperado: vazia ou só acesso trivial a dado -->
+  - Nenhum.
 
 ## Itens N3 (aprovação no Gate 1)
 <!-- Só acréscimo a contrato público (nada removido, renomeado ou com tipo ou semântica alterados). Qualquer outro gatilho N3: a mudança não cabe na trilha enxuta. Sem itens: deixe a tabela sem linhas. A última coluna é preenchida pelo orquestrador com a decisão do humano no Gate 1. -->
