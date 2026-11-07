@@ -47,4 +47,19 @@ tl_espera 0 "parecer: ordem das seções" ordem $p '## Rodada anterior' '## Veri
 tl_espera 1 "parecer: sem linha **Status:** (status-projeto não o lista)" linha $p '^\*\*Status:\*\*'
 tl_espera 0 "kit sem escala alheia" nenhum 'REPROVADO|bloqueante' core adapters README.md
 
+# --- Task 3: seção "No brief" em cada contrato de papel
+for papel in dominio arquiteto testes dev revisor; do
+  c=core/papeis/$papel.md
+  tl_espera 0 "$papel: tem ## No brief" tem $c '## No brief'
+  tl_espera 0 "$papel: No brief antes de Ao terminar" ordem $c '## No brief' '## Ao terminar'
+  tl_espera 0 "$papel: No brief com 3 a 5 itens" sh -c \
+    "n=\$(tr -d '\r' < '$raiz/$c' | sed -n '/^## No brief/,/^## /p' | grep -c '^- '); [ \$n -ge 3 ] && [ \$n -le 5 ]"
+  tl_espera 1 "$papel: sem placeholder {{ no contrato" sh -c "grep -q '{{' '$raiz/$c'"
+done
+for papel in dominio arquiteto testes dev; do
+  tl_espera 0 "$papel: No brief depois de Independência" ordem core/papeis/$papel.md '## Independência' '## No brief'
+done
+tl_espera 0 "revisor: No brief depois de Nunca faz" ordem core/papeis/revisor.md '## Nunca faz' '## No brief'
+tl_espera 1 "oráculo não ganha No brief" tem core/papeis/_oraculo.md '## No brief'
+
 tl_fim

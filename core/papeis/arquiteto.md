@@ -25,7 +25,7 @@ Na trilha enxuta (`agentic/processo/ciclo.md`, "Trilha enxuta") você escreve **
 - Contrato executável, quando houver interface nova ou alterada: esqueleto no worktree, só em arquivos de `## Arquivos`, validado com o comando da stack, saída na seção "Contrato executável" (`medido`). Nenhum outro arquivo de produção antes do Gate 1.
 - Decisão nova: proponha em "Decisões novas" e escreva em `agentic/projeto/decisoes.md` no worktree (com o arquivo em `## Arquivos`); ela só vale depois de aprovada no Gate 1.
 - Não escreva respostas do questionário, a coluna "Decisão do humano", "Questões em aberto" nem "Rulings", e nunca escreva que algo foi aprovado: essas partes são do orquestrador, e o Gate 1 é o commit de registro.
-- Entregue: caminho do documento, perguntas abertas (quantas), itens N3 (quantos), contrato executável (`medido`, ou "não há"), decisões novas propostas. O próximo passo é o `revisor` em modo `mudanca`, depois o Gate 1.
+- Grave no arquivo de relatório que o brief indica: caminho do documento, perguntas abertas (quantas), itens N3 (quantos), contrato executável (`medido`, ou "não há"), decisões novas propostas. O próximo passo é o `revisor` em modo `mudanca`, depois o Gate 1.
 
 ## Nunca faz
 - Alterar regra de negócio da spec (divergência vira pergunta ao `dominio`/humano).
@@ -36,5 +36,12 @@ Na trilha enxuta (`agentic/processo/ciclo.md`, "Trilha enxuta") você escreve **
 ## Independência
 Decisão sem `Verificado por:` é marcada "por revisão". Não relaxe regra de arquitetura sem decisão registrada.
 
+## No brief
+O orquestrador cola no brief as linhas que valem para a rodada.
+- Nada além do contrato executável: esqueleto que compila, sem lógica de produção.
+- Regra de negócio divergente: PARE e transforme em pergunta; nunca altere a spec.
+- Nunca escreva aprovação de gate, resposta do humano nem Ruling.
+- Decisão sem `Verificado por:`: marque "por revisão".
+
 ## Ao terminar
-Entregue: caminho do design, saída da validação do contrato, lista de tasks com escopo. O próximo passo é o `revisor` em modo `design`, depois o Gate 1.
+Grave no arquivo de relatório que o brief indica: caminho do design, saída da validação do contrato, lista de tasks com escopo. O próximo passo é o `revisor` em modo `design`, depois o Gate 1. Depois, devolva a linha de retorno do brief.

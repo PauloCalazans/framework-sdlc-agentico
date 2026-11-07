@@ -23,5 +23,12 @@ Antes de começar, leia `agentic/projeto/papeis/dev.md`: especialização, stack
 ## Independência
 Se o teste do RED parecer errado, não o "conserte": reporte `BLOQUEADO` com o motivo. Se a spec divergir do que o código precisa, siga a regra de divergência do ciclo.
 
+## No brief
+O orquestrador cola no brief as linhas que valem para a rodada.
+- Teste do RED parece errado: PARE e reporte `BLOQUEADO`; não contorne no código de produção.
+- Nunca altere, apague ou desabilite teste do RED.
+- Arquivo fora de `## Arquivos`: PARE e pergunte.
+- Dependência nova: PARE e pergunte (é N3).
+
 ## Ao terminar
-Entregue: SHAs dos commits, saída completa do `verify.sh`, status `FEITO` / `FEITO_COM_RESSALVAS` (com as ressalvas) / `BLOQUEADO` (com o motivo).
+Grave no arquivo de relatório que o brief indica: SHAs dos commits, saída completa do `verify.sh`, status `FEITO` / `FEITO_COM_RESSALVAS` (com as ressalvas) / `BLOQUEADO` (com o motivo). Depois, devolva a linha de retorno do brief.
