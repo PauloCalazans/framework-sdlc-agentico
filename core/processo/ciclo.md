@@ -28,7 +28,7 @@ Na dúvida, trilha padrão.
 - Achados **Menores** ficam registrados e são tratados na revisão final da branch, antes da publicação.
 - **Gate 1 não aceita hipótese:** toda regra da spec chega ao Gate 1 com estado `confirmada`.
 - **Registro do Gate 1:** depois da aprovação, o orquestrador cria a branch e o worktree da primeira task, e o primeiro commit da branch é `docs(spec): <nome> aprovada (Gate 1)` (com o Gate 1 delegado: `docs(spec): <nome> aprovada (Gate 1 delegado, D<n>)`), com intent, spec, design e tasks (`**Status:** aprovado` em intent, spec e design). As tasks seguintes da mesma spec saem da principal depois que a primeira é integrada; no modo automático, podem sair da branch da task anterior ("Branches empilhadas").
-- **Gate 2 sem plataforma de PR:** o orquestrador deixa a branch rebaseada na principal; o humano integra com `git merge --ff-only <branch>`.
+- **Gate 2 sem plataforma de PR:** o orquestrador commita na branch o parecer final aprovado em `agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md` ("Orquestração") e deixa a branch rebaseada na principal; o humano integra com `git merge --ff-only <branch>`.
 
 ## Trilha enxuta
 
@@ -100,8 +100,12 @@ O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador exter
 1. lê `status-projeto` (injetado no início da sessão) e escolhe a próxima task;
 2. cria o worktree e o registro de execução em `agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/`:
    - `progress.md` — task atual, SHA base, próximo passo;
-   - `task-N-brief.md` — o que o papel recebe; começa com `Papel: <papel>` e traz os caminhos absolutos do contrato do papel (`agentic/processo/papeis/<papel>.md`) e do perfil (`agentic/projeto/papeis/<papel>.md`), a task, o contrato executável, os caminhos absolutos do worktree e os comandos. O perfil vai no brief mesmo que o contrato já o cite;
-   - `task-N-relatorio.md` — o que o papel devolveu (`FEITO` / `FEITO_COM_RESSALVAS` / `BLOQUEADO`) e o parecer do revisor;
+   - **brief** `NN-<papel>[-<modo>]-brief.md` (`NN` = ordem do despacho: `01`, `02`, …) — o que o papel recebe, montado por `agentic/processo/templates/brief.md` e conferido pela lista "Antes de enviar" do template: cabeçalho com `Papel: <papel>` e os caminhos absolutos do contrato e do perfil (o perfil vai mesmo que o contrato já o cite), escopo, o que fazer, "Nunca faz" colado da seção "No brief" do contrato, leitura com intervalo, comandos com saída limitada, teto e entrega. Por quê: cada requisição do papel reenvia o contexto inteiro, e a regra que fica só no contrato linkado não chega ao papel;
+   - **rodada de correção** — é despacho novo: o brief anterior do mesmo papel copiado inteiro para um arquivo novo, com "O que fazer" reescrito e a seção "Desde a rodada anterior". Nunca "mesmo brief anterior", "mesmo escopo" nem continuação de sessão encerrada;
+   - **relatório** `NN-<papel>[-<modo>]-relatorio.md` (revisor: `NN-revisor-<modo>-parecer.md`, pelo template `agentic/processo/templates/parecer.md`) — gravado pelo próprio papel no caminho que o brief dá; o retorno pela ferramenta é só a linha de retorno do brief, um ponteiro para o arquivo;
+   - **ao receber** — antes de passar a entrega adiante, o orquestrador roda a lista "Ao receber" do template (`agentic/processo/templates/brief.md`): as verificações do papel e, no revisor, a conferência de que nada mudou no que ele revisou;
+   - **parecer** — fica local, como os briefs. Sem plataforma de PR, o parecer final aprovado do modo `diff` é copiado para `agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md` (`<NNN>` = número da task, para não sobrescrever o de outra task da mesma spec) e commitado na branch da task antes do Gate 2;
+   - `Verificado por:` revisão (lista "Antes de enviar" do template; nenhum mecanismo confere o brief, que não é commitado); a entrega, pela lista "Ao receber" (`verifica-escopo.sh`, `verifica-red.sh`, `verify.sh` e a conferência do revisor); a cópia em `pareceres/`, por revisão no Gate 2;
 3. despacha cada papel com o brief; nunca implementa ele mesmo;
 4. registra uma **Ruling** sempre que decide algo não previsto na spec, no design ou na task (seção "Rulings");
 5. escolhe o modelo de cada papel por `agentic/processo/modelos.md` (nível de partida, ajuste por dado, composição do time com mais de um produto).

@@ -20,7 +20,7 @@ O núcleo (`core/`, `mecanismos/`) é neutro. O que muda de uma ferramenta para 
 | Perfil | `agentic/projeto/papeis/<papel>.md` | projeto; o kit nunca toca: especialização, stack, padrões, proibições |
 | Adaptador | `.claude/agents/<papel>.md`, `.github/agents/<papel>.agent.md` | kit; ponteiro fino para o contrato |
 
-A persona nunca vai para o adaptador. Toda ferramenta segue o mesmo caminho: AGENTS.md → contrato → perfil. O contrato manda ler o perfil, e o brief (`task-N-brief.md`) traz os dois caminhos.
+A persona nunca vai para o adaptador. Toda ferramenta segue o mesmo caminho: AGENTS.md → contrato → perfil. O contrato manda ler o perfil, e o brief (montado por `agentic/processo/templates/brief.md`) traz os dois caminhos.
 
 O `instalar.sh` grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo do kit) e, na reinstalação, troca sem merge o arquivo que ainda bate com o manifesto. O `checa-instancia.sh` acusa contrato editado na instância e caminho citado num perfil que não existe.
 
@@ -34,7 +34,7 @@ O `instalar.sh` grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo 
 
 O adaptador do Copilot traz:
 - `.github/copilot-instructions.md`: aponta para o `AGENTS.md` e repete só as regras invioláveis.
-- `.github/agents/<papel>.agent.md`: um agente por papel, apontando para o contrato; o `revisor` vem sem `edit`.
+- `.github/agents/<papel>.agent.md`: um agente por papel, apontando para o contrato; o `revisor` tem `edit` só para gravar o parecer ("escreve só o parecer" é verificado na conferência ao receber).
 - `.github/prompts/*.prompt.md`: os comandos do ciclo, apontando para `.claude/commands/`.
 - `.github/workflows/copilot-setup-steps.yml`: prepara o agente de nuvem com histórico completo, `gitleaks` e githooks ligados. O passo da stack é completado no `/bootstrap`.
 
