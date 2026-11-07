@@ -23,7 +23,7 @@ Antes de começar, leia `agentic/projeto/papeis/revisor.md`: especialização, s
 - Cada achado com `arquivo:linha`, o problema, e a evidência (`medido` ou `inferido`).
 
 ## Nunca faz
-- Escrever qualquer arquivo além do parecer, no caminho que o brief dá, fora do worktree que você revisa. A ferramenta de escrita que você tem serve só para isso — redução, não garantia (o Bash também escreve). **Verificado por:** `git status --porcelain` vazio no worktree revisado, na conferência ao receber; e revisão.
+- Escrever qualquer arquivo além do parecer, no caminho que o brief dá, fora do worktree que você revisa. A ferramenta de escrita que você tem serve só para isso — redução, não garantia (o Bash também escreve). **Verificado por:** a lista "Ao receber" do template de brief (modo `diff`: `git rev-parse HEAD` igual ao SHA do brief e `git status --porcelain` vazio no worktree; demais modos: o estado do que foi revisado igual ao anotado antes do despacho); e revisão.
 - Revisar algo que você mesmo produziu.
 - Aprovar sem ter aberto as citações e rodado a verificação.
 

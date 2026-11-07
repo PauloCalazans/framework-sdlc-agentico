@@ -5,11 +5,11 @@ Task: /home/dev/loja/agentic/projeto/specs/pedidos/tasks/001-criar.md — fase 4
 
 ## Escopo
 Worktree: /home/dev/loja/agentic/.estado/worktrees/pedidos-001-criar (branch pedidos/001-criar). Escreva só em:
-src/pedidos/criar_pedido.*, src/pedidos/desconto.*. Nunca toque em tests/. Outro arquivo: PARE e pergunte.
+src/pedidos/criar_pedido.*, src/pedidos/desconto.*, src/pedidos/erros.*. Nunca toque em tests/. Outro arquivo: PARE e pergunte.
 
 ## O que fazer
 - I1 do parecer 05: o desconto é calculado no pedido (criar_pedido.*:41), contra o D2; mova-o para desconto.*.
-- M1 do parecer 05: o código de erro PEDIDO_VAZIO aparece como texto solto em dois lugares; use uma constante.
+- M1 do parecer 05: o código de erro PEDIDO_VAZIO aparece como texto solto em dois lugares; use uma constante em src/pedidos/erros.*.
 - O RED a1b2c3d continua passando, sem mudar teste nenhum.
 
 ## Já decidido
@@ -42,4 +42,4 @@ src/pedidos/criar_pedido.*, src/pedidos/desconto.*. Nunca toque em tests/. Outro
 ## Desde a rodada anterior
 - Brief anterior: /home/dev/loja/agentic/.estado/execucao/2026-11-06-pedidos/04-dev-brief.md (GREEN d4e5f6a).
 - Motivo: /home/dev/loja/agentic/.estado/execucao/2026-11-06-pedidos/05-revisor-diff-parecer.md, achados I1 e M1 (DEVOLVIDO).
-- Mudou: "O que fazer", "Leia só isto", o teto e os commits. Escopo, "Nunca faz" e comandos são os do 04.
+- Mudou: "O que fazer", "Leia só isto", o teto, os commits e o escopo (+ src/pedidos/erros.*, já em `## Arquivos` da task). "Nunca faz" e comandos são os do 04.

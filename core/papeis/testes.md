@@ -25,7 +25,7 @@ Rode os testes e confira a falha antes do commit (`medido`). Se um critério de 
 ## No brief
 O orquestrador cola no brief as linhas que valem para a rodada.
 - Escreva só nos diretórios de teste (e no documento da task); nunca em código de produção.
-- Antes do commit, rode o comando do brief e confira que cada teste falha pelo motivo certo (asserção, não erro de compilação).
+- Antes do commit, rode o comando do brief e confira que cada teste falha pelo motivo certo (asserção, não erro de compilação — salvo quando a ausência do símbolo é o próprio comportamento testado).
 - Teste que passaria com qualquer implementação não vale: reescreva.
 - Critério de aceite que não dá para testar como está escrito: PARE e reporte `BLOQUEADO` com a pergunta.
 - Reaproveite fixtures existentes; não crie dados redundantes.

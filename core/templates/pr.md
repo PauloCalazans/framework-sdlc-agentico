@@ -25,7 +25,7 @@
 ## Parecer do revisor
 - Veredito: <APROVADO>
 - Achados menores registrados: <lista ou nenhum>
-- Parecer: <local, em agentic/.estado/execucao/ | sem plataforma de PR: agentic/projeto/specs/<nome>/pareceres/<arquivo>>
+- Parecer: <local, em agentic/.estado/execucao/ | sem plataforma de PR: agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md>
 
 ## O que ficou desconfortável
 - <…>

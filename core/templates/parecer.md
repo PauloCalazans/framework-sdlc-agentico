@@ -1,7 +1,7 @@
 <!-- Template de parecer do revisor. O revisor preenche e apaga este comentário.
 - Onde: no caminho que o brief dá, agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/NN-revisor-<modo>-parecer.md, fora do
   worktree revisado. O parecer é local (agentic/.estado/ não é versionado); o PR leva o veredito e os achados menores.
-  Sem plataforma de PR, o orquestrador copia o parecer final aprovado para agentic/projeto/specs/<nome>/pareceres/.
+  Sem plataforma de PR, o orquestrador copia o parecer final aprovado para agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md (NNN = número da task).
 - Escala do kit: Crítico e Importante bloqueiam; Menor fica registrado para a revisão final da branch.
 - Toda evidência é `medido` (você abriu ou rodou) ou `inferido` (dedução). Aprovar sem abrir as citações e rodar a
   verificação não vale.
