@@ -71,4 +71,8 @@ tl_espera 0 "adapter Claude Code: revisor com Write" linha adapters/claude-code/
 tl_espera 1 "adapter Claude Code: revisor sem Edit" linha adapters/claude-code/agents/revisor.md '^tools: .*\bEdit\b'
 tl_espera 0 "adapter Copilot: revisor com edit" linha adapters/copilot/agents/revisor.agent.md "^tools: .*'edit'"
 
+# --- Task 5: a orquestração monta o brief pelo template
+# shellcheck disable=SC2086 # $k é lista de caminhos
+tl_espera 0 "kit sem task-N-brief/relatorio" nenhum 'task-N-(brief|relatorio)' $k
+
 tl_fim
