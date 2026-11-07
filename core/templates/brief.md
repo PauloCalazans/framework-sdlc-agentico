@@ -72,7 +72,11 @@ e IDs dos achados) e o que mudou. Não substitui nenhuma seção acima>
 Ao receber (antes de passar a entrega adiante):
 - [ ] `sh agentic/mecanismos/scripts/verifica-escopo.sh <task.md>` na branch do papel;
 - [ ] depois do RED: `sh agentic/mecanismos/scripts/verifica-red.sh`; depois da GREEN: `sh agentic/mecanismos/scripts/verify.sh`;
-- [ ] revisor: `git status --porcelain` vazio no worktree revisado (o parecer fica fora dele);
+- [ ] revisor, modo diff: `git rev-parse HEAD` no worktree igual ao SHA final do intervalo do brief (o revisor não
+  comita) e `git status --porcelain` vazio;
+- [ ] revisor, modos spec, design e mudanca (nada commitado): `git status --porcelain` e
+  `{ git diff; git ls-files -o --exclude-standard | xargs cat; } | sha256sum` iguais aos que você anotou no
+  progress.md antes do despacho. O parecer fica fora do que é conferido;
 - [ ] a linha de retorno confere com o arquivo de relatório.
 Desvio que é da stack não entra aqui: pelo Princípio 2, vai para o CMD_VERIFY_STACK do projeto.
 -->

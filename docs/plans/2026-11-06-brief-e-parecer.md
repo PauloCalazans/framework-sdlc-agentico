@@ -14,7 +14,7 @@
 
 - Branch: `brief-e-parecer` (já criada; o commit do design é `4b67c1f`). Nunca commitar na `main`, nunca fazer merge.
 - Não adicionar `docs/avaliacao-normativa-swebok-iso.md` (não rastreado, fora deste trabalho). Use `git add <caminhos>`, nunca `git add -A`.
-- Nenhum arquivo do kit, mensagem de commit ou PR cita o projeto de referência, os nomes dos papéis dele (Forja, Lupa, Esquadro), `mocktail`, `worker_done`, Orca, Maestri, `Select-Object`, Maven ou `flutter`. Fale em "projeto de referência".
+- Nenhum arquivo do kit, mensagem de commit ou PR cita o projeto de referência, os nomes dos papéis dele, `mocktail`, `worker_done`, Orca, Maestri, `Select-Object`, Maven ou `flutter`. Fale em "projeto de referência".
 - Escala do revisor: Crítico / Importante / Menor; vereditos `APROVADO` / `DEVOLVIDO`. Nunca `REPROVADO`, Bloqueante ou Maior.
 - Placeholders em templates e contratos usam `<...>`, nunca `{{...}}` (o `checa-instancia.sh` acusa `{{` em `agentic/processo/papeis/`).
 - Nomes de arquivo na pasta de execução: `NN-<papel>[-<modo>]-brief.md`, `NN-<papel>[-<modo>]-relatorio.md`, `NN-revisor-<modo>-parecer.md`.
@@ -96,7 +96,7 @@ tl_espera 0 "brief: lista Antes de enviar" tem $b 'Antes de enviar'
 tl_espera 0 "brief: lista Ao receber" tem $b 'Ao receber'
 tl_espera 1 "brief: sem placeholder {{" tem $b '{{'
 tl_espera 0 "kit sem nome do projeto de referência nem de ferramenta de orquestração" nenhum \
-  'avitech|forja|lupa|esquadro|mocktail|worker_done|maestri|\borca\b' \
+  'mocktail|worker_done|maestri|\borca\b' \
   core adapters bootstrap mecanismos README.md docs/portabilidade.md
 tl_espera 0 "core/ sem comando de stack" nenhum 'select-object|maven|\bmvn\b|flutter' core
 tl_fim
@@ -348,7 +348,7 @@ for e in docs/exemplos-brief/06-dev-brief.md docs/exemplos-brief/07-revisor-diff
 done
 tl_espera 0 "parecer de confirmação: Rodada anterior" tem docs/exemplos-brief/07-revisor-diff-parecer.md '## Rodada anterior'
 tl_espera 0 "exemplos sem nome de stack, de projeto de referência ou de ferramenta de orquestração" nenhum \
-  'avitech|forja|lupa|esquadro|mocktail|worker_done|maestri|\borca\b|select-object|maven|\bmvn\b|flutter' docs/exemplos-brief
+  'mocktail|worker_done|maestri|\borca\b|select-object|maven|\bmvn\b|flutter' docs/exemplos-brief
 ```
 
 - [ ] **Passo 2: Rodar e ver falhar**

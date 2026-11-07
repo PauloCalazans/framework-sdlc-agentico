@@ -34,7 +34,7 @@ tl_espera 0 "brief: lista Antes de enviar" tem $b 'Antes de enviar'
 tl_espera 0 "brief: lista Ao receber" tem $b 'Ao receber'
 tl_espera 1 "brief: sem placeholder {{" tem $b '{{'
 tl_espera 0 "kit sem nome do projeto de referência nem de ferramenta de orquestração" nenhum \
-  'avitech|forja|lupa|esquadro|mocktail|worker_done|maestri|\borca\b' \
+  'mocktail|worker_done|maestri|\borca\b' \
   core adapters bootstrap mecanismos README.md docs/portabilidade.md
 tl_espera 0 "core/ sem comando de stack" nenhum 'select-object|maven|\bmvn\b|flutter' core
 
@@ -93,6 +93,32 @@ for e in docs/exemplos-brief/06-dev-brief.md docs/exemplos-brief/07-revisor-diff
 done
 tl_espera 0 "parecer de confirmação: Rodada anterior" tem docs/exemplos-brief/07-revisor-diff-parecer.md '## Rodada anterior'
 tl_espera 0 "exemplos sem nome de stack, de projeto de referência ou de ferramenta de orquestração" nenhum \
-  'avitech|forja|lupa|esquadro|mocktail|worker_done|maestri|\borca\b|select-object|maven|\bmvn\b|flutter' docs/exemplos-brief
+  'mocktail|worker_done|maestri|\borca\b|select-object|maven|\bmvn\b|flutter' docs/exemplos-brief
+
+# --- Revisão final da branch (correções)
+# Revisor: ao receber, HEAD igual ao SHA do brief no modo diff; estado igual ao anotado nos modos sem commit.
+tl_espera 0 "brief: ao receber confere HEAD do revisor" tem core/templates/brief.md 'git rev-parse HEAD'
+tl_espera 0 "brief: ao receber confere também os arquivos novos nos modos sem commit" tem core/templates/brief.md 'git ls-files -o --exclude-standard'
+tl_espera 0 "revisor: Verificado por cita o HEAD" tem core/papeis/revisor.md 'git rev-parse HEAD'
+tl_espera 0 "ciclo e modelos só apontam para a lista Ao receber do template" nenhum 'porcelain' core/processo
+# Termos que não podem entrar no repositório versionado, mas que também não podem ser versionados
+# (nomes do projeto de referência): lista local opcional, uma ERE por linha, em .superpowers/ (ignorado pelo git).
+termos="$raiz/.superpowers/termos-locais.txt"
+if [ -f "$termos" ]; then
+  # git grep sai 1 quando não acha e >1 em erro: só o 1 passa (um erro não pode virar "sem ocorrências").
+  tl_espera 1 "repositório versionado sem os termos locais" git -C "$raiz" grep -n -i -I -E -f "$termos"
+fi
+# Parecer copiado tem nome fixo por task, para não sobrescrever o de outra task da mesma spec.
+tl_espera 0 "ciclo: nome fixo do parecer copiado" tem core/processo/ciclo.md 'pareceres/<NNN>-diff.md'
+tl_espera 0 "nova-task: nome fixo do parecer copiado" tem adapters/claude-code/commands/nova-task.md 'pareceres/<NNN>-diff.md'
+# Regras novas da Orquestração declaram Verificado por: (Princípio 1).
+tl_espera 0 "ciclo: Verificado por depois das regras do brief" ordem core/processo/ciclo.md '- **parecer** —' '`Verificado por:` revisão (lista "Antes de enviar"'
+tl_espera 0 "ciclo: Verificado por antes do item 3" ordem core/processo/ciclo.md '`Verificado por:` revisão (lista "Antes de enviar"' '3. despacha cada papel'
+# No brief do testes mantém a ressalva do contrato (nenhuma regra nova).
+tl_espera 0 "testes: No brief mantém a ressalva do símbolo ausente" sh -c \
+  "tr -d '\r' < '$raiz/core/papeis/testes.md' | sed -n '/^## No brief/,/^## /p' | grep -q 'salvo quando a ausência do símbolo'"
+# Exemplo de correção: o escopo cobre o arquivo que o parecer de confirmação aprova.
+tl_espera 0 "06-dev: escopo inclui erros.*" sh -c \
+  "tr -d '\r' < '$raiz/docs/exemplos-brief/06-dev-brief.md' | sed -n '/^## Escopo/,/^## /p' | grep -q 'src/pedidos/erros'"
 
 tl_fim
