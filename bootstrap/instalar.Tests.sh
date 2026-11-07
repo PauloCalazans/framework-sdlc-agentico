@@ -15,6 +15,8 @@ done
 # Na raiz só entra o que as ferramentas exigem lá; o resto do kit vive em agentic/.
 tl_espera 0 "raiz recebe só AGENTS.md, CLAUDE.md, .claude/, agentic/, .gitignore e .gitattributes" sh -c \
   "[ \"\$(ls -A '$r' | grep -vx '.git' | sort | tr '\n' ' ')\" = '.claude .gitattributes .gitignore AGENTS.md CLAUDE.md agentic ' ]"
+tl_espera 0 "revisor do Claude Code com Write (só o parecer)" grep -qE '^tools: .*Write' "$r/.claude/agents/revisor.md"
+tl_espera 1 "revisor do Claude Code sem Edit" grep -qE '^tools: .*Edit' "$r/.claude/agents/revisor.md"
 tl_espera 1 "não instala settings.json direto (ação humana)" test -f "$r/.claude/settings.json"
 tl_espera 1 "não copia suítes *.Tests.sh do kit" sh -c "find '$r' -name '*.Tests.sh' | grep -q ."
 tl_espera 1 "não copia testlib.sh" sh -c "find '$r' -name 'testlib.sh' | grep -q ."
@@ -133,7 +135,7 @@ done
 for p in dominio arquiteto testes dev revisor; do
   tl_espera 0 "--copilot: agente do papel $p" test -f "$r/.github/agents/$p.agent.md"
 done
-tl_espera 1 "--copilot: revisor sem a ferramenta edit" grep -qF "'edit'" "$r/.github/agents/revisor.agent.md"
+tl_espera 0 "--copilot: revisor com a ferramenta edit (só o parecer)" grep -qF "'edit'" "$r/.github/agents/revisor.agent.md"
 cat > "$r/.ponteiros.sh" <<'EOS'
 # todo agente e prompt do Copilot aponta (primeiro caminho .md entre crases) para um arquivo instalado
 for f in .github/agents/*.agent.md .github/prompts/*.prompt.md; do

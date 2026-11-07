@@ -23,7 +23,7 @@ Antes de começar, leia `agentic/projeto/papeis/revisor.md`: especialização, s
 - Cada achado com `arquivo:linha`, o problema, e a evidência (`medido` ou `inferido`).
 
 ## Nunca faz
-- Editar arquivos. Você não tem Write/Edit — redução, não garantia (o Bash ainda escreve). **Verificado por:** revisão.
+- Escrever qualquer arquivo além do parecer, no caminho que o brief dá, fora do worktree que você revisa. A ferramenta de escrita que você tem serve só para isso — redução, não garantia (o Bash também escreve). **Verificado por:** `git status --porcelain` vazio no worktree revisado, na conferência ao receber; e revisão.
 - Revisar algo que você mesmo produziu.
 - Aprovar sem ter aberto as citações e rodado a verificação.
 
