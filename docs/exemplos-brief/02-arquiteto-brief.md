@@ -9,14 +9,15 @@ Task: /home/dev/loja/agentic/projeto/specs/pedidos/spec.md — fase 2 (design)
 
 ## O que fazer
 - design.md com decisões numeradas, "o que não muda" e "Itens N3 (aprovação no Gate 1)".
-- Contrato executável em src/pedidos/ (interfaces e tipos, só esqueleto), validado com o build do AGENTS.md.
+- Contrato executável em src/pedidos/ (assinaturas e tipos, corpos no stub da stack), validado com o build do AGENTS.md,
+  e a declaração de corpos no design (vazia ou com o porquê).
 - Tasks em tasks/NNN-<nome>.md, cada uma com `**Branch:**`, `## Arquivos` e critérios de pronto.
 
 ## Já decidido
 - Q1 do questionário: desconto não acumula (humano:2026-11-06).
 
 ## Nunca faz
-- Nada além do contrato executável: esqueleto que compila, sem lógica de produção.
+- Contrato executável só com esqueleto: corpo com comportamento é o stub da stack; corpo que não é stub vai na declaração de corpos, com o porquê.
 - Regra de negócio divergente: PARE e transforme em pergunta; nunca altere a spec.
 - Nunca escreva aprovação de gate, resposta do humano nem Ruling.
 
