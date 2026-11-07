@@ -24,7 +24,7 @@ Serve para **qualquer stack** (Java, Python, Node, .NET, front-end…) e para pr
 | commita na `main` ou faz o merge do próprio PR | commit, push e merge na branch protegida são bloqueados | `pre-commit`, `pre-push`, `pre-merge-commit`, `deny` de `gh pr merge` |
 | commita uma senha ou token | conteúdo staged é varrido antes do commit | `pre-commit` (gitleaks + palavras-chave) |
 | afrouxa as próprias permissões | edição de `agentic/config`, hooks e `.claude/settings.json` é negada | `deny` do Claude Code |
-| revisa o próprio trabalho | o `revisor` roda em contexto limpo, sem ferramenta de escrita, e nunca corrige | contrato do papel + adaptador |
+| revisa o próprio trabalho | o `revisor` roda em contexto limpo, escreve só o parecer e nunca corrige | contrato do papel + adaptador + conferência ao receber |
 | decide sozinho regra de negócio, segurança ou dependência nova | gatilhos N3 param a execução e chamam o humano | revisão |
 
 Regra que nenhum mecanismo garante aparece como "por revisão", nunca como garantida (`core/principios.md`).
@@ -55,7 +55,7 @@ flowchart TB
 | `arquiteto` | desenha, valida o contrato executável e quebra em tasks | muda regra de negócio |
 | `testes` | escreve testes que falham pelo motivo certo | toca código de produção |
 | `dev` | faz os testes passarem e refatora | altera ou desabilita teste do RED |
-| `revisor` | revisa em contexto limpo e dá parecer Crítico / Importante / Menor | edita arquivo ou revisa o que produziu |
+| `revisor` | revisa em contexto limpo e dá parecer Crítico / Importante / Menor | escreve além do parecer ou revisa o que produziu |
 
 Três trilhas, pelo tamanho da mudança:
 
