@@ -38,4 +38,13 @@ tl_espera 0 "kit sem nome do projeto de referência nem de ferramenta de orquest
   core adapters bootstrap mecanismos README.md docs/portabilidade.md
 tl_espera 0 "core/ sem comando de stack" nenhum 'select-object|maven|\bmvn\b|flutter' core
 
+# --- Task 2: template de parecer, na escala do kit
+p=core/templates/parecer.md
+for s in '## Rodada anterior' '## Critérios de aceite' '## Achados' '## Verificação'; do
+  tl_espera 0 "parecer: seção $s" tem $p "$s"
+done
+tl_espera 0 "parecer: ordem das seções" ordem $p '## Rodada anterior' '## Verificação'
+tl_espera 1 "parecer: sem linha **Status:** (status-projeto não o lista)" linha $p '^\*\*Status:\*\*'
+tl_espera 0 "kit sem escala alheia" nenhum 'REPROVADO|bloqueante' core adapters README.md
+
 tl_fim
