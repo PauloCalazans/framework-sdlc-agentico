@@ -75,4 +75,24 @@ tl_espera 0 "adapter Copilot: revisor com edit" linha adapters/copilot/agents/re
 # shellcheck disable=SC2086 # $k é lista de caminhos
 tl_espera 0 "kit sem task-N-brief/relatorio" nenhum 'task-N-(brief|relatorio)' $k
 
+# --- Task 6: formato dos briefs e do parecer de exemplo
+for f in "$raiz"/docs/exemplos-brief/*-brief.md; do
+  [ -f "$f" ] || continue
+  e=docs/exemplos-brief/$(basename "$f")
+  tl_espera 0 "$e: primeira linha é Papel de um contrato do kit" sh -c \
+    "p=\$(head -n1 '$f' | tr -d '\r' | sed -n 's/^Papel: \([a-z]*\).*/\1/p'); [ -n \"\$p\" ] && [ -f '$raiz/core/papeis/'\$p.md ]"
+  tl_espera 0 "$e: contrato com caminho absoluto" linha $e '^Contrato: (/|[A-Za-z]:/)'
+  tl_espera 0 "$e: perfil com caminho absoluto" linha $e '^Perfil: (/|[A-Za-z]:/)'
+  for s in '## Escopo' '## O que fazer' '## Já decidido' '## Nunca faz' '## Leia só isto' '## Comandos' '## Teto' '## Entrega'; do
+    tl_espera 0 "$e: seção $s" tem $e "$s"
+  done
+  tl_espera 0 "$e: teto com número" sh -c "tr -d '\r' < '$f' | sed -n '/^## Teto/,/^## /p' | grep -q '[0-9]'"
+done
+for e in docs/exemplos-brief/06-dev-brief.md docs/exemplos-brief/07-revisor-diff-brief.md; do
+  tl_espera 0 "$e: correção traz Desde a rodada anterior" tem $e '## Desde a rodada anterior'
+done
+tl_espera 0 "parecer de confirmação: Rodada anterior" tem docs/exemplos-brief/07-revisor-diff-parecer.md '## Rodada anterior'
+tl_espera 0 "exemplos sem nome de stack, de projeto de referência ou de ferramenta de orquestração" nenhum \
+  'avitech|forja|lupa|esquadro|mocktail|worker_done|maestri|\borca\b|select-object|maven|\bmvn\b|flutter' docs/exemplos-brief
+
 tl_fim
