@@ -21,6 +21,11 @@ tl_contem "Modo automático: ligado" "lê o auto-mode"
 tl_contem "Gate 1: humano" "sem gate1, o Gate 1 é humano"
 copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
 tl_espera 1 "ignora arquivos _modelo" grep -q "_template" "$copia_saida"
+mkdir -p "$r/agentic/projeto/specs/pedidos/pareceres"
+printf '# Parecer — diff — pedidos/001 — rodada 2\n**Veredito:** APROVADO · C 0 I 0 M 1\n' \
+  > "$r/agentic/projeto/specs/pedidos/pareceres/001-diff.md"
+tl_espera 0 "status com parecer copiado sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
+tl_espera 1 "não lista parecer copiado para pareceres/" grep -q "pareceres/" "$TL_SAIDA"
 
 # Review Focus 2: repositório sem a branch principal.
 r2=$(mktemp -d); git -C "$r2" init -q -b trabalho

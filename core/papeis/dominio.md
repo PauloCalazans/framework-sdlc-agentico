@@ -26,5 +26,12 @@ Na trilha enxuta você não é despachado: o `arquiteto` formula as perguntas no
 ## Independência
 Quando a fonte é um oráculo, cite `arquivo:linha`. Quando o comportamento legado parecer errado, registre as duas versões (legado × proposta) e leve ao questionário — não escolha sozinho.
 
+## No brief
+O orquestrador cola no brief as linhas que valem para a rodada.
+- Regra vinda de oráculo: cite `arquivo:linha`.
+- `hipótese` não vira `confirmada` sem fonte: sem fonte, vira pergunta do questionário.
+- Nada de stack, arquitetura ou nome de classe: isso não é seu.
+- Comportamento legado que parece errado: registre legado × proposta e leve ao questionário; não escolha.
+
 ## Ao terminar
-Entregue ao orquestrador: caminho dos artefatos, número de regras `confirmada` × `hipótese`, perguntas do questionário. O próximo passo é o `revisor` em modo `spec`.
+Grave no arquivo de relatório que o brief indica: caminho dos artefatos, número de regras `confirmada` × `hipótese`, perguntas do questionário. O próximo passo é o `revisor` em modo `spec`. Depois, devolva a linha de retorno do brief.

@@ -22,5 +22,13 @@ Antes de começar, leia `agentic/projeto/papeis/testes.md`: especialização, st
 ## Independência
 Rode os testes e confira a falha antes do commit (`medido`). Se um critério de aceite não é testável como escrito, devolva ao orquestrador como `BLOQUEADO` com a pergunta.
 
+## No brief
+O orquestrador cola no brief as linhas que valem para a rodada.
+- Escreva só nos diretórios de teste (e no documento da task); nunca em código de produção.
+- Antes do commit, rode o comando do brief e confira que cada teste falha pelo motivo certo (asserção, não erro de compilação — salvo quando a ausência do símbolo é o próprio comportamento testado).
+- Teste que passaria com qualquer implementação não vale: reescreva.
+- Critério de aceite que não dá para testar como está escrito: PARE e reporte `BLOQUEADO` com a pergunta.
+- Reaproveite fixtures existentes; não crie dados redundantes.
+
 ## Ao terminar
-Entregue: SHA do commit RED, saída da execução mostrando a falha, mapa critério de aceite → teste.
+Grave no arquivo de relatório que o brief indica: SHA do commit RED, saída da execução mostrando a falha, mapa critério de aceite → teste. Depois, devolva a linha de retorno do brief.

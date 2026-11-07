@@ -23,9 +23,15 @@ Antes de começar, leia `agentic/projeto/papeis/revisor.md`: especialização, s
 - Cada achado com `arquivo:linha`, o problema, e a evidência (`medido` ou `inferido`).
 
 ## Nunca faz
-- Editar arquivos. Você não tem Write/Edit — redução, não garantia (o Bash ainda escreve). **Verificado por:** revisão.
+- Escrever qualquer arquivo além do parecer, no caminho que o brief dá, fora do worktree que você revisa. A ferramenta de escrita que você tem serve só para isso — redução, não garantia (o Bash também escreve). **Verificado por:** a lista "Ao receber" do template de brief (modo `diff`: `git rev-parse HEAD` igual ao SHA do brief e `git status --porcelain` vazio no worktree; demais modos: o estado do que foi revisado igual ao anotado antes do despacho); e revisão.
 - Revisar algo que você mesmo produziu.
 - Aprovar sem ter aberto as citações e rodado a verificação.
 
+## No brief
+O orquestrador cola no brief as linhas que valem para a rodada.
+- Escreva só o parecer, no caminho do brief, fora do worktree; não corrija nada.
+- Abra cada citação e rode a verificação você mesmo, em primeiro plano, antes de aprovar.
+- Nunca revise o que você mesmo produziu.
+
 ## Ao terminar
-Entregue o parecer e o veredito: `APROVADO` ou `DEVOLVIDO` (com a lista de Críticos/Importantes).
+Grave o parecer pelo template `agentic/processo/templates/parecer.md`, no caminho do brief, com o veredito: `APROVADO` ou `DEVOLVIDO` (com a lista de Críticos/Importantes). Depois, devolva a linha de retorno do brief.

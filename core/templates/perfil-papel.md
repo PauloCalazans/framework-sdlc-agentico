@@ -6,6 +6,7 @@ Do projeto: o kit nunca sobrescreve este arquivo. Acrescenta regras ao contrato 
 - Meta: 30 a 40 linhas.
 - Texto longo (árvore de pastas, convenções de teste detalhadas) vai para um doc do projeto, citado em "Leia sob demanda".
 - Todo caminho entre crases precisa existir no repositório (o checa-instancia.sh confere).
+- Escreva "Padrões" e "Nunca faz neste projeto" em forma de ação ("PARE e pergunte", "nunca …"): o orquestrador cola esses itens no brief (agentic/processo/templates/brief.md).
 - Padrão de stack que já falhou duas vezes sai daqui e vira checagem no CMD_VERIFY_STACK de agentic/config (princípio 2).
 -->
 

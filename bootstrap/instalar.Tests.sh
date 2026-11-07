@@ -6,7 +6,7 @@ dir=$(cd "$(dirname "$0")" && pwd)
 r=$(tl_repo)
 tl_espera 0 "instala num repositório git" sh "$dir/instalar.sh" "$r"
 for f in AGENTS.md CLAUDE.md agentic/processo/ciclo.md agentic/processo/modelos.md agentic/processo/principios.md agentic/processo/entrevista.md \
-         agentic/processo/papeis/dev.md agentic/processo/templates/task.md agentic/processo/templates/mudanca.md .claude/commands/mudanca.md agentic/mecanismos/githooks/pre-commit agentic/mecanismos/githooks/pre-push \
+         agentic/processo/papeis/dev.md agentic/processo/templates/task.md agentic/processo/templates/mudanca.md agentic/processo/templates/brief.md agentic/processo/templates/parecer.md .claude/commands/mudanca.md agentic/mecanismos/githooks/pre-commit agentic/mecanismos/githooks/pre-push \
          agentic/mecanismos/scripts/verify.sh agentic/mecanismos/scripts/lib-agentic.sh .claude/agents/revisor.md \
          .claude/commands/bootstrap.md .claude/hooks/pre-tool-use.sh agentic/config agentic/auto-mode \
          agentic/.estado/settings.pendente.json; do
@@ -15,6 +15,8 @@ done
 # Na raiz só entra o que as ferramentas exigem lá; o resto do kit vive em agentic/.
 tl_espera 0 "raiz recebe só AGENTS.md, CLAUDE.md, .claude/, agentic/, .gitignore e .gitattributes" sh -c \
   "[ \"\$(ls -A '$r' | grep -vx '.git' | sort | tr '\n' ' ')\" = '.claude .gitattributes .gitignore AGENTS.md CLAUDE.md agentic ' ]"
+tl_espera 0 "revisor do Claude Code com Write (só o parecer)" grep -qE '^tools: .*Write' "$r/.claude/agents/revisor.md"
+tl_espera 1 "revisor do Claude Code sem Edit" grep -qE '^tools: .*Edit' "$r/.claude/agents/revisor.md"
 tl_espera 1 "não instala settings.json direto (ação humana)" test -f "$r/.claude/settings.json"
 tl_espera 1 "não copia suítes *.Tests.sh do kit" sh -c "find '$r' -name '*.Tests.sh' | grep -q ."
 tl_espera 1 "não copia testlib.sh" sh -c "find '$r' -name 'testlib.sh' | grep -q ."
@@ -100,7 +102,7 @@ tl_espera 0 "manifesto tem o contrato do dev" grep -q "^[0-9a-f]\{64\}  agentic/
 tl_espera 0 "manifesto tem os mecanismos" grep -q "  agentic/mecanismos/scripts/verify.sh$" "$m"
 tl_espera 1 "manifesto não lista perfis da instância" grep -q "agentic/projeto/" "$m"
 tl_espera 1 "manifesto não lista agentic/.estado" grep -q "agentic/.estado/" "$m"
-tl_espera 0 "hash do manifesto confere com o arquivo instalado" sh -c "cd '$r' && grep '  agentic/processo/ciclo.md\$' '$m' | sha256sum -c --status"
+tl_espera 0 "hash do manifesto confere com o arquivo instalado" sh -c ". '$dir/lib-kit.sh'; [ \"\$(sed -n 's|^\([0-9a-f]*\)  agentic/processo/ciclo.md\$|\1|p' '$m')\" = \"\$(kit_hash '$r/agentic/processo/ciclo.md')\" ]"
 cp "$m" "$r/.manifesto-antes"
 sh "$dir/instalar.sh" "$r" >/dev/null
 tl_espera 0 "reinstalar não muda o manifesto" cmp -s "$m" "$r/.manifesto-antes"
@@ -133,7 +135,7 @@ done
 for p in dominio arquiteto testes dev revisor; do
   tl_espera 0 "--copilot: agente do papel $p" test -f "$r/.github/agents/$p.agent.md"
 done
-tl_espera 1 "--copilot: revisor sem a ferramenta edit" grep -qF "'edit'" "$r/.github/agents/revisor.agent.md"
+tl_espera 0 "--copilot: revisor com a ferramenta edit (só o parecer)" grep -qF "'edit'" "$r/.github/agents/revisor.agent.md"
 cat > "$r/.ponteiros.sh" <<'EOS'
 # todo agente e prompt do Copilot aponta (primeiro caminho .md entre crases) para um arquivo instalado
 for f in .github/agents/*.agent.md .github/prompts/*.prompt.md; do
