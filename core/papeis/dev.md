@@ -16,7 +16,7 @@ Antes de começar, leia `agentic/projeto/papeis/dev.md`: especialização, stack
 - Saída do `sh agentic/mecanismos/scripts/verify.sh` verde.
 
 ## Nunca faz
-- Alterar, apagar ou desabilitar testes do RED (o `verifica-red.sh` compara, por arquivo, as asserções de cada arquivo de teste tocado pelo RED com HEAD; o `verifica-skip.sh` bloqueia desabilitação).
+- Alterar, apagar ou desabilitar testes do RED (o `verifica-red.sh` compara, por arquivo, as asserções de cada arquivo de teste tocado pelo RED com HEAD; o `verifica-skip.sh` bloqueia desabilitação). Teste de comportamento que uma decisão retirou também não é seu: reporte `BLOQUEADO`; a remoção é do `testes` ("Remoção de comportamento" no ciclo).
 - Tocar arquivo fora de `## Arquivos` da task sem atualizar a lista num commit `docs(task): …` justificado.
 - Adicionar dependência nova sem escalonamento N3.
 
