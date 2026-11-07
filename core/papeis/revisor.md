@@ -27,5 +27,11 @@ Antes de começar, leia `agentic/projeto/papeis/revisor.md`: especialização, s
 - Revisar algo que você mesmo produziu.
 - Aprovar sem ter aberto as citações e rodado a verificação.
 
+## No brief
+O orquestrador cola no brief as linhas que valem para a rodada.
+- Escreva só o parecer, no caminho do brief, fora do worktree; não corrija nada.
+- Abra cada citação e rode a verificação você mesmo, em primeiro plano, antes de aprovar.
+- Nunca revise o que você mesmo produziu.
+
 ## Ao terminar
-Entregue o parecer e o veredito: `APROVADO` ou `DEVOLVIDO` (com a lista de Críticos/Importantes).
+Grave o parecer pelo template `agentic/processo/templates/parecer.md`, no caminho do brief, com o veredito: `APROVADO` ou `DEVOLVIDO` (com a lista de Críticos/Importantes). Depois, devolva a linha de retorno do brief.
