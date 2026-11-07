@@ -100,7 +100,7 @@ tl_espera 0 "manifesto tem o contrato do dev" grep -q "^[0-9a-f]\{64\}  agentic/
 tl_espera 0 "manifesto tem os mecanismos" grep -q "  agentic/mecanismos/scripts/verify.sh$" "$m"
 tl_espera 1 "manifesto não lista perfis da instância" grep -q "agentic/projeto/" "$m"
 tl_espera 1 "manifesto não lista agentic/.estado" grep -q "agentic/.estado/" "$m"
-tl_espera 0 "hash do manifesto confere com o arquivo instalado" sh -c "cd '$r' && grep '  agentic/processo/ciclo.md\$' '$m' | sha256sum -c --status"
+tl_espera 0 "hash do manifesto confere com o arquivo instalado" sh -c ". '$dir/lib-kit.sh'; [ \"\$(sed -n 's|^\([0-9a-f]*\)  agentic/processo/ciclo.md\$|\1|p' '$m')\" = \"\$(kit_hash '$r/agentic/processo/ciclo.md')\" ]"
 cp "$m" "$r/.manifesto-antes"
 sh "$dir/instalar.sh" "$r" >/dev/null
 tl_espera 0 "reinstalar não muda o manifesto" cmp -s "$m" "$r/.manifesto-antes"
