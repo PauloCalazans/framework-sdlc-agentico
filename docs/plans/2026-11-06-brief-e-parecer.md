@@ -4,7 +4,7 @@
 
 **Objetivo:** levar ao kit o template de brief, o template de parecer, a seção "No brief" dos contratos e o revisor que escreve só o parecer, deixando o kit inteiro coerente com isso.
 
-**Arquitetura:** quase tudo é texto (`core/`, `adapters/`, `README.md`, `docs/`). Uma suíte nova, `scripts/coerencia-kit.Tests.sh`, transforma cada exigência do design numa asserção que o `scripts/verify.sh` roda. Cada task acrescenta primeiro as suas asserções (falham), depois edita o texto (passam). Testes de mecanismo existentes (`instalar.Tests.sh`, `status-projeto.Tests.sh`) ganham os casos que o design pede.
+**Arquitetura:** quase tudo é texto (`core/`, `adapters/`, `README.md`, `docs/`). Uma suíte nova, `scripts/coerencia-kit.Tests.sh`, transforma cada exigência do design numa asserção que o `scripts/verify.sh` roda. Cada task acrescenta primeiro as suas asserções (falham), depois edita o texto (passam). É o Princípio 2 aplicado ao próprio kit: a deriva entre arquivos já aconteceu mais de uma vez. A suíte confere só quatro coisas: estrutura (seções e ordem), termos que não podem voltar, ferramentas dos adaptadores e formato dos exemplos. Ela não confere frases de conteúdo, que ficam para a revisão. Assim, reescrever uma frase sem mudar a regra não quebra teste. Testes de mecanismo existentes (`instalar.Tests.sh`, `status-projeto.Tests.sh`) ganham os casos que o design pede.
 
 **Stack:** POSIX `sh`, `grep`, `tr`, a `testlib.sh` do kit. Markdown em português.
 
@@ -94,10 +94,6 @@ done
 tl_espera 0 "brief: obrigatórias antes das condicionais" ordem $b '## Entrega' '## Desde a rodada anterior'
 tl_espera 0 "brief: lista Antes de enviar" tem $b 'Antes de enviar'
 tl_espera 0 "brief: lista Ao receber" tem $b 'Ao receber'
-tl_espera 0 "brief: nome de arquivo por ordem de despacho" tem $b 'NN-<papel>'
-tl_espera 0 "brief: correção copia o brief anterior inteiro" tem $b 'brief anterior'
-tl_espera 0 "brief: o verify do revisor nunca sai do revisor" linha $b 'nunca tira do .?revisor.? o .?verify'
-tl_espera 0 "brief: ao receber confere o worktree do revisor limpo" tem $b 'git status --porcelain'
 tl_espera 1 "brief: sem placeholder {{" tem $b '{{'
 tl_espera 0 "kit sem nome do projeto de referência nem de ferramenta de orquestração" nenhum \
   'avitech|forja|lupa|esquadro|mocktail|worker_done|maestri|\borca\b' \
@@ -154,9 +150,6 @@ for s in '## Rodada anterior' '## Critérios de aceite' '## Achados' '## Verific
   tl_espera 0 "parecer: seção $s" tem $p "$s"
 done
 tl_espera 0 "parecer: ordem das seções" ordem $p '## Rodada anterior' '## Verificação'
-for t in Crítico Importante Menor APROVADO DEVOLVIDO 'C n I n M n' medido inferido 'não se aplica'; do
-  tl_espera 0 "parecer: contém $t" tem $p "$t"
-done
 tl_espera 1 "parecer: sem linha **Status:** (status-projeto não o lista)" linha $p '^\*\*Status:\*\*'
 tl_espera 0 "kit sem escala alheia" nenhum 'REPROVADO|bloqueante' core adapters README.md
 ```
@@ -210,22 +203,21 @@ for papel in dominio arquiteto testes dev revisor; do
   tl_espera 0 "$papel: No brief antes de Ao terminar" ordem $c '## No brief' '## Ao terminar'
   tl_espera 0 "$papel: No brief com 3 a 5 itens" sh -c \
     "n=\$(tr -d '\r' < '$raiz/$c' | sed -n '/^## No brief/,/^## /p' | grep -c '^- '); [ \$n -ge 3 ] && [ \$n -le 5 ]"
-  tl_espera 0 "$papel: Ao terminar grava relatório e devolve a linha" tem $c 'linha de retorno'
   tl_espera 1 "$papel: sem placeholder {{ no contrato" sh -c "grep -q '{{' '$raiz/$c'"
 done
 for papel in dominio arquiteto testes dev; do
   tl_espera 0 "$papel: No brief depois de Independência" ordem core/papeis/$papel.md '## Independência' '## No brief'
 done
 tl_espera 0 "revisor: No brief depois de Nunca faz" ordem core/papeis/revisor.md '## Nunca faz' '## No brief'
-tl_espera 0 "revisor: verify em primeiro plano no No brief" tem core/papeis/revisor.md 'em primeiro plano'
 tl_espera 1 "oráculo não ganha No brief" tem core/papeis/_oraculo.md '## No brief'
-tl_espera 0 "perfil: Padrões e Nunca faz em forma de ação" tem core/templates/perfil-papel.md 'forma de ação'
 ```
+
+O "Ao terminar" com a linha de retorno e o comentário do `perfil-papel.md` são conteúdo: não ganham asserção e ficam para a revisão.
 
 - [ ] **Passo 2: Rodar e ver falhar**
 
 Run: `sh scripts/coerencia-kit.Tests.sh 2>&1 | grep -c FALHA`
-Expected: ≥ 20.
+Expected: ≥ 15.
 
 - [ ] **Passo 3: Escrever as seções.** Texto de cada `## No brief` exatamente como as listas da seção 5.2 do design (uma linha `- ` por cláusula; o revisor com "rode a verificação você mesmo, em primeiro plano, antes de aprovar"). Abrir a seção com uma frase: "O orquestrador cola no brief as linhas que valem para a rodada." Nenhuma cláusula nova: cada linha reescreve uma regra que o próprio contrato já tem; se não achar a regra-fonte no contrato, pare e reporte. "Ao terminar" de cada contrato: a frase atual "Entregue: …" passa a "Grave no arquivo de relatório que o brief indica: …" e termina com "e devolva a linha de retorno do brief". No `revisor.md`, só a seção nova e o "Ao terminar" mudam aqui (o "Nunca faz" é da Task 4). No `perfil-papel.md`, uma linha no comentário de preenchimento: itens de "Padrões" e "Nunca faz neste projeto" em forma de ação, porque o orquestrador os cola no brief.
 
@@ -258,9 +250,6 @@ Em `coerencia-kit.Tests.sh`:
 k='core adapters bootstrap mecanismos README.md docs/portabilidade.md'
 tl_espera 0 "kit não descreve o revisor como sem escrita" nenhum \
   'sem ferramenta de escrita|não tem write/edit|omite write/edit|omite `edit`|negue escrita|editar arquivos\.|edita arquivo ou revisa' $k
-tl_espera 0 "revisor: escreve só o parecer" tem core/papeis/revisor.md 'só o parecer'
-tl_espera 0 "revisor: parecer fora do worktree" tem core/papeis/revisor.md 'fora do worktree'
-tl_espera 0 "revisor: continua rodando o verify ele mesmo" tem core/papeis/revisor.md 'Rode o `verify.sh` você mesmo'
 tl_espera 0 "adapter Claude Code: revisor com Write" linha adapters/claude-code/agents/revisor.md '^tools: .*\bWrite\b'
 tl_espera 1 "adapter Claude Code: revisor sem Edit" linha adapters/claude-code/agents/revisor.md '^tools: .*\bEdit\b'
 tl_espera 0 "adapter Copilot: revisor com edit" linha adapters/copilot/agents/revisor.agent.md "^tools: .*'edit'"
@@ -271,7 +260,7 @@ Em `instalar.Tests.sh:136`: o caso vira `tl_espera 0 "--copilot: revisor com a f
 - [ ] **Passo 2: Rodar e ver falhar**
 
 Run: `sh scripts/coerencia-kit.Tests.sh 2>&1 | grep FALHA`
-Expected: falham "sem escrita" (lista as ocorrências em `revisor.md`, `modelos.md`, `README.md` e nos dois adaptadores), "só o parecer", "fora do worktree", "com Write" e "com edit".
+Expected: falham "sem escrita" (lista as ocorrências em `revisor.md`, `modelos.md`, `README.md` e nos dois adaptadores), "com Write" e "com edit".
 
 - [ ] **Passo 3: Editar o texto**, pela tabela da seção 5.8:
   - `revisor.md`, "Nunca faz": "Escrever qualquer arquivo além do parecer, no caminho que o brief dá, fora do worktree que você revisa. Redução, não garantia. **Verificado por:** `git status --porcelain` vazio no worktree revisado, na conferência ao receber; e revisão." O "Quem você é" e o "Rode o `verify.sh` você mesmo" do modo `diff` ficam.
@@ -307,23 +296,14 @@ Design 5.4, 5.5 e as linhas restantes da tabela da 5.8.
 
 ```sh
 tl_espera 0 "kit sem task-N-brief/relatorio" nenhum 'task-N-(brief|relatorio)' $k
-c=core/processo/ciclo.md
-for t in 'agentic/processo/templates/brief.md' 'NN-<papel>' 'Desde a rodada anterior' 'brief anterior' \
-         'linha de retorno' 'Ao receber' 'pareceres/'; do
-  tl_espera 0 "ciclo: Orquestração cita $t" tem $c "$t"
-done
-tl_espera 0 "AGENTS: papel grava o relatório e devolve a linha" tem core/templates/AGENTS.md 'linha de retorno'
-tl_espera 0 "nova-task: brief pelo template" tem adapters/claude-code/commands/nova-task.md 'agentic/processo/templates/brief.md'
-tl_espera 0 "nova-task: conferência ao receber" tem adapters/claude-code/commands/nova-task.md 'Ao receber'
-tl_espera 0 "mudanca: brief pelo template" tem adapters/claude-code/commands/mudanca.md 'agentic/processo/templates/brief.md'
-tl_espera 0 "portabilidade: brief pelo template" tem docs/portabilidade.md 'agentic/processo/templates/brief.md'
-tl_espera 0 "pr: parecer em pareceres/ sem plataforma de PR" tem core/templates/pr.md 'pareceres/'
 ```
+
+O resto da task é conteúdo (o que o `ciclo.md`, o `AGENTS.md`, os comandos, o `portabilidade.md` e o `pr.md` passam a dizer) e fica para a revisão, que confere cada linha da tabela da seção 5.8 do design.
 
 - [ ] **Passo 2: Rodar e ver falhar**
 
 Run: `sh scripts/coerencia-kit.Tests.sh 2>&1 | grep FALHA`
-Expected: falham as asserções acima; a de `task-N` lista `ciclo.md` e `portabilidade.md`.
+Expected: falha só a asserção de `task-N`, listando `ciclo.md` e `portabilidade.md`.
 
 - [ ] **Passo 3: Editar o texto.** `ciclo.md`, "Orquestração", item 2: as duas linhas de `task-N-*` dão lugar às cinco regras da seção 5.5 (brief pelo template e conferido por "Antes de enviar"; rodada de correção = despacho novo com o brief anterior copiado inteiro mais "Desde a rodada anterior", nunca continuação; relatório gravado pelo papel, retorno é só a linha; "Ao receber" antes de passar adiante; parecer local, final aprovado em `agentic/projeto/specs/<nome>/pareceres/` quando não há plataforma de PR). O `progress.md` fica. Os demais arquivos, pela tabela da 5.8. Os prompts do Copilot e o `copilot-instructions.md` não mudam (apontam para os comandos e para o `AGENTS.md`).
 
@@ -397,7 +377,14 @@ git commit -m "docs(exemplos): um brief por papel, uma correção e um parecer d
 - [ ] **Passo 1: Varredura** (design 5.8, último parágrafo)
 
 Run: `grep -rniE "revisor|brief|relatório|parecer|\bWrite\b|'edit'" core adapters bootstrap mecanismos README.md docs/portabilidade.md | grep -v '\.Tests\.sh:'`
-Expected: toda ocorrência é coerente com o design. A que não for, corrija no arquivo e acrescente uma asserção à suíte; commit `docs(<área>): …`.
+Expected: toda ocorrência é coerente com o design. A que não for, corrija no arquivo; se for termo que não pode voltar, acrescente uma asserção `nenhum` à suíte. Commit `docs(<área>): …`.
+
+O conteúdo que a suíte não confere vai para a revisão final da branch, linha a linha:
+- cada linha da tabela da seção 5.8;
+- as cinco regras da seção 5.5 no `ciclo.md`;
+- "Ao terminar" de cada contrato com a linha de retorno;
+- a exceção do `verify` do revisor no template de brief e no "No brief" do revisor;
+- o comentário do `perfil-papel.md`.
 
 - [ ] **Passo 2: Verificação completa**
 
