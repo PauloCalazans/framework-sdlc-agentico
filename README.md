@@ -18,7 +18,7 @@ Serve para **qualquer stack** (Java, Python, Node, .NET, front-end…) e para pr
 | Sem o kit, o agente… | Com o kit | Quem garante |
 |---|---|---|
 | diz "está funcionando" sem rodar nada | `verify.sh` é o ponto único de verificação; sucesso só com `VERIFY: OK` na saída | regra + `verify.sh` |
-| altera o teste até ele passar | o commit `test(red):` prova que os testes falhavam; asserção removida depois reprova | `verifica-red.sh` |
+| altera o teste até ele passar | o commit `test(red):` prova que os testes falhavam; asserção removida depois reprova, salvo remoção declarada em trailer com decisão registrada antes | `verifica-red.sh` |
 | desliga o teste que incomoda (`.skip`, `@Disabled`) | teste desabilitado na branch ou skip novo no relatório JUnit reprova | `verifica-skip.sh` |
 | "aproveita" e mexe em arquivos fora do pedido | cada task declara `## Arquivos`; arquivo fora da lista reprova | `verifica-escopo.sh` |
 | commita na `main` ou faz o merge do próprio PR | commit, push e merge na branch protegida são bloqueados | `pre-commit`, `pre-push`, `pre-merge-commit`, `deny` de `gh pr merge` |

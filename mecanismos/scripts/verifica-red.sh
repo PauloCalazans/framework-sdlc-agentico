@@ -8,6 +8,13 @@
 #   (3) não teve asserções removidas depois, POR ARQUIVO: para cada arquivo de teste tocado pelo RED, o
 #       número de linhas que casam MARCADOR_ASSERCAO em HEAD não pode ser menor que no RED (arquivo
 #       removido em HEAD conta zero). Arquivos não tocados pelo RED não entram na comparação.
+#       Exceção: remoção autorizada, quando uma Ruling, decisão ou emenda de spec tirou o comportamento que as
+#       asserções provavam. Um commit da branch declara, num trailer,
+#         Assercoes-removidas: <arquivo> <n> [em <sha>] (<R-n | D<n> | Emenda n>)
+#       as n asserções removidas no commit X (<sha>, ou o próprio commit do trailer). O trailer só conta se:
+#       X vem depois do RED e não depois do commit do trailer; a referência foi acrescentada sob agentic/projeto/
+#       entre a base e o pai de X (registrada antes da remoção). O crédito de X é no máximo a queda de asserções
+#       do arquivo em X, mesmo com várias declarações; o limite passa a ser (asserções no RED - créditos).
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 base=${1:-$(agentic_base)}
@@ -33,6 +40,72 @@ conta_assercoes() {
   ca_rc=$?
   [ "$ca_rc" -le 1 ] || return 1 # 1 = nenhuma ocorrência (ou arquivo ausente); > 1 = erro
   printf '%s\n' "$ca_saida" | awk -F: 'NF { s += $NF } END { print s + 0 }'
+}
+
+# ignora_trailer <portador> <motivo> <linha>: explica por que uma declaração não conta (em stderr).
+ignora_trailer() {
+  echo "verifica-red: trailer Assercoes-removidas ignorado em $(git rev-parse --short "$1") ($2): $3" >&2
+}
+
+# ref_registrada <rev> <ref>: a referência aparece numa linha acrescentada sob agentic/projeto/ entre a base e <rev>.
+ref_registrada() {
+  git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
+    | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]]|$)"
+}
+
+# removidas_autorizadas <rev-red> <arquivo>: créditos de remoção autorizada do arquivo para esse RED, a partir
+# dos trailers "Assercoes-removidas:" dos commits <rev-red>..HEAD (regras no cabeçalho, etapa 3).
+removidas_autorizadas() {
+  ra_tmp=$(mktemp) || return 1
+  git -c core.quotepath=off log --format='@@%H%n%(trailers:key=Assercoes-removidas,valueonly,unfold)' "$1..HEAD" 2>/dev/null \
+    | tr -d '\r' | while IFS= read -r ra_l; do
+    case "$ra_l" in
+      @@*) ra_portador=${ra_l#@@}; continue ;;
+      "$2 "*) ;;
+      *) continue ;;
+    esac
+    ra_l=$(printf '%s' "$ra_l" | sed 's/[[:space:]]*$//')
+    case "$ra_l" in *"("*")") ;; *) ignora_trailer "$ra_portador" "sem (<ref>) no fim" "$ra_l"; continue ;; esac
+    ra_ref=${ra_l##*\(}; ra_ref=${ra_ref%\)}
+    ra_resto=$(printf '%s' "${ra_l%\(*}" | sed 's/[[:space:]]*$//')
+    ra_x=$ra_portador
+    ra_ant=${ra_resto% *}
+    if [ "${ra_ant##* }" = em ]; then
+      ra_x=${ra_resto##* }
+      ra_resto=${ra_ant% *}
+    fi
+    ra_n=${ra_resto##* }
+    [ "${ra_resto% *}" = "$2" ] || continue # outro arquivo com o mesmo prefixo
+    case "$ra_n" in ""|*[!0-9]*) ignora_trailer "$ra_portador" "número inválido" "$ra_l"; continue ;; esac
+    case "$ra_ref" in
+      R-[0-9]*) ra_num=${ra_ref#R-} ;;
+      D[0-9]*) ra_num=${ra_ref#D} ;;
+      "Emenda "[0-9]*) ra_num=${ra_ref#Emenda } ;;
+      *) ra_num=x ;;
+    esac
+    case "$ra_num" in *[!0-9]*) ignora_trailer "$ra_portador" "referência não é R-n, D<n> nem Emenda n" "$ra_l"; continue ;; esac
+    if ! ra_xc=$(git rev-parse --verify -q "$ra_x^{commit}"); then
+      ignora_trailer "$ra_portador" "commit $ra_x inexistente" "$ra_l"; continue
+    fi
+    if [ "$ra_xc" = "$(git rev-parse "$1")" ] || ! git merge-base --is-ancestor "$1" "$ra_xc" \
+      || ! git merge-base --is-ancestor "$ra_xc" "$ra_portador"; then
+      ignora_trailer "$ra_portador" "a remoção não está entre o RED $curto e o commit do trailer" "$ra_l"; continue
+    fi
+    if ! ref_registrada "$ra_xc^" "$ra_ref"; then
+      ignora_trailer "$ra_portador" "$ra_ref não foi registrada sob agentic/projeto/ antes da remoção" "$ra_l"; continue
+    fi
+    printf '%s %s\n' "$ra_xc" "$ra_n" >> "$ra_tmp"
+  done
+  ra_total=0
+  for ra_xc in $(cut -d' ' -f1 "$ra_tmp" | sort -u); do
+    ra_decl=$(awk -v x="$ra_xc" '$1 == x { s += $2 } END { print s + 0 }' "$ra_tmp")
+    ra_antes=$(conta_assercoes "$ra_xc^" "$2") && ra_depois=$(conta_assercoes "$ra_xc" "$2") || ra_antes=0 ra_depois=0
+    ra_queda=$((ra_antes - ra_depois))
+    [ "$ra_decl" -gt "$ra_queda" ] && ra_decl=$ra_queda
+    [ "$ra_decl" -gt 0 ] && ra_total=$((ra_total + ra_decl))
+  done
+  rm -f "$ra_tmp"
+  echo "$ra_total"
 }
 
 # comando_arquivo <arquivo>: CMD_TESTE_ARQUIVO com cada {} trocado pelo caminho entre aspas simples.
@@ -124,9 +197,15 @@ EOT
     [ -n "$f" ] || continue
     a_red=$(conta_assercoes "$c" "$f") || { rm -f "$lista"; agentic_falha "falha ao contar asserções no RED $curto (git grep com erro; MARCADOR_ASSERCAO='$MARCADOR_ASSERCAO')"; }
     a_head=$(conta_assercoes HEAD "$f") || { rm -f "$lista"; agentic_falha "falha ao contar asserções em HEAD (git grep com erro; MARCADOR_ASSERCAO='$MARCADOR_ASSERCAO')"; }
-    if [ "$a_head" -lt "$a_red" ]; then
-      echo "agentic: BLOQUEADO — asserções diminuíram desde o RED $curto em $f: $a_red -> $a_head"
+    [ "$a_head" -lt "$a_red" ] || continue
+    rem=$(removidas_autorizadas "$c" "$f") || { rm -f "$lista"; agentic_falha "mktemp falhou"; }
+    if [ "$a_head" -lt $((a_red - rem)) ]; then
+      sufixo=""
+      [ "$rem" -gt 0 ] && sufixo=" (removidas autorizadas: $rem)"
+      echo "agentic: BLOQUEADO — asserções diminuíram desde o RED $curto em $f: $a_red -> $a_head$sufixo"
       status=1
+    else
+      echo "verifica-red: $f: $a_red -> $a_head desde o RED $curto, com $rem removidas autorizadas por trailer (ok)"
     fi
   done < "$lista"
 done
