@@ -225,4 +225,140 @@ git -C "$r" rm -q tests/t_soma.sh; git -C "$r" commit -q -m "refactor: apaguei o
 tl_espera 1 "arquivo de teste do RED removido em HEAD bloqueia (cai para zero)" sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 tl_contem "2 -> 0" "aponta a queda para zero"
 
+# --- (c) Remoção autorizada por trailer "Assercoes-removidas: <arquivo> <n> [em <sha>] (<ref>)".
+# grava_t <repo> <arquivo> "<chamada>|<esperado>"...: teste que carrega src/*.sh, com uma asserção por par
+# (a definição de assert_igual também casa o marcador: contagem = pares + 1).
+grava_t() {
+  gt_r=$1; gt_f=$2; shift 2
+  {
+    echo 'for s in ./src/*.sh; do . "$s"; done'
+    echo 'assert_igual() { [ "$1" = "$2" ] || { echo "esperado $2, obtido $1"; exit 1; }; }'
+    for gt_p in "$@"; do echo "assert_igual \"\$(${gt_p%|*})\" ${gt_p#*|}"; done
+  } > "$gt_r/tests/$gt_f"
+}
+# ruling <repo> <ref>: registra a referência no documento da task, num commit docs(task).
+ruling() {
+  mkdir -p "$1/agentic/projeto/specs/x/tasks"
+  echo "- $2 (execução): o comportamento sai — por quê: decisão do dono" >> "$1/agentic/projeto/specs/x/tasks/001-x.md"
+  git -C "$1" add -A; git -C "$1" commit -q -m "docs(task): $2"
+}
+# commita <repo> <assunto> [trailer...]: commit de tudo, com cada trailer numa linha do último parágrafo.
+commita() {
+  cm_r=$1; cm_s=$2; shift 2
+  git -C "$cm_r" add -A
+  if [ $# -gt 0 ]; then
+    git -C "$cm_r" commit -q --allow-empty -m "$cm_s" -m "$(printf '%s\n' "$@")"
+  else
+    git -C "$cm_r" commit -q --allow-empty -m "$cm_s"
+  fi
+}
+# prepara_rem <repo>: RED com 3 asserções em tests/t_soma.sh (contagem 4) e GREEN.
+prepara_rem() {
+  r=$(prepara_multi)
+  grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2" "soma 0 4|4"
+  commita "$r" "test(red): soma"; green_soma "$r"
+  printf '%s\n' "$r"
+}
+vr() { sh -c "cd '$1' && sh '$dir/verifica-red.sh'"; }
+
+r=$(prepara_rem); ruling "$r" R-1
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (R-1)" "Assercoes-removidas: tests/t_soma.sh 1 (R-1)"
+tl_espera 0 "remoção: trailer igual ao removido, com Ruling registrada antes, passa" vr "$r"
+tl_contem "tests/t_soma.sh: 4 -> 3 desde o RED" "remoção: informa a queda aceita"
+tl_contem "1 removidas autorizadas por trailer" "remoção: informa o total autorizado"
+
+r=$(prepara_rem); ruling "$r" R-1
+grava_t "$r" t_soma.sh "soma 2 3|5"
+commita "$r" "test: soma enxuta (R-1)" "Assercoes-removidas: tests/t_soma.sh 1 (R-1)"
+tl_espera 1 "remoção: trailer que declara menos que o removido bloqueia" vr "$r"
+tl_contem "4 -> 2 (removidas autorizadas: 1)" "remoção: mostra o total autorizado"
+
+r=$(prepara_rem); ruling "$r" R-1
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (R-1)" "Assercoes-removidas: tests/t_soma.sh 5 (R-1)"
+grava_t "$r" t_soma.sh "soma 2 3|5"
+commita "$r" "refactor: tirei mais uma"
+tl_espera 1 "remoção: trailer acima da queda do commit não dá folga para remoção posterior" vr "$r"
+tl_contem "4 -> 2 (removidas autorizadas: 1)" "remoção: o crédito é limitado à queda do commit"
+
+r=$(prepara_rem); ruling "$r" R-1
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4" "Assercoes-removidas: tests/t_soma.sh 1 (porque sim)"
+tl_espera 1 "remoção: trailer sem referência R-n, D<n> ou Emenda n não conta" vr "$r"
+
+r=$(prepara_rem); ruling "$r" R-1
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (R-9)" "Assercoes-removidas: tests/t_soma.sh 1 (R-9)"
+tl_espera 1 "remoção: referência que não está registrada nos documentos não conta" vr "$r"
+tl_contem "R-9" "remoção: aponta a referência sem registro"
+
+r=$(prepara_rem); ruling "$r" R-12
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (R-1)" "Assercoes-removidas: tests/t_soma.sh 1 (R-1)"
+tl_espera 1 "remoção: R-1 não casa com R-12 registrada" vr "$r"
+
+r=$(prepara_rem)
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (R-1)" "Assercoes-removidas: tests/t_soma.sh 1 (R-1)"
+ruling "$r" R-1
+tl_espera 1 "remoção: Ruling registrada só depois da remoção não conta" vr "$r"
+
+r=$(prepara_rem); ruling "$r" R-1
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (R-1)" "Assercoes-removidas: tests/t_velho.sh 1 (R-1)"
+tl_espera 1 "remoção: trailer de outro arquivo não conta para este" vr "$r"
+
+r=$(prepara_multi); ruling "$r" R-1
+commita "$r" "chore: declaração antecipada" "Assercoes-removidas: tests/t_soma.sh 1 (R-1)"
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2" "soma 0 4|4"
+commita "$r" "test(red): soma"; green_soma "$r"
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4"
+tl_espera 1 "remoção: trailer num commit anterior ao RED não conta" vr "$r"
+
+# Commit vazio posterior apontando o commit da remoção ("em <sha>"): a história não é reescrita.
+r=$(prepara_rem); ruling "$r" "Emenda 2"
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma segue a Emenda 2"; x=$(git -C "$r" rev-parse --short HEAD)
+commita "$r" "chore: declara remoções" "Assercoes-removidas: tests/t_soma.sh 1 em $x (Emenda 2)"
+tl_espera 0 "remoção: commit vazio com 'em <sha>' autoriza a remoção daquele commit" vr "$r"
+tl_contem "1 removidas autorizadas por trailer" "remoção: em <sha> informa o total autorizado"
+
+r=$(prepara_rem); ruling "$r" R-1
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4"
+commita "$r" "chore: declara remoções" "Assercoes-removidas: tests/t_soma.sh 1 em deadbeef (R-1)"
+tl_espera 1 "remoção: 'em <sha>' inexistente não conta" vr "$r"
+
+r=$(prepara_rem); ruling "$r" R-1
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (R-1)" "Assercoes-removidas: tests/t_soma.sh 1 (R-1)"
+x=$(git -C "$r" rev-parse --short HEAD)
+commita "$r" "chore: repete a declaração" "Assercoes-removidas: tests/t_soma.sh 1 em $x (R-1)"
+grava_t "$r" t_soma.sh "soma 2 3|5"
+commita "$r" "refactor: tirei mais uma"
+tl_espera 1 "remoção: duas declarações do mesmo commit somam no máximo a queda dele" vr "$r"
+
+# RED posterior à remoção não recebe o crédito, mesmo com o commit vazio no fim da branch.
+r=$(prepara_rem); ruling "$r" "Emenda 2"
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma segue a Emenda 2"; x=$(git -C "$r" rev-parse --short HEAD)
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2" "triplo 2|6" "triplo 3|9"
+commita "$r" "test(red): triplo"
+echo 'triplo() { echo $(($1 * 3)); }' > "$r/src/triplo.sh"; commita "$r" "feat(green): triplo"
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2" "triplo 2|6"
+commita "$r" "refactor: tirei um caso do triplo"
+commita "$r" "chore: declara remoções" "Assercoes-removidas: tests/t_soma.sh 1 em $x (Emenda 2)"
+tl_espera 1 "remoção: RED posterior ao commit da remoção não recebe o crédito" vr "$r"
+tl_contem "tests/t_soma.sh: 5 -> 4" "remoção: aponta a queda do RED posterior"
+
+# Caminho com espaço: o trailer é lido de trás para frente.
+r=$(prepara_multi)
+grava_t "$r" "t_soma x.sh" "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test(red): soma"; green_soma "$r"; ruling "$r" R-1
+grava_t "$r" "t_soma x.sh" "soma 2 3|5"
+commita "$r" "test: soma sem o caso 1+1 (R-1)" "Assercoes-removidas: tests/t_soma x.sh 1 (R-1)"
+tl_espera 0 "remoção: caminho com espaço no trailer" vr "$r"
+
 tl_fim
