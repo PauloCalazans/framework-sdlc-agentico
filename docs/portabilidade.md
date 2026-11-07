@@ -34,7 +34,7 @@ O `instalar.sh` grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo 
 
 O adaptador do Copilot traz:
 - `.github/copilot-instructions.md`: aponta para o `AGENTS.md` e repete só as regras invioláveis.
-- `.github/agents/<papel>.agent.md`: um agente por papel, apontando para o contrato; o `revisor` vem sem `edit`.
+- `.github/agents/<papel>.agent.md`: um agente por papel, apontando para o contrato; o `revisor` tem `edit` só para gravar o parecer ("escreve só o parecer" é verificado na conferência ao receber).
 - `.github/prompts/*.prompt.md`: os comandos do ciclo, apontando para `.claude/commands/`.
 - `.github/workflows/copilot-setup-steps.yml`: prepara o agente de nuvem com histórico completo, `gitleaks` e githooks ligados. O passo da stack é completado no `/bootstrap`.
 

@@ -66,7 +66,7 @@ tl_espera 1 "oráculo não ganha No brief" tem core/papeis/_oraculo.md '## No br
 k='core adapters bootstrap mecanismos README.md docs/portabilidade.md'
 # shellcheck disable=SC2086 # $k é lista de caminhos
 tl_espera 0 "kit não descreve o revisor como sem escrita" nenhum \
-  'sem ferramenta de escrita|não tem write/edit|omite write/edit|omite `edit`|negue escrita|editar arquivos\.|edita arquivo ou revisa' $k
+  'sem ferramenta de escrita|não tem write/edit|omite write/edit|omite `edit`|negue escrita|editar arquivos\.|edita arquivo ou revisa|revisor. vem sem .edit' $k
 tl_espera 0 "adapter Claude Code: revisor com Write" linha adapters/claude-code/agents/revisor.md '^tools: .*\bWrite\b'
 tl_espera 1 "adapter Claude Code: revisor sem Edit" linha adapters/claude-code/agents/revisor.md '^tools: .*\bEdit\b'
 tl_espera 0 "adapter Copilot: revisor com edit" linha adapters/copilot/agents/revisor.agent.md "^tools: .*'edit'"
