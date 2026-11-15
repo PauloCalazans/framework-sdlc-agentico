@@ -86,4 +86,27 @@ tl_contem "003-legado.md: em-andamento" "em-andamento escrito continua lido"
 copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
 tl_espera 1 "pendente sem branch não é derivado" grep -q "002-sem-branch.md: em-andamento" "$copia_saida"
 
+# O commit de registro do Gate 1 não conta; task empilhada conta a partir da branch-base.
+r5=$(tl_repo)
+mkdir -p "$r5/$t"
+printf '# Task 001\n**Status:** pendente\n**Branch:** pedidos/001\n' > "$r5/$t/001-a.md"
+printf '# Task 002\n**Status:** pendente\n**Branch:** pedidos/002\n**Base:** pedidos/001\n' > "$r5/$t/002-b.md"
+git -C "$r5" add -A; git -C "$r5" commit -q -m "base"
+git -C "$r5" checkout -q -b pedidos/001
+git -C "$r5" commit -q --allow-empty -m "docs(mudanca): a aprovada (Gate 1)"
+git -C "$r5" checkout -q -b pedidos/002
+git -C "$r5" commit -q --allow-empty -m "docs(mudanca): b aprovada (Gate 1)"
+git -C "$r5" checkout -q main
+tl_espera 0 "status com branches só com o commit do Gate 1" sh -c "cd '$r5' && sh '$dir/status-projeto.sh'"
+tl_contem "001-a.md: pendente" "só o commit do Gate 1: continua pendente"
+tl_contem "002-b.md: pendente" "empilhada só com commits da base e o Gate 1: continua pendente"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "nenhuma derivada de só Gate 1" grep -q "em-andamento" "$copia_saida"
+git -C "$r5" checkout -q pedidos/002
+git -C "$r5" commit -q --allow-empty -m "test(red): b"
+git -C "$r5" checkout -q main
+tl_espera 0 "status com um commit além do Gate 1" sh -c "cd '$r5' && sh '$dir/status-projeto.sh'"
+tl_contem "002-b.md: em-andamento (derivado do git)" "um commit além do Gate 1 na empilhada: em andamento"
+tl_contem "001-a.md: pendente" "a base continua pendente"
+
 tl_fim

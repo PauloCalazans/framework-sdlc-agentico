@@ -319,7 +319,7 @@ if [ -n "$vinc_task" ]; then
           *) echo "agentic: BLOQUEADO — $vinc_id sem → test: na task $vinc_task"; continue ;;
         esac
         vinc_resto=${vinc_l#*→ test:}
-        printf '%s\n' "$vinc_resto" | sed 's/; /\n/g' | while IFS= read -r vinc_i; do
+        printf '%s\n' "$vinc_resto" | awk '{gsub(/; /,"\n")}1' | while IFS= read -r vinc_i; do
           vinc_a=${vinc_i%%::*}
           vinc_a=$(printf '%s' "$vinc_a" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
           [ -n "$vinc_a" ] || { echo "agentic: BLOQUEADO — $vinc_id com → test: sem arquivo na task $vinc_task"; continue; }
