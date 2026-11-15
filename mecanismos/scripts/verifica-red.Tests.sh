@@ -517,4 +517,42 @@ tl_espera 0 "stdin: comando que lê stdin não come a lista de arquivos" vrc "$r
 tl_contem "(tests/a.sh)" "stdin: provou a.sh"
 tl_contem "(tests/b.sh)" "stdin: provou b.sh"
 
+
+# --- Vínculo CA -> teste no commit RED (Task 9)
+# vinculo <texto-da-seção> [titulo]: repo com a task da branch; o RED toca tests/a.sh e tests/b.sh.
+vinculo() {
+  r=$(prepara)
+  mkdir -p "$r/agentic/projeto/specs/x/tasks"
+  printf '# Task 001\n**Status:** pendente\n**Branch:** feat/soma\n\n## %s\n' "${2:-Critérios de pronto}" > "$r/agentic/projeto/specs/x/tasks/001-x.md"
+  printf '%b\n\n## Questões em aberto\n- nada\n' "$1" >> "$r/agentic/projeto/specs/x/tasks/001-x.md"
+  git -C "$r" add -A; git -C "$r" commit -q -m "docs: task"
+  printf 'exit 1\nassert_igual\n' > "$r/tests/a.sh"; printf 'exit 1\nassert_igual\n' > "$r/tests/b.sh"
+  printf 'x\n' > "$r/tests/outro.sh"
+  printf 'exit 1
+' > "$r/tests/run.sh"
+  git -C "$r" add tests/a.sh tests/b.sh tests/run.sh; git -C "$r" commit -q -m "test(red): a e b"
+}
+vv() { sh -c "cd '$1' && sh '$dir/verifica-red.sh'"; }
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b → test: tests/b.sh::dois\n- `sh verify.sh` verde'
+tl_espera 0 "vínculo: todo CA anotado com arquivo do RED passa" vv "$r"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b sem anotação'
+tl_espera 1 "vínculo: CA sem anotação, com outro anotado, bloqueia" vv "$r"
+tl_contem "CA2 sem → test:" "vínculo: nomeia o CA"
+vinculo '- CA1 (R1): a → test: tests/outro.sh::um'
+tl_espera 1 "vínculo: arquivo anotado fora dos commits RED bloqueia" vv "$r"
+tl_contem "tests/outro.sh" "vínculo: nomeia o arquivo"
+vinculo '- CA1 (R1): a\n- CA2 (R2): b'
+tl_espera 0 "vínculo: task sem nenhuma anotação passa com aviso" vv "$r"
+tl_contem "aviso: task sem anotação" "vínculo: avisa"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um; tests/b.sh::dois'
+tl_espera 0 "vínculo: dois testes num CA separados por ; " vv "$r"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\r\n- CA2 (R2): b → test: `tests/b.sh::dois`\r'
+tl_espera 0 "vínculo: anotação com CRLF" vv "$r"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n<!-- - CA9 (R9): comentado sem anotação -->'
+tl_espera 0 "vínculo: CA dentro de comentário HTML é ignorado" vv "$r"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b' "Critérios de aceite"
+tl_espera 1 "vínculo: mudança lê Critérios de aceite" vv "$r"
+r=$(prepara); printf 'exit 1\nassert_igual\n' > "$r/tests/a.sh"; echo "exit 1" > "$r/tests/run.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 0 "vínculo: branch sem task (trilha rápida) não checa" vv "$r"
+
 tl_fim

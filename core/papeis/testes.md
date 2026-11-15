@@ -36,6 +36,7 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 ## Pronto para revisão
 Confira antes de entregar; o revisor confere a mesma lista.
 - cada CA da task tem teste que falha pelo motivo do CA, não por símbolo ausente do contrato;
+- cada CA anotado com `→ test: <arquivo>::<nome>` no commit RED;
 - só a resposta certa satisfaz a asserção;
 - as bordas citadas no CA são exercitadas;
 - teste de caracterização (passa no HEAD) não entra no RED;
