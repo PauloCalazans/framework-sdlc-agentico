@@ -11,12 +11,15 @@
 # barrada — reescreva a mensagem; comando montado em tempo de execução escapa.
 entrada=$(cat)
 bruto=$(printf '%s' "$entrada" | sed -nE 's/.*"command"[[:space:]]*:[[:space:]]*"(([^"\\]|\\.)*)".*/\1/p' | head -n 1 \
-  | awk '{ gsub(/\\[nt]/, "\n"); gsub(/\\"/, "\""); print }')
-if printf '%s' "$bruto" | grep -qE '(^|[^[:alnum:]_.-])git([^[:alnum:]_.-]|$)'; then
+  | awk '{ gsub(/\\\\/, "\001"); gsub(/\\n/, "\n"); gsub(/\\t/, " "); gsub(/\\"/, "\""); gsub(/\001/, "\\"); print }')
+# Continuação de linha (\ + quebra) junta o comando; git.exe conta como git.
+bruto=$(printf '%s\n' "$bruto" | awk '{ if (sub(/\\$/, "")) { printf "%s ", $0 } else print }')
+if printf '%s' "$bruto" | grep -qiE '(^|[^[:alnum:]_.-])git(\.exe)?([^[:alnum:]_.-]|$)'; then
   # Sem aspas (os caracteres, não o conteúdo) e um trecho de comando por linha.
   trechos=$(printf '%s\n' "$bruto" | tr -d "\"'" | tr ';&|' '\n\n\n')
-  if printf '%s' "$bruto" | grep -qiE -- '--no-v|hookspath|config-env|GIT_CONFIG_' \
-    || printf '%s\n' "$trechos" | grep -E '(^|[^[:alnum:]_.-])git([[:space:]]+(-[Cc][[:space:]]+[^[:space:]]+|-[^[:space:]]+))*[[:space:]]+commit([[:space:]]|$)' \
+  # Palavras procuradas sem aspas nem barra invertida: o shell junta --n""o-verify e --\no-verify.
+  if printf '%s' "$bruto" | tr -d "\"'\\\\" | grep -qiE -- '--no-v|hookspath|config-env|GIT_CONFIG_' \
+    || printf '%s\n' "$trechos" | grep -iE '(^|[^[:alnum:]_.-])git(\.exe)?([[:space:]]+((-C|-c|--git-dir|--work-tree|--namespace)[[:space:]]+[^[:space:]]+|-[^[:space:]]+))*[[:space:]]+commit([[:space:]]|$)' \
        | grep -qE '[[:space:]]-[A-Za-z]*n[A-Za-z]*([[:space:]]|$)'; then
     echo "agentic: BLOQUEADO — comando git que pula ou troca os githooks (--no-verify, commit -n, core.hooksPath, --config-env, GIT_CONFIG_). Os githooks são a proteção da branch protegida e dos segredos. Se for só texto de mensagem, reescreva-a sem essas palavras." >&2
     exit 2

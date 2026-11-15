@@ -621,6 +621,8 @@ semred
 echo 'soma() { echo 2; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test: disfarçado"
 tl_espera 1 "sem RED: test: que toca produção conta como GREEN" vv "$r"
 semred
+printf '\n## Rulings\n- R-1 (4): tira x — por quê: decisão — descartado: manter\n' >> "$r/agentic/projeto/specs/x/tasks/001-x.md"
+git -C "$r" add -A; git -C "$r" commit -q -m "docs(task): R-1"
 printf 'x\n' > "$r/tests/velho.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test: remove x (R-1)" -m "Assercoes-removidas: tests/velho.sh 1 (R-1)"
 echo 'soma() { echo 3; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "refactor: tira comportamento"
 tl_espera 0 "sem RED: task de remoção de comportamento não bloqueia" vv "$r"
@@ -628,5 +630,13 @@ semred
 git -C "$r" checkout -q -b sub; echo 'soma() { echo 4; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): na sub"
 git -C "$r" checkout -q feat/soma; git -C "$r" merge -q --no-ff --no-edit sub
 tl_espera 1 "sem RED: GREEN trazido de sub-branch por merge conta" vv "$r"
+
+semred
+echo 'soma() { echo 5; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): x" -m "Assercoes-removidas: tests/x.sh 0 (R-99)"
+tl_espera 1 "sem RED: trailer com referência não registrada não libera" vv "$r"
+
+semred
+echo 'soma() { echo 6; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "docs(task): ajuste"
+tl_espera 1 "sem RED: docs que toca produção conta como GREEN" vv "$r"
 
 tl_fim
