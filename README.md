@@ -122,7 +122,6 @@ O `arquiteto` recusa a trilha enxuta: "mudança em regra de desconto" é gatilho
 
    ```
    docs(mudanca): ... aprovada (Gate 1)   ← registro da aprovação
-   docs(task): ... em-andamento
    test(red): ...                         ← testes falhando, sem código de produção
    feat(green): ...                       ← testes passando
    fix: ...                               ← achado do revisor: espaço sem quebra (NBSP) no "R$ 10,00"
@@ -232,6 +231,19 @@ agentic/
 ```
 
 Mais uma linha em `.gitignore` (`agentic/.estado/`) e em `.gitattributes` (LF nos scripts).
+
+## O que muda ao atualizar o kit
+
+Instâncias antigas continuam funcionando: as variáveis novas de `agentic/config` são opcionais e, se ausentes, viram `aviso:` em vez de falha. As seções `## Impacto` e `## Pronto para revisão` passam a ser exigidas dos artefatos escritos depois da atualização; os antigos continuam funcionando sem elas.
+
+- Três variáveis opcionais em `agentic/config`: `CMD_VALIDA_CONTRATO`, `CAMINHOS_N3` e `CMD_VERIFY_RAPIDO`. Vazias ou ausentes, `CMD_VALIDA_CONTRATO` e `CAMINHOS_N3` fazem a checagem correspondente ser pulada com `aviso:`; com `CMD_VERIFY_RAPIDO` vazio, `verify.sh --rapido` usa o `CMD_VERIFY_STACK` completo, também com `aviso:`.
+- O orquestrador roda `mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` na lista "Ao receber" do brief, no worktree do autor, antes do revisor (mesmo quando ele é opcional) e só antes do Gate 1. Artefatos aprovados antes da atualização não são verificados de novo.
+- Design e mudança ganham `## Impacto` (arquiteto); os contratos dos autores ganham `## Pronto para revisão` (autoverificação registrada no relatório).
+- O parecer ganha a coluna "Causa" (defeito, contrato, não conferido, sem contrato, forma) e o PR, a linha "Rodadas", registro durável da revisão.
+- No laço roda `verify.sh --rapido`; o `verify.sh` completo roda uma vez antes do PR e no revisor `diff`. A prova do RED fica em cache por SHA (`AGENTIC_RED_SEM_CACHE=1` força nova prova).
+- `em-andamento` é derivado do git; o Ruling vai no próximo commit da task, sem commit próprio.
+- O commit RED anota `CA<n> … → test: <arquivo>::<nome>`, conferido por `verifica-red.sh`; task sem anotação passa com `aviso:`.
+- Para medir: `grep` da coluna Causa nos pareceres de `agentic/.estado/execucao/` e das linhas "Rodadas" nos PRs.
 
 ## Estrutura do framework
 

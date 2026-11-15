@@ -121,4 +121,100 @@ tl_espera 0 "testes: No brief mantém a ressalva do símbolo ausente" sh -c \
 tl_espera 0 "06-dev: escopo inclui erros.*" sh -c \
   "tr -d '\r' < '$raiz/docs/exemplos-brief/06-dev-brief.md' | sed -n '/^## Escopo/,/^## /p' | grep -q 'src/pedidos/erros'"
 
+# --- Revisão que converge, Task 1
+tl_espera 0 "brief: lista Ao receber cita verifica-artefato.sh" tem core/templates/brief.md 'verifica-artefato.sh'
+tl_espera 0 "ciclo: cita verifica-artefato.sh" tem core/processo/ciclo.md 'verifica-artefato.sh'
+tl_espera 0 "config.padrao: CAMINHOS_N3" tem bootstrap/config.padrao 'CAMINHOS_N3='
+
+# --- Revisão que converge, Task 2: impacto é entrega do arquiteto
+for t in core/templates/design.md core/templates/mudanca.md; do
+  tl_espera 0 "$t: seção ## Impacto" tem $t '## Impacto'
+  tl_espera 0 "$t: colunas do Impacto" tem $t '| Alterado (símbolo, rota, schema, regra) | Quem usa hoje (arquivo:linha, medido) |'
+done
+tl_espera 0 "design: Impacto depois do contrato" ordem core/templates/design.md '## Contrato executável' '## Impacto'
+tl_espera 0 "mudança: Impacto depois de Arquivos" ordem core/templates/mudanca.md '## Arquivos' '## Impacto'
+tl_espera 0 "design: decisões sem prefixo D" tem core/templates/design.md 'sem o prefixo `D`'
+tl_espera 0 "arquiteto consome o código e as specs afetadas" tem core/papeis/arquiteto.md 'specs aprovadas que a mudança toca'
+tl_espera 0 "arquiteto produz o Impacto" tem core/papeis/arquiteto.md '## Impacto'
+tl_espera 0 "dominio: estado atual com fonte" tem core/papeis/dominio.md 'estado atual'
+tl_espera 0 "ciclo: emenda a outra spec" tem core/processo/ciclo.md 'Emenda a outra spec'
+tl_espera 1 "arquiteto: Produz sem item com mais de 400 caracteres" sh -c \
+  "tr -d '\r' < '$raiz/core/papeis/arquiteto.md' | sed -n '/^## Produz/,/^## /p' | awk 'length > 400' | grep -q ."
+
+# --- Revisão que converge, Task 3: lista Pronto para revisão
+for papel in dominio arquiteto testes dev; do
+  c=core/papeis/$papel.md
+  tl_espera 0 "$papel: tem Pronto para revisão" tem $c '## Pronto para revisão'
+  tl_espera 0 "$papel: depois de No brief" ordem $c '## No brief' '## Pronto para revisão'
+  tl_espera 0 "$papel: antes de Ao terminar" ordem $c '## Pronto para revisão' '## Ao terminar'
+  tl_espera 0 "$papel: autoconferência no relatório" tem $c 'autoconferência'
+done
+tl_espera 0 "revisor: modos usam a lista do autor" tem core/papeis/revisor.md '"Pronto para revisão"'
+tl_espera 0 "perfil: padrão do revisor espelhado no autor" tem core/templates/perfil-papel.md 'Pronto para revisão'
+
+tl_espera 1 "revisor: modo mudanca não repete a lista do autor" tem core/papeis/revisor.md '"Questões em aberto", "Rulings" e a coluna "Decisão do humano" estão vazias'
+tl_espera 1 "revisor: modo design não repete a lista do autor" tem core/papeis/revisor.md 'está em "Itens N3 (aprovação no Gate 1)", e cada task cita'
+tl_espera 0 "revisor: mudanca mantém a classificação errada como Importante" tem core/papeis/revisor.md 'mais de uma task) é achado **Importante**'
+
+tl_espera 0 "arquiteto: Pronto cobre acréscimo só acréscimo" tem core/papeis/arquiteto.md 'nada removido, renomeado ou com tipo ou semântica alterados'
+tl_espera 0 "arquiteto: Pronto cobre decisões novas da mudança" tem core/papeis/arquiteto.md 'listadas em "Decisões novas"'
+
+# --- Revisão que converge, Task 4: brief sem desenho, parecer sem prescrição, causa medida
+tl_espera 0 "pr: resumo por rodada" tem core/templates/pr.md 'r<k> <modo>: <veredito> · C n I n M n · causas:'
+b=core/templates/brief.md
+tl_espera 0 "brief: seção Casos a cobrir" tem $b '## Casos a cobrir'
+tl_espera 0 "brief: Casos a cobrir é condicional (depois de Entrega)" ordem $b '## Entrega' '## Casos a cobrir'
+tl_espera 0 "brief: Já decidido só com origem citável" tem $b 'origem citável'
+tl_espera 0 "brief: Antes de enviar confere decisão sem origem" tem $b 'nenhuma linha decide algo sem origem citável'
+p=core/templates/parecer.md
+tl_espera 0 "parecer: coluna Causa" tem $p '| ID | Classe | Causa | Onde | Problema | Evidência |'
+tl_espera 0 "parecer: valores de Causa" tem $p 'defeito | contrato | não conferido | sem contrato | forma'
+tl_espera 0 "parecer: marca já na rodada 1" tem $p 'já na rodada 1'
+tl_espera 1 "parecer: não prescreve correção" tem $p 'o que outro papel deve fazer'
+tl_espera 0 "revisor: rodada de correção" tem core/papeis/revisor.md '## Rodada de correção'
+tl_espera 0 "ciclo: 3ª devolução vai ao humano" tem core/processo/ciclo.md '3ª devolução'
+tl_espera 0 "kit: Menor não abre rodada" tem core/processo/ciclo.md 'Menor não abre rodada'
+tl_espera 0 "kit sem Menor só na revisão final" nenhum 'Menor.{0,60}revisão final da branch' core adapters
+
+# --- Revisão que converge, Task 7: verify em dois níveis
+tl_espera 0 "coerência: Ao receber pede o rápido no laço" tem core/templates/brief.md 'verify.sh --rapido'
+tl_espera 0 "coerência: Ao receber pede o completo uma vez antes do PR" tem core/templates/brief.md 'verify.sh` completo, uma vez'
+tl_espera 1 "coerência: Ao receber não pede o completo antes de despachar o revisor diff" tem core/templates/brief.md 'antes de despachar o revisor `diff`'
+tl_espera 0 "coerência: Ao receber manda verifica-red depois do RED" tem core/templates/brief.md 'depois do RED: `sh agentic/mecanismos/scripts/verifica-red.sh`'
+tl_espera 0 "coerência: ciclo descreve os níveis (completo só no revisor diff e antes do PR)" tem core/processo/ciclo.md 'o completo roda só no revisor `diff` (ele mesmo, nunca `--rapido`) e uma vez, pelo orquestrador, antes do PR'
+tl_espera 0 "coerência: revisor roda o verify completo, nunca --rapido" tem core/papeis/revisor.md 'Rode o `verify.sh` completo você mesmo — nunca `--rapido`'
+tl_espera 1 "coerência: dev não exige o completo antes de devolver" tem core/papeis/dev.md 'antes de devolver'
+tl_espera 0 "coerência: testes prova o RED com verifica-red, sem verify completo" tem core/papeis/testes.md 'verifica-red.sh` verde; o verify completo não é exigido de você'
+tl_espera 0 "coerência: verifica-artefato sempre e no worktree do autor (brief)" tem core/templates/brief.md 'no worktree do autor: `cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh'
+tl_espera 0 "coerência: verifica-artefato no worktree do autor (ciclo)" tem core/processo/ciclo.md 'no worktree do autor: `cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh'
+tl_espera 0 "coerência: /mudanca roda verifica-artefato no worktree do autor" tem adapters/claude-code/commands/mudanca.md 'cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh mudanca'
+tl_espera 0 "coerência: README esclarece Impacto e Pronto para revisão só em artefatos novos" tem README.md 'exigidas dos artefatos escritos depois da atualização'
+tl_espera 1 "coerência: verifica-red sem sed 's/; /\n/' (GNU-only)" tem mecanismos/scripts/verifica-red.sh "sed 's/; /\n/g'"
+tl_espera 0 "coerência: config.padrao tem CMD_VERIFY_RAPIDO" tem bootstrap/config.padrao 'CMD_VERIFY_RAPIDO='
+tl_espera 0 "coerência: entrevista pergunta o comando rápido" tem bootstrap/entrevista.md 'CMD_VERIFY_RAPIDO'
+tl_espera 0 "coerência: dev usa o rápido no laço" tem core/papeis/dev.md 'verify.sh --rapido'
+tl_espera 0 "coerência: /verify do claude aceita --rapido" tem adapters/claude-code/commands/verify.md '--rapido'
+tl_espera 0 "coerência: /verify do copilot aceita --rapido" tem adapters/copilot/prompts/verify.prompt.md '--rapido'
+
+# --- Revisão que converge, Task 8: Ruling e em-andamento sem commit próprio; caracterização antes do RED
+tl_espera 1 "nova-task não escreve em-andamento" tem adapters/claude-code/commands/nova-task.md 'Marque a task `**Status:** em-andamento`'
+tl_espera 0 "ciclo: Ruling vai no próximo commit do papel seguinte, antes do revisor diff" tem core/processo/ciclo.md 'o brief do próximo papel manda incluir essa mudança no próximo commit dele'
+tl_espera 0 "brief: Ruling vai no próximo commit do papel" tem core/templates/brief.md 'o brief do próximo papel manda incluir essa mudança no próximo commit dele'
+tl_espera 0 "settings do claude nega Edit no cache da prova RED" tem adapters/claude-code/settings.json.tmpl '"Edit(**/.git/agentic/**)"'
+tl_espera 1 "enxuta: sem commit de em-andamento" tem core/processo/ciclo.md '`docs(task): … em-andamento`'
+tl_espera 0 "testes: caracterização antes do RED" tem core/papeis/testes.md 'caracterização'
+tl_espera 1 "mudanca: sem em-andamento na lista do passo 6" tem adapters/claude-code/commands/mudanca.md '`em-andamento`, fases RED'
+
+tl_espera 1 "README: sem commit docs(task) de em-andamento" tem README.md 'docs(task): ... em-andamento'
+
+
+# --- Revisão que converge, Task 9: vínculo CA → teste no commit RED
+tl_espera 0 "testes: CA anotado com → test: no RED" tem core/papeis/testes.md '→ test: <arquivo>::<nome>'
+tl_espera 0 "template task: formato da anotação" tem core/templates/task.md '→ test: <arquivo>::<nome>'
+tl_espera 0 "template mudanca: formato da anotação" tem core/templates/mudanca.md '→ test: <arquivo>::<nome>'
+tl_espera 0 "verifica-red: mensagem de CA sem anotação" tem mecanismos/scripts/verifica-red.sh 'sem → test: na task'
+
+# --- Revisão que converge, Task 10: nota de atualização
+tl_espera 0 "README: nota de atualização" tem README.md '## O que muda ao atualizar o kit'
+
 tl_fim

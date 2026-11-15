@@ -361,4 +361,214 @@ grava_t "$r" "t_soma x.sh" "soma 2 3|5"
 commita "$r" "test: soma sem o caso 1+1 (R-1)" "Assercoes-removidas: tests/t_soma x.sh 1 (R-1)"
 tl_espera 0 "remoção: caminho com espaço no trailer" vr "$r"
 
+# Branch empilhada: o RED da base (que passa no HEAD da base) não é cobrado da task empilhada, que não o fez.
+r=$(prepara)
+echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "feat: soma antes do teste"
+teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+git -C "$r" branch -q pedidos/001
+mkdir -p "$r/agentic/projeto/specs/pedidos/tasks"
+printf '# T2
+**Status:** em-andamento
+**Branch:** feat/soma
+**Base:** pedidos/001
+
+## Arquivos
+- src/*
+' > "$r/agentic/projeto/specs/pedidos/tasks/002-t.md"
+git -C "$r" add -A; git -C "$r" commit -q -m "task 2"
+tl_espera 0 "avulso em branch empilhada não prova o RED da base" env -u AGENTIC_BASE sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_contem "nenhum commit test(red):" "avulso empilhado: só os REDs da própria task"
+
+
+# --- Cache da prova de RED (por SHA + assinatura) ---
+vrc() { sh -c "cd '$1' && sh '$dir/verifica-red.sh'" </dev/null; }
+conta() { [ "$(wc -l < "$cont")" -eq "$1" ]; }
+prepara_cache() {
+  r=$(prepara)
+  cont=$(mktemp)
+  : > "$cont"
+  printf 'CMD_TESTE_ARQUIVO="echo x >> '"'%s'"'; sh {}"\n' "$cont" >> "$r/agentic/config"
+  git -C "$r" add -A; git -C "$r" commit -q -m "config: contador"
+  teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+  echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+  git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): soma"
+}
+prepara_cache
+tl_espera 0 "cache: 1ª prova executa" vrc "$r"
+tl_espera 0 "cache: contador 1" conta 1
+tl_espera 0 "cache: 2ª chamada usa o cache" vrc "$r"
+tl_contem "já provado (tests/run.sh) (ok)" "cache: diz que usou o cache"
+tl_espera 0 "cache: contador continua 1" conta 1
+git -C "$r" worktree add -q --detach "$r.wt" HEAD
+tl_espera 0 "cache: compartilhado entre worktrees" vrc "$r.wt"
+tl_contem "já provado" "cache: o worktree ligado usou a prova do diretório comum"
+tl_espera 0 "cache: contador inalterado no worktree ligado" conta 1
+git -C "$r" worktree remove --force "$r.wt"
+tl_espera 0 "cache: AGENTIC_RED_SEM_CACHE=1 prova de novo" env AGENTIC_RED_SEM_CACHE=1 sh -c "cd '$r' && sh '$dir/verifica-red.sh'" </dev/null
+tl_espera 0 "cache: contador 2" conta 2
+printf 'CMD_TESTE_ARQUIVO="echo y >> '"'%s'"'; sh {}"\n' "$cont" >> "$r/agentic/config"
+git -C "$r" add -A; git -C "$r" commit -q -m "config: outro comando"
+tl_espera 0 "cache: assinatura nova prova de novo" vrc "$r"
+tl_espera 0 "cache: contador 3" conta 3
+tl_espera 0 "cache: depois da nova assinatura usa o cache" vrc "$r"
+tl_espera 0 "cache: contador segue 3" conta 3
+
+# RED que passava nunca é guardado.
+r=$(prepara)
+echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "feat: soma antes do teste"
+teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 1 "cache: RED que passava não é guardado (1ª)" vrc "$r"
+tl_espera 1 "cache: RED que passava não é guardado (2ª)" vrc "$r"
+tl_contem "PASSAVAM" "cache: segue explicando"
+
+# Preparo com falha nunca é guardado.
+r=$(prepara); teste_red "$r"; echo 'CMD_PREPARAR_TESTE="exit 1"' >> "$r/agentic/config"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 1 "cache: preparo com falha bloqueia (1ª)" vrc "$r"
+tl_espera 1 "cache: preparo com falha bloqueia (2ª)" vrc "$r"
+tl_contem "CMD_PREPARAR_TESTE falhou" "cache: preparo com falha segue explicado"
+
+# Asserções removidas depois: verificadas mesmo com prova guardada.
+prepara_cache
+tl_espera 0 "cache: guarda a prova" vrc "$r"
+printf '. ./src/soma.sh\n' > "$r/tests/run.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "refactor: removi a asserção"
+tl_espera 1 "cache: contagem de asserções roda mesmo com cache" vrc "$r"
+tl_contem "asserções diminuíram" "cache: aponta a queda"
+tl_contem "já provado" "cache: e ainda usou a prova guardada"
+
+# Produção no RED: bloqueia mesmo com a prova guardada para esse SHA.
+r=$(prepara); teste_red "$r"; echo '# mexi' >> "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+red=$(git -C "$r" rev-parse HEAD)
+mkdir -p "$r/.git/agentic"
+sig=$(printf '%s\n%s\n%s\n' "" "" "sh tests/run.sh" | git hash-object --stdin)
+printf '%s %s %s\n' "$red" "$sig" '*suite*' > "$r/.git/agentic/red-provados"
+tl_espera 1 "cache: recusa de produção roda mesmo com prova guardada" vrc "$r"
+tl_contem "já provado (*suite*)" "cache: a prova guardada estava valendo (assinatura certa)"
+tl_contem "src/soma.sh" "cache: aponta a produção"
+
+# Modo degradado: a suíte inteira é guardada como *suite*.
+r=$(prepara); teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 0 "cache degradado: 1ª prova" vrc "$r"
+tl_espera 0 "cache degradado: 2ª usa o cache" vrc "$r"
+tl_contem "já provado (*suite*)" "cache degradado: diz que usou o cache"
+tl_espera 0 "cache degradado: arquivo guarda *suite* literal" grep -qF ' *suite*' "$r/.git/agentic/red-provados"
+
+# Execução interrompida (rc >= 124: timeout ou sinal) não vira prova permanente.
+r=$(prepara); cont=$(mktemp); : > "$cont"
+printf 'CMD_TESTE_ARQUIVO="echo x >> '"'%s'"'; exit 130"
+' "$cont" >> "$r/agentic/config"
+git -C "$r" add -A; git -C "$r" commit -q -m "config: interrompido"
+printf 'exit 1
+assert_igual
+' > "$r/tests/a.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 0 "cache: rc 130 mantém o veredicto (falhava)" vrc "$r"
+tl_contem "falhava (tests/a.sh) (ok)" "cache: rc 130 segue 'falhava (ok)'"
+tl_espera 0 "cache: rc 130 executou uma vez" conta 1
+tl_espera 0 "cache: rc 130 prova de novo na 2ª chamada" vrc "$r"
+tl_espera 0 "cache: rc 130 não imprime 'já provado'" sh -c "! grep -q 'já provado' '$TL_SAIDA'"
+tl_espera 0 "cache: rc 130 não foi guardado (contador 2)" conta 2
+
+# Cache parcial: um arquivo já provado e outro novo; só o novo executa.
+parcial() {
+  r=$(prepara); cont=$(mktemp); : > "$cont"
+  cmdarq="echo x >> '$cont'; sh {}"
+  printf 'CMD_TESTE_ARQUIVO="%s"
+' "$cmdarq" >> "$r/agentic/config"
+  git -C "$r" add -A; git -C "$r" commit -q -m "config: contador"
+  printf 'exit 1
+assert_igual
+' > "$r/tests/a.sh"
+  printf '%s
+assert_igual
+' "$1" > "$r/tests/b.sh"
+  git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a e b"
+  red=$(git -C "$r" rev-parse HEAD)
+  sig=$(printf '%s
+%s
+%s
+' "" "$cmdarq" "sh tests/run.sh" | git hash-object --stdin)
+  mkdir -p "$r/.git/agentic"
+  printf '%s %s %s
+' "$red" "$sig" 'tests/a.sh' > "$r/.git/agentic/red-provados"
+}
+parcial 'exit 1'
+tl_espera 0 "cache parcial: a provado, b novo" vrc "$r"
+tl_contem "já provado (tests/a.sh) (ok)" "cache parcial: a veio do cache"
+tl_contem "falhava (tests/b.sh) (ok)" "cache parcial: b foi provado"
+tl_espera 0 "cache parcial: só o novo executou" conta 1
+parcial 'exit 0'
+tl_espera 1 "cache parcial: b novo que passa bloqueia" vrc "$r"
+tl_contem "já provado (tests/a.sh)" "cache parcial: a segue do cache"
+tl_contem "PASSAVAM no RED" "cache parcial: explica que b passava"
+tl_espera 0 "cache parcial: b executou" conta 1
+
+# Review Focus 5: comando que lê stdin não come a lista de arquivos.
+r=$(prepara)
+echo 'CMD_TESTE_ARQUIVO="cat >/dev/null; sh {}"' >> "$r/agentic/config"
+git -C "$r" add -A; git -C "$r" commit -q -m "config: lê stdin"
+printf 'exit 1\nassert_igual\n' > "$r/tests/a.sh"; printf 'exit 1\nassert_igual\n' > "$r/tests/b.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a e b"
+tl_espera 0 "stdin: comando que lê stdin não come a lista de arquivos" vrc "$r"
+tl_contem "(tests/a.sh)" "stdin: provou a.sh"
+tl_contem "(tests/b.sh)" "stdin: provou b.sh"
+
+
+# --- Vínculo CA -> teste no commit RED (Task 9)
+# vinculo <texto-da-seção> [titulo]: repo com a task da branch; o RED toca tests/a.sh e tests/b.sh.
+vinculo() {
+  r=$(prepara)
+  mkdir -p "$r/agentic/projeto/specs/x/tasks"
+  printf '# Task 001\n**Status:** pendente\n**Branch:** feat/soma\n\n## %s\n' "${2:-Critérios de pronto}" > "$r/agentic/projeto/specs/x/tasks/001-x.md"
+  printf '%b\n\n## Questões em aberto\n- nada\n' "$1" >> "$r/agentic/projeto/specs/x/tasks/001-x.md"
+  git -C "$r" add -A; git -C "$r" commit -q -m "docs: task"
+  printf 'exit 1\nassert_igual\n' > "$r/tests/a.sh"; printf 'exit 1\nassert_igual\n' > "$r/tests/b.sh"
+  printf 'x\n' > "$r/tests/outro.sh"
+  printf 'exit 1
+' > "$r/tests/run.sh"
+  git -C "$r" add tests/a.sh tests/b.sh tests/run.sh; git -C "$r" commit -q -m "test(red): a e b"
+}
+vv() { sh -c "cd '$1' && sh '$dir/verifica-red.sh'"; }
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b → test: tests/b.sh::dois\n- `sh verify.sh` verde'
+tl_espera 0 "vínculo: todo CA anotado com arquivo do RED passa" vv "$r"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b sem anotação'
+tl_espera 1 "vínculo: CA sem anotação, com outro anotado, bloqueia" vv "$r"
+tl_contem "CA2 sem → test:" "vínculo: nomeia o CA"
+vinculo '- CA1 (R1): a → test: tests/outro.sh::um'
+tl_espera 1 "vínculo: arquivo anotado fora dos commits RED bloqueia" vv "$r"
+tl_contem "tests/outro.sh" "vínculo: nomeia o arquivo"
+vinculo '- CA1 (R1): a\n- CA2 (R2): b'
+tl_espera 0 "vínculo: task sem nenhuma anotação passa com aviso" vv "$r"
+tl_contem "aviso: task sem anotação" "vínculo: avisa"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um; tests/b.sh::dois'
+tl_espera 0 "vínculo: dois testes num CA separados por ; " vv "$r"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\r\n- CA2 (R2): b → test: `tests/b.sh::dois`\r'
+tl_espera 0 "vínculo: anotação com CRLF" vv "$r"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n<!-- - CA9 (R9): comentado sem anotação -->'
+tl_espera 0 "vínculo: CA dentro de comentário HTML é ignorado" vv "$r"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b' "Critérios de aceite"
+tl_espera 1 "vínculo: mudança lê Critérios de aceite" vv "$r"
+r=$(prepara); printf 'exit 1\nassert_igual\n' > "$r/tests/a.sh"; echo "exit 1" > "$r/tests/run.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 0 "vínculo: branch sem task (trilha rápida) não checa" vv "$r"
+
+
+# Correções da revisão: anotação sem arquivo e CA em checkbox
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b → test: ::x'
+tl_espera 1 "vínculo: → test: ::x (sem arquivo) bloqueia" vv "$r"
+tl_contem "CA2 com → test: sem arquivo" "vínculo: nomeia o CA sem arquivo"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b → test:'
+tl_espera 1 "vínculo: → test: vazio bloqueia" vv "$r"
+tl_contem "CA2 com → test: sem arquivo" "vínculo: nomeia o CA com anotação vazia"
+vinculo '- CA1 (R1): b → test:'
+tl_espera 1 "vínculo: única anotação vazia não vira aviso" vv "$r"
+vinculo '- [x] CA1 (R1): a → test: tests/a.sh::um\n- [ ] CA2 (R2): b sem anotação'
+tl_espera 1 "vínculo: CA em checkbox sem anotação bloqueia" vv "$r"
+tl_contem "CA2 sem → test:" "vínculo: nomeia o CA do checkbox"
+vinculo '- [x] CA1 (R1): a → test: tests/a.sh::um\n- [ ] CA2 (R2): b → test: tests/b.sh::dois'
+tl_espera 0 "vínculo: CA em checkbox anotado passa" vv "$r"
+
 tl_fim

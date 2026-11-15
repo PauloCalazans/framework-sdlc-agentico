@@ -49,7 +49,11 @@ if [ -n "$orfas" ]; then
 fi
 
 # (2) decisão da base que sumiu
-base=${1:-$(agentic_base)}
+if [ -n "${1:-}" ]; then
+  base=$(git merge-base HEAD "$1") || agentic_falha "base inválida: $1"
+else
+  base=$(agentic_base)
+fi
 if [ -z "$base" ]; then
   echo "degradado: sem base de comparação — perda de decisões não verificada"
 elif ! git rev-parse --verify -q "$base^{commit}" >/dev/null; then
