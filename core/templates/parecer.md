@@ -25,7 +25,7 @@
 
 | CA | Teste | Status |
 |---|---|---|
-| <CA-n> | <arquivo:linha do teste> | <coberto \| não coberto> (<medido \| inferido>) |
+| <CA<n>> | <arquivo:linha do teste> | <coberto \| não coberto> (<medido \| inferido>) |
 
 ## Achados
 <ou: nenhum>

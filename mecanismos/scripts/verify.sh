@@ -69,6 +69,8 @@ if [ -n "$task" ]; then
   fi
 fi
 
+# A task chega ao verifica-red (vínculo CA → teste) também quando veio de --task.
+[ -n "$task" ] && { AGENTIC_TASK=$task; export AGENTIC_TASK; }
 etapa hooks verifica_hooks
 if [ -n "$task" ]; then
   etapa escopo sh "$dir/verifica-escopo.sh" "$task"

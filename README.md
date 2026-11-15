@@ -17,11 +17,12 @@ Serve para **qualquer stack** (Java, Python, Node, .NET, front-end…) e para pr
 
 | Sem o kit, o agente… | Com o kit | Quem garante |
 |---|---|---|
-| diz "está funcionando" sem rodar nada | `verify.sh` é o ponto único de verificação; sucesso só com `VERIFY: OK` na saída | regra + `verify.sh` |
+| diz "está funcionando" sem rodar nada | `verify.sh` é o ponto único de verificação; sucesso só com a saída do nível do passo (`VERIFY: OK` no completo, `VERIFY RÁPIDO: OK` no laço do `dev`) | regra + `verify.sh` |
 | altera o teste até ele passar | o commit `test(red):` prova que os testes falhavam; asserção removida depois reprova, salvo remoção declarada em trailer com decisão registrada antes | `verifica-red.sh` |
 | desliga o teste que incomoda (`.skip`, `@Disabled`) | teste desabilitado na branch ou skip novo no relatório JUnit reprova | `verifica-skip.sh` |
 | "aproveita" e mexe em arquivos fora do pedido | cada task declara `## Arquivos`; arquivo fora da lista reprova | `verifica-escopo.sh` |
-| commita na `main` ou faz o merge do próprio PR | commit, push e merge na branch protegida são bloqueados | `pre-commit`, `pre-push`, `pre-merge-commit`, `deny` de `gh pr merge` |
+| commita na `main` ou faz o merge do próprio PR | commit e push na branch protegida são bloqueados, e o merge com commit também; merge fast-forward local não dispara hook (o remoto continua protegido pelo `pre-push`) | `pre-commit`, `pre-push`, `pre-merge-commit`, `deny` de `gh pr merge` (e de `git merge` sem plataforma de PR) |
+| pula os githooks (`--no-verify`) | comando git com `--no-verify`, `commit -n` ou `-c core.hooksPath` é barrado em qualquer posição | hook `PreToolUse` do Claude Code |
 | commita uma senha ou token | conteúdo staged é varrido antes do commit | `pre-commit` (gitleaks + palavras-chave) |
 | afrouxa as próprias permissões | edição de `agentic/config`, hooks e `.claude/settings.json` é negada | `deny` do Claude Code |
 | revisa o próprio trabalho | o `revisor` roda em contexto limpo, escreve só o parecer e nunca corrige | contrato do papel + adaptador + conferência ao receber |
@@ -69,15 +70,15 @@ Regras completas: `core/processo/ciclo.md`.
 
 ### Modo automático e Gate 1 delegado
 
-Com `enabled: true` em `agentic/auto-mode`, o orquestrador encadeia as tasks e publica os PRs sem pedir confirmação. Quando a task anterior ainda não foi integrada, a seguinte sai da branch dela: a task declara `**Base:** <branch anterior>` e o `verify.sh` compara com essa branch até ela entrar na principal.
+Com `enabled: true` em `agentic/auto-mode`, o orquestrador encadeia as tasks e publica os PRs sem pedir confirmação. Com plataforma de PR, quando a task anterior ainda não foi integrada, a seguinte sai da branch dela: a task declara `**Base:** <branch anterior>` e o `verify.sh` compara com essa branch até ela entrar na principal.
 
 O humano também pode delegar o Gate 1, por exemplo depois de escrever um plano longo. O orquestrador passa a aprovar intent, spec e design com base no plano e nos pareceres do `revisor`, e só chama o humano para o que a delegação não cobre. A delegação é uma decisão registrada e vale até ser revogada:
 
-1. o humano registra `D<n> — Delegação do Gate 1` em `agentic/projeto/decisoes.md`: plano, specs cobertas e itens N3 que o orquestrador pode aprovar;
-2. o humano grava `gate1: D<n>` em `agentic/auto-mode` (arquivo que o agente não edita);
-3. cada aprovação vira o commit `docs(spec): <nome> aprovada (Gate 1 delegado, D<n>)`.
+1. o humano decide, e a decisão `D<n> — Delegação do Gate 1` é registrada em `agentic/projeto/decisoes.md` (por ele ou pelo `/bootstrap`, que transcreve a resposta dele): plano, specs cobertas e itens N3 que o orquestrador pode aprovar;
+2. o humano grava `enabled: true` e `gate1: D<n>` em `agentic/auto-mode` (arquivo que o agente não edita);
+3. cada aprovação vira o commit `docs(spec): <nome> aprovada (Gate 1 delegado, D<n>)` (trilha enxuta: `docs(mudanca): …`).
 
-Toda decisão que o orquestrador toma fora da spec e do design é uma **Ruling**: fica na seção `## Rulings` da task (versionada na branch), aparece no PR em "Decisões do orquestrador", é conferida pelo `revisor` e é listada ao humano ao publicar. A que vale além da task vira `D<n>` em `decisoes.md`.
+Toda decisão que o orquestrador toma fora da spec e do design é uma **Ruling**: fica na seção `## Rulings` da task (versionada na branch; a tomada depois do último commit de papel fica só no PR ou, sem plataforma de PR, no aviso ao humano), aparece no PR em "Decisões do orquestrador", é conferida pelo `revisor` (a tomada depois do último commit de papel, só pelo humano, no Gate 2) e é listada ao humano ao publicar. A que vale além da task vira `D<n>` em `decisoes.md`.
 
 O `verifica-decisoes.sh` bloqueia `gate1:` apontando para decisão revogada ou inexistente, e commit de Gate 1 delegado sem delegação vigente. O Gate 2 nunca é delegado: o merge continua com o humano.
 
@@ -129,7 +130,7 @@ O `arquiteto` recusa a trilha enxuta: "mudança em regra de desconto" é gatilho
    docs(task): ... publicada
    ```
 
-4. **Gate 2:** o humano integra. O agente não tem como fazer isso: `gh pr merge` é negado e os githooks bloqueiam a `main`.
+4. **Gate 2:** o humano integra. O agente não tem como fazer isso pela plataforma: `gh pr merge` é negado, e os githooks bloqueiam commit, push e merge com commit na `main` (sem plataforma de PR, o `deny` de `git merge` cobre o fast-forward local).
 
 Resultado medido: 84 linhas de código e teste, cerca de 80% menos documentação que a trilha padrão, e um defeito real pego pelo `revisor` antes do merge.
 
@@ -234,10 +235,10 @@ Mais uma linha em `.gitignore` (`agentic/.estado/`) e em `.gitattributes` (LF no
 
 ## O que muda ao atualizar o kit
 
-Instâncias antigas continuam funcionando: as variáveis novas de `agentic/config` são opcionais e, se ausentes, viram `aviso:` em vez de falha. As seções `## Impacto` e `## Pronto para revisão` passam a ser exigidas dos artefatos escritos depois da atualização; os antigos continuam funcionando sem elas.
+Instâncias antigas continuam funcionando: as variáveis novas de `agentic/config` são opcionais e, se ausentes, viram `aviso:` em vez de falha. A seção `## Impacto` passa a ser exigida dos designs e documentos de mudança escritos depois da atualização; os antigos continuam funcionando sem ela. `## Pronto para revisão` é seção dos contratos dos papéis: a autoconferência vai no relatório, não no artefato.
 
 - Três variáveis opcionais em `agentic/config`: `CMD_VALIDA_CONTRATO`, `CAMINHOS_N3` e `CMD_VERIFY_RAPIDO`. Vazias ou ausentes, `CMD_VALIDA_CONTRATO` e `CAMINHOS_N3` fazem a checagem correspondente ser pulada com `aviso:`; com `CMD_VERIFY_RAPIDO` vazio, `verify.sh --rapido` usa o `CMD_VERIFY_STACK` completo, também com `aviso:`.
-- O orquestrador roda `mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` na lista "Ao receber" do brief, no worktree do autor, antes do revisor (mesmo quando ele é opcional) e só antes do Gate 1. Artefatos aprovados antes da atualização não são verificados de novo.
+- O orquestrador roda `mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` na lista "Ao receber" do brief, na árvore onde o autor escreveu (trilha enxuta: o worktree; trilha padrão: a principal), antes do revisor (mesmo quando ele é opcional) e só antes do Gate 1. Artefatos aprovados antes da atualização não são verificados de novo.
 - Design e mudança ganham `## Impacto` (arquiteto); os contratos dos autores ganham `## Pronto para revisão` (autoverificação registrada no relatório).
 - O parecer ganha a coluna "Causa" (defeito, contrato, não conferido, sem contrato, forma) e o PR, a linha "Rodadas", registro durável da revisão.
 - No laço roda `verify.sh --rapido`; o `verify.sh` completo roda uma vez antes do PR e no revisor `diff`. A prova do RED fica em cache por SHA (`AGENTIC_RED_SEM_CACHE=1` força nova prova).
