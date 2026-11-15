@@ -555,4 +555,20 @@ tl_espera 1 "vínculo: mudança lê Critérios de aceite" vv "$r"
 r=$(prepara); printf 'exit 1\nassert_igual\n' > "$r/tests/a.sh"; echo "exit 1" > "$r/tests/run.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
 tl_espera 0 "vínculo: branch sem task (trilha rápida) não checa" vv "$r"
 
+
+# Correções da revisão: anotação sem arquivo e CA em checkbox
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b → test: ::x'
+tl_espera 1 "vínculo: → test: ::x (sem arquivo) bloqueia" vv "$r"
+tl_contem "CA2 com → test: sem arquivo" "vínculo: nomeia o CA sem arquivo"
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b → test:'
+tl_espera 1 "vínculo: → test: vazio bloqueia" vv "$r"
+tl_contem "CA2 com → test: sem arquivo" "vínculo: nomeia o CA com anotação vazia"
+vinculo '- CA1 (R1): b → test:'
+tl_espera 1 "vínculo: única anotação vazia não vira aviso" vv "$r"
+vinculo '- [x] CA1 (R1): a → test: tests/a.sh::um\n- [ ] CA2 (R2): b sem anotação'
+tl_espera 1 "vínculo: CA em checkbox sem anotação bloqueia" vv "$r"
+tl_contem "CA2 sem → test:" "vínculo: nomeia o CA do checkbox"
+vinculo '- [x] CA1 (R1): a → test: tests/a.sh::um\n- [ ] CA2 (R2): b → test: tests/b.sh::dois'
+tl_espera 0 "vínculo: CA em checkbox anotado passa" vv "$r"
+
 tl_fim
