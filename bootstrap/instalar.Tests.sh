@@ -22,7 +22,7 @@ tl_espera 1 "não copia suítes *.Tests.sh do kit" sh -c "find '$r' -name '*.Tes
 tl_espera 1 "não copia testlib.sh" sh -c "find '$r' -name 'testlib.sh' | grep -q ."
 set -f # os padrões abaixo são literais
 for p in .claude/settings.json .claude/hooks/** agentic/config agentic/auto-mode agentic/mecanismos/** \
-         agentic/baseline-skips .gitleaksignore; do
+         agentic/baseline-skips .git/agentic/** .gitleaksignore; do
   tl_espera 0 "settings pendente nega Edit (cobre escrita) em $p" sh -c "grep -qF '\"Edit($p)\"' '$r/agentic/.estado/settings.pendente.json'"
 done
 set +f
@@ -36,7 +36,7 @@ tl_espera 0 "configura core.hooksPath" sh -c "[ \"\$(git -C '$r' config core.hoo
 tl_espera 0 ".gitignore ignora agentic/.estado/ (uma linha)" grep -qxF "agentic/.estado/" "$r/.gitignore"
 set -f
 for p in .claude/settings.json .claude/settings.local.json .claude/hooks/** agentic/config agentic/auto-mode agentic/mecanismos/** \
-         agentic/baseline-skips .gitleaksignore; do
+         agentic/baseline-skips .git/agentic/** .gitleaksignore; do
   tl_espera 0 "settings pendente nega Edit (cobre escrita) em **/$p (worktree aninhado)" sh -c "grep -qF '\"Edit(**/$p)\"' '$r/agentic/.estado/settings.pendente.json'"
 done
 set +f
