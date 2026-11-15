@@ -26,7 +26,7 @@ O nível acompanha o custo do erro que escapa e a existência de um mecanismo qu
 | orquestrador | médio; forte só se o `revisor` não for forte |
 
 ## Ajuste por dado
-A medição são as devoluções e rodadas registradas no `progress.md`.
+A medição são as devoluções e rodadas dos pareceres (coluna Causa, em `agentic/.estado/execucao/`) e a linha "Rodadas" dos PRs.
 - **Subir um nível:** o papel teve Crítico ou Importante em duas rodadas da mesma task, ou em duas tasks seguidas.
 - **Descer um nível, como experimento:** o papel foi aprovado na primeira rodada em três tasks seguidas. Volte se a regra de subir disparar.
 - **Antes de trocar o modelo, baixe o esforço de raciocínio,** quando o produto permitir.

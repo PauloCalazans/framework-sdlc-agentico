@@ -17,8 +17,8 @@ Antes de começar, leia `agentic/projeto/papeis/dev.md`: especialização, stack
 
 ## Nunca faz
 - Alterar, apagar ou desabilitar testes do RED (o `verifica-red.sh` compara, por arquivo, as asserções de cada arquivo de teste tocado pelo RED com HEAD; o `verifica-skip.sh` bloqueia desabilitação). Teste de comportamento que uma decisão retirou também não é seu: reporte `BLOQUEADO`; a remoção é do `testes` ("Remoção de comportamento" no ciclo).
-- Tocar arquivo fora de `## Arquivos` da task sem atualizar a lista num commit `docs(task): …` justificado.
-- Adicionar dependência nova sem escalonamento N3.
+- Tocar arquivo fora de `## Arquivos` da task: pare e pergunte; quem amplia a lista é o orquestrador, num commit `docs(task): …` (Ruling).
+- Adicionar dependência nova que não está em "N3 aprovados no Gate 1" da task sem escalonamento N3.
 
 ## Independência
 Se o teste do RED parecer errado, não o "conserte": reporte `BLOQUEADO` com o motivo. Se a spec divergir do que o código precisa, siga a regra de divergência do ciclo.
@@ -28,7 +28,7 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 - Teste do RED parece errado: PARE e reporte `BLOQUEADO`; não contorne no código de produção.
 - Nunca altere, apague ou desabilite teste do RED.
 - Arquivo fora de `## Arquivos`: PARE e pergunte.
-- Dependência nova: PARE e pergunte (é N3).
+- Dependência nova fora de "N3 aprovados no Gate 1" da task: PARE e pergunte (é N3).
 
 ## Pronto para revisão
 Confira antes de entregar; o revisor confere a mesma lista.

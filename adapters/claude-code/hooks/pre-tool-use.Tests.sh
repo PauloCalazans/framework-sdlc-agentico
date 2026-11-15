@@ -18,4 +18,18 @@ tl_espera 0 "permite grep -r num diretório do projeto" roda 'grep -r foo src/'
 tl_espera 0 "permite ls não recursivo da raiz" roda 'ls -la /'
 tl_espera 0 "permite comandos comuns" roda 'git log --format=%H'
 
+# Desvio dos githooks: o deny casa por prefixo; o hook olha o comando inteiro.
+tl_espera 2 "bloqueia push com --no-verify depois do refspec" roda 'git push origin main --no-verify'
+tl_contem "pula os githooks" "explica o bloqueio do desvio"
+tl_espera 2 "bloqueia abreviação --no-veri" roda 'git push --no-veri origin x'
+tl_espera 2 "bloqueia commit -m ... --no-verify" roda 'git commit -m msg --no-verify'
+tl_espera 2 "bloqueia commit -n no fim" roda 'git commit -m msg -n'
+tl_espera 2 "bloqueia commit -nm" roda 'git commit -nm msg'
+tl_espera 2 "bloqueia -c core.hooksPath" roda 'git -c core.hooksPath=/dev/null push origin main'
+tl_espera 2 "bloqueia desvio depois de &&" roda 'git add -A && git commit -m x --no-verify'
+tl_espera 0 "permite push comum" roda 'git push -u origin feat/x'
+tl_espera 0 "permite commit com mensagem que tem -n no texto entre aspas simples" roda "git commit -m 'teste'"
+tl_espera 0 "permite push -n (dry-run)" roda 'git push -n origin feat/x'
+tl_espera 0 "permite git log -n 5" roda 'git log -n 5'
+
 tl_fim

@@ -82,6 +82,7 @@ if [ -n "$copilot" ]; then
   copia_dir "$fw/adapters/copilot/agents" .github/agents
   copia_dir "$fw/adapters/copilot/prompts" .github/prompts
   copia "$fw/adapters/copilot/copilot-setup-steps.yml" .github/workflows/copilot-setup-steps.yml
+  copia "$fw/adapters/copilot/agente-oraculo.tmpl.md" agentic/processo/templates/agente-oraculo-copilot.md
 fi
 
 for p in dominio arquiteto testes dev revisor; do

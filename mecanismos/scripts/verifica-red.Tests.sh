@@ -571,4 +571,29 @@ tl_contem "CA2 sem → test:" "vínculo: nomeia o CA do checkbox"
 vinculo '- [x] CA1 (R1): a → test: tests/a.sh::um\n- [ ] CA2 (R2): b → test: tests/b.sh::dois'
 tl_espera 0 "vínculo: CA em checkbox anotado passa" vv "$r"
 
+# Varredura de coerência: GREEN sem RED numa task com CA bloqueia; só registro/contrato ainda não.
+semred() {
+  r=$(prepara)
+  mkdir -p "$r/agentic/projeto/specs/x/tasks"
+  printf '# Task 001\n**Status:** pendente\n**Branch:** feat/soma\n\n## Critérios de pronto\n- CA1 (R1): a\n' > "$r/agentic/projeto/specs/x/tasks/001-x.md"
+  git -C "$r" add -A; git -C "$r" commit -q -m "docs(spec): x aprovada (Gate 1)"
+  echo 'soma() { echo 9; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "chore: contrato executável"
+}
+semred
+tl_espera 0 "sem RED: só docs e chore ainda não bloqueia" vv "$r"
+tl_contem "nenhum commit test(red):" "sem RED: informa"
+echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): soma"
+tl_espera 1 "sem RED: task com CA e GREEN sem RED bloqueia" vv "$r"
+tl_contem "sem nenhum test(red):" "sem RED: explica"
+r=$(prepara); echo 'soma() { echo 1; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "fix: sem task"
+tl_espera 0 "sem RED: branch sem task (trilha rápida) não bloqueia" vv "$r"
+
+# Varredura de coerência: verify.sh --task exporta AGENTIC_TASK; a task chega ao vínculo numa branch de nome imposto.
+vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b sem anotação'
+git -C "$r" checkout -q -b copilot/imposta
+tl_espera 0 "branch imposta sem AGENTIC_TASK: sem task associada, não checa" vv "$r"
+tl_espera 1 "branch imposta com AGENTIC_TASK: vínculo checado" sh -c "cd '$r' && AGENTIC_TASK=agentic/projeto/specs/x/tasks/001-x.md sh '$dir/verifica-red.sh'"
+tl_contem "CA2 sem → test:" "branch imposta: nomeia o CA"
+tl_espera 0 "verify.sh exporta a task para o verifica-red" grep -q 'AGENTIC_TASK=$task; export AGENTIC_TASK' "$dir/verify.sh"
+
 tl_fim

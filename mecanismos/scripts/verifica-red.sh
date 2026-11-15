@@ -17,8 +17,10 @@
 #       do arquivo em X, mesmo com várias declarações; o limite passa a ser (asserções no RED - créditos).
 #   (4) cache: a prova de (2) é guardada por SHA do RED e assinatura dos comandos de teste, e reaproveitada (ver
 #       "Cache (4)" mais abaixo); AGENTIC_RED_SEM_CACHE=1 ignora a leitura. (1) e (3) rodam sempre.
-#   (5) vínculo CA → teste: cada CA da task da branch (**Branch:**) tem "→ test: <arquivo>::<nome>" e o arquivo é
-#       tocado por commit RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa.
+#   (5) vínculo CA → teste: cada CA da task (AGENTIC_TASK, exportada pelo verify.sh, inclusive com --task; ou a
+#       task de **Branch:** igual à branch atual) tem "→ test: <arquivo>::<nome>" e o arquivo é tocado por commit
+#       RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa. Task com CA e nenhum commit
+#       RED bloqueia quando a branch tem commit além de docs(…), chore: e merge (GREEN sem RED).
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 if [ -n "${1:-}" ]; then
@@ -30,7 +32,28 @@ fi
 git rev-parse --verify -q "$base^{commit}" >/dev/null || agentic_falha "base inválida: $base"
 
 reds=$(git log --format=%H --grep='^test(red):' "$base..HEAD") || agentic_falha "falha ao listar commits"
+# Task da branch: AGENTIC_TASK (exportada pelo verify.sh, inclusive com --task) ou **Branch:** igual ao HEAD.
+vinc_task=""
+if [ -n "${AGENTIC_TASK:-}" ] && [ -f "$AGENTIC_TASK" ]; then
+  vinc_task=$AGENTIC_TASK
+else
+  vinc_br=$(git symbolic-ref --short -q HEAD)
+  if [ -n "$vinc_br" ]; then
+    for vinc_f in agentic/projeto/specs/*/tasks/*.md; do
+      [ -f "$vinc_f" ] || continue
+      vinc_b=$(sed -n 's/^\*\*Branch:\*\*[[:space:]]*//p' "$vinc_f" | head -n 1 | tr -d '\r`' | sed 's/[[:space:]]*$//')
+      [ "$vinc_b" = "$vinc_br" ] && { vinc_task=$vinc_f; break; }
+    done
+  fi
+fi
 if [ -z "$reds" ]; then
+  # GREEN sem RED: task com CA e algum commit que não é registro (docs), contrato executável (chore) nem merge.
+  if [ -n "$vinc_task" ] && tr -d '\r`' < "$vinc_task" | grep -qE '^[[:space:]]*[-*]?[[:space:]]*(\[[ xX]\][[:space:]]*)?CA[0-9]+'; then
+    if git log --format=%s "$base..HEAD" | grep -qvE '^(docs[(:]|chore[(:]|Merge )'; then
+      echo "agentic: BLOQUEADO — a task $vinc_task tem CA e a branch tem commit além de docs/chore sem nenhum test(red):"
+      exit 1
+    fi
+  fi
   echo "verifica-red: nenhum commit test(red): na branch"
   exit 0
 fi
@@ -277,15 +300,7 @@ done
 # --- Vínculo CA -> teste (task da branch): cada CA da seção precisa de "→ test: <arquivo>::<nome>", e o arquivo
 # anotado precisa ter sido tocado por um commit RED. Task sem nenhuma anotação (anterior a esta versão do kit)
 # só gera aviso; branch sem task (trilha rápida) não é checada.
-vinc_task=""
-vinc_br=$(git symbolic-ref --short -q HEAD)
-if [ -n "$vinc_br" ]; then
-  for vinc_f in agentic/projeto/specs/*/tasks/*.md; do
-    [ -f "$vinc_f" ] || continue
-    vinc_b=$(sed -n 's/^\*\*Branch:\*\*[[:space:]]*//p' "$vinc_f" | head -n 1 | tr -d '\r`' | sed 's/[[:space:]]*$//')
-    [ "$vinc_b" = "$vinc_br" ] && { vinc_task=$vinc_f; break; }
-  done
-fi
+# (vinc_task é resolvida antes da lista de commits RED.)
 if [ -n "$vinc_task" ]; then
   # Seção "Critérios de pronto" (task) ou, sem ela, "Critérios de aceite" (mudança); sem \r, backticks e comentários HTML.
   vinc_secao=""
