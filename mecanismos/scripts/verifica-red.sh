@@ -20,7 +20,8 @@
 #   (5) vínculo CA → teste: cada CA da task (AGENTIC_TASK, exportada pelo verify.sh, inclusive com --task; ou a
 #       task de **Branch:** igual à branch atual) tem "→ test: <arquivo>::<nome>" e o arquivo é tocado por commit
 #       RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa. Task com CA e nenhum commit
-#       RED bloqueia quando a branch tem commit próprio além de docs, chore e test: (GREEN sem RED).
+#       RED bloqueia quando a branch tem código além de docs, chore e test: só de teste (GREEN sem RED), salvo
+#       task de remoção de comportamento (trailer Assercoes-removidas:).
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 if [ -n "${1:-}" ]; then
@@ -70,11 +71,31 @@ if [ -n "$vinc_task" ]; then
   vinc_ca=$(printf '%s\n' "$vinc_secao" | grep -E '^[[:space:]]*[-*]?[[:space:]]*(\[[ xX]\][[:space:]]*)?CA[0-9]+')
 fi
 if [ -z "$reds" ]; then
-  # GREEN sem RED: task com CA e algum commit da própria branch (primeiro pai, sem merges: o que um merge trouxe
-  # de outra branch não conta) que não é registro (docs), contrato executável (chore) nem teste (test:).
+  # GREEN sem RED: task com CA e algum commit desta branch que ainda não está na principal (sem merges; o que um
+  # merge da principal trouxe não conta, o que um merge de sub-branch trouxe conta) e que não é registro (docs),
+  # contrato executável (chore) nem teste (test: só com arquivos de teste ou documentação). Task de remoção de
+  # comportamento (trailer Assercoes-removidas:) não tem RED por construção ("Remoção de comportamento" no ciclo).
   if [ -n "$vinc_ca" ]; then
-    if git log --first-parent --no-merges --format=%s "$base..HEAD" | grep -qvE '^(docs|chore|test)[(:]'; then
-      echo "agentic: BLOQUEADO — a task $vinc_task tem CA e a branch tem commit além de docs/chore sem nenhum test(red):"
+    gr_commits=$(git log --no-merges --format=%H "$base..HEAD" --not "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL" 2>/dev/null \
+      || git log --no-merges --format=%H "$base..HEAD")
+    gr_remocao=""; gr_green=""
+    for c in $gr_commits; do
+      git log -1 --format=%B "$c" | grep -q '^Assercoes-removidas:' && gr_remocao=1
+      gr_s=$(git log -1 --format=%s "$c")
+      case "$gr_s" in
+        docs:*|docs\(*|chore:*|chore\(*) continue ;;
+        test:*|test\(*)
+          gr_prod=$(git -c core.quotepath=off diff-tree --no-commit-id --name-only -r "$c" | while IFS= read -r f; do
+            case "$f" in docs/*|agentic/projeto/*) continue ;; esac
+            gr_t=""; set -f; for d in $DIRS_TESTE; do case "$f" in "$d"*) gr_t=1 ;; esac; done; set +f
+            [ -n "$gr_t" ] || echo "$f"
+          done)
+          [ -n "$gr_prod" ] && gr_green="$gr_green ${c%"${c#???????}"}" ;;
+        *) gr_green="$gr_green ${c%"${c#???????}"}" ;;
+      esac
+    done
+    if [ -n "$gr_green" ] && [ -z "$gr_remocao" ]; then
+      echo "agentic: BLOQUEADO — a task $vinc_task tem CA e a branch tem código sem nenhum test(red): (commits:$gr_green)"
       exit 1
     fi
   fi

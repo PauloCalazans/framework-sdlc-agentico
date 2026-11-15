@@ -1,6 +1,6 @@
 #!/bin/sh
 # verifica-escopo.sh <task.md> [base] — falha se a branch altera arquivo fora da seção "## Arquivos" da task.
-# Para ampliar o escopo, atualize a lista da task num commit docs(task): (visível na revisão e no Gate 2).
+# Ampliar o escopo é Ruling do orquestrador: ele atualiza a lista da task e o próximo commit do papel a inclui.
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 task=${1:-}

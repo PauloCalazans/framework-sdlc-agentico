@@ -3,20 +3,22 @@
 # da raiz, do home ou de um drive, e o desvio dos githooks. Proteções de git vivem nos agentic/mecanismos/githooks
 # (valem para qualquer autor); interpretar texto de comando para reproduzi-las é uma corrida que não se ganha.
 # O que os githooks não conseguem impedir é ser pulados: o deny do settings casa por prefixo e deixa passar
-# "git push origin main --no-verify". Por isso, e só por isso, o hook barra num comando git: --no-verify (e as
-# abreviações que o git aceita), a opção -n do commit, e qualquer menção a core.hooksPath, --config-env ou
-# GIT_CONFIG_ (troca da pasta de hooks). Olha só o campo "command", sem trechos entre aspas e sem corpo de
-# heredoc nas opções; core.hooksPath é procurado no comando inteiro. Limite declarado: comando montado em tempo de execução escapa.
+# "git push origin main --no-verify". Por isso, e só por isso, num comando que chama git o hook barra, por PALAVRA e
+# não por análise de opções: "--no-v" (--no-verify e as abreviações que o git aceita), "hookspath", "config-env"
+# e "GIT_CONFIG_" em qualquer ponto do campo "command", inclusive entre aspas; e um token -…n… no mesmo trecho
+# (entre ; & | e quebra de linha) de um "git [opções globais] commit".
+# Limite declarado, preferido à corrida: mensagem que cite essas palavras (ou " -n " na linha do commit) é
+# barrada — reescreva a mensagem; comando montado em tempo de execução escapa.
 entrada=$(cat)
 bruto=$(printf '%s' "$entrada" | sed -nE 's/.*"command"[[:space:]]*:[[:space:]]*"(([^"\\]|\\.)*)".*/\1/p' | head -n 1 \
-  | awk '{ gsub(/\\n/, "\n"); gsub(/\\"/, "\""); print }')
-# Para opções: sem corpo de heredoc e sem trechos entre aspas (mensagem de commit não é opção).
-cmd=$(printf '%s\n' "$bruto" | awk 'h { next } /<</ { sub(/<<.*/, ""); h = 1 } { print }' | sed "s/\"[^\"]*\"//g; s/'[^']*'//g")
-if printf '%s' "$bruto" | grep -qE '(^|[;&|(`[:space:]])git([[:space:]]|$)'; then
-  if printf '%s' "$bruto" | grep -qiE 'core\.hookspath|--config-env|GIT_CONFIG_' \
-    || printf '%s' "$cmd" | grep -qiE '(^|[[:space:]])--no-v(e(r(i(f(y)?)?)?)?)?([[:space:]=;&|)]|$)' \
-    || printf '%s' "$cmd" | grep -qE '(^|[;&|(`[:space:]])git([[:space:]]+[^;&|[:space:]]+)*[[:space:]]+commit([[:space:]]+[^;&|[:space:]]+)*[[:space:]]+-[A-Za-z]*n[A-Za-z]*([[:space:];&|)]|$)'; then
-    echo "agentic: BLOQUEADO — comando git que pula ou troca os githooks (--no-verify, commit -n, core.hooksPath, --config-env, GIT_CONFIG_). Os githooks são a proteção da branch protegida e dos segredos." >&2
+  | awk '{ gsub(/\\[nt]/, "\n"); gsub(/\\"/, "\""); print }')
+if printf '%s' "$bruto" | grep -qE '(^|[^[:alnum:]_.-])git([^[:alnum:]_.-]|$)'; then
+  # Sem aspas (os caracteres, não o conteúdo) e um trecho de comando por linha.
+  trechos=$(printf '%s\n' "$bruto" | tr -d "\"'" | tr ';&|' '\n\n\n')
+  if printf '%s' "$bruto" | grep -qiE -- '--no-v|hookspath|config-env|GIT_CONFIG_' \
+    || printf '%s\n' "$trechos" | grep -E '(^|[^[:alnum:]_.-])git([[:space:]]+(-[Cc][[:space:]]+[^[:space:]]+|-[^[:space:]]+))*[[:space:]]+commit([[:space:]]|$)' \
+       | grep -qE '[[:space:]]-[A-Za-z]*n[A-Za-z]*([[:space:]]|$)'; then
+    echo "agentic: BLOQUEADO — comando git que pula ou troca os githooks (--no-verify, commit -n, core.hooksPath, --config-env, GIT_CONFIG_). Os githooks são a proteção da branch protegida e dos segredos. Se for só texto de mensagem, reescreva-a sem essas palavras." >&2
     exit 2
   fi
 fi

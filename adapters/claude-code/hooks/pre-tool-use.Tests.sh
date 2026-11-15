@@ -38,9 +38,18 @@ tl_espera 2 "bloqueia -c entre aspas" roda 'git -c \"core.hooksPath=/x\" commit 
 tl_espera 2 "bloqueia --config-env" roda 'git --config-env=core.hooksPath=X push'
 tl_espera 2 "bloqueia GIT_CONFIG_*" roda 'GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=/x git push'
 tl_espera 2 "bloqueia git config --local core.hooksPath" roda 'git config --local core.hooksPath /x'
-tl_espera 0 "permite -n dentro da mensagem entre aspas" roda 'git commit -m \"remove -n e --no-verify do texto\"'
+tl_espera 2 "limite declarado: mensagem que cita --no-verify é barrada" roda 'git commit -m \"remove --no-verify do texto\"'
 tl_espera 0 "permite heredoc com -n no corpo" roda 'git commit -F - <<EOF\nusa head -n 1\nEOF'
 tl_espera 2 "bloqueia --no-verify na linha que abre o heredoc" roda 'git commit --no-verify -F - <<EOF\nmsg\nEOF'
 tl_espera 0 "permite comando sem git com descrição citando git" sh -c "printf '{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"ls -n\",\"description\":\"git commit -n\"}}' | sh '$dir/pre-tool-use.sh'"
+
+# Re-revisão: opção entre aspas, depois de << e <<<, tab, e falsos positivos.
+tl_espera 2 "bloqueia \"--no-verify\" entre aspas" roda 'git push origin main \"--no-verify\"'
+tl_espera 2 "bloqueia -\"n\"" roda 'git commit -\"n\" -m x'
+tl_espera 2 "bloqueia opção depois de <<<" roda 'git commit -F - <<<\"msg\" --no-verify'
+tl_espera 2 "bloqueia cat <<EOF | git commit --no-verify" roda 'cat <<EOF | git commit -F - --no-verify\nmsg\nEOF'
+tl_espera 2 "bloqueia opção depois de tab" roda 'git commit -m x\t--no-verify'
+tl_espera 0 "permite git log --grep commit -n 5" roda 'git log --grep commit -n 5'
+tl_espera 0 "permite heredoc de commit com -n no corpo, em outra linha" roda 'git commit -F - <<EOF\nusa head -n 1\nEOF'
 
 tl_fim
