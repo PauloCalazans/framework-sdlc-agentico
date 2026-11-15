@@ -380,4 +380,89 @@ git -C "$r" add -A; git -C "$r" commit -q -m "task 2"
 tl_espera 0 "avulso em branch empilhada não prova o RED da base" env -u AGENTIC_BASE sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
 tl_contem "nenhum commit test(red):" "avulso empilhado: só os REDs da própria task"
 
+
+# --- Cache da prova de RED (por SHA + assinatura) ---
+vrc() { sh -c "cd '$1' && sh '$dir/verifica-red.sh'" </dev/null; }
+conta() { [ "$(wc -l < "$cont")" -eq "$1" ]; }
+prepara_cache() {
+  r=$(prepara)
+  cont=$(mktemp)
+  : > "$cont"
+  printf 'CMD_TESTE_ARQUIVO="echo x >> '"'%s'"'; sh {}"\n' "$cont" >> "$r/agentic/config"
+  git -C "$r" add -A; git -C "$r" commit -q -m "config: contador"
+  teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+  echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+  git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): soma"
+}
+prepara_cache
+tl_espera 0 "cache: 1ª prova executa" vrc "$r"
+tl_espera 0 "cache: contador 1" conta 1
+tl_espera 0 "cache: 2ª chamada usa o cache" vrc "$r"
+tl_contem "já provado (tests/run.sh) (ok)" "cache: diz que usou o cache"
+tl_espera 0 "cache: contador continua 1" conta 1
+git -C "$r" worktree add -q --detach "$r.wt" HEAD
+tl_espera 0 "cache: compartilhado entre worktrees" vrc "$r.wt"
+tl_espera 0 "cache: contador inalterado no worktree ligado" conta 1
+git -C "$r" worktree remove --force "$r.wt"
+tl_espera 0 "cache: AGENTIC_RED_SEM_CACHE=1 prova de novo" env AGENTIC_RED_SEM_CACHE=1 sh -c "cd '$r' && sh '$dir/verifica-red.sh'" </dev/null
+tl_espera 0 "cache: contador 2" conta 2
+printf 'CMD_TESTE_ARQUIVO="echo y >> '"'%s'"'; sh {}"\n' "$cont" >> "$r/agentic/config"
+git -C "$r" add -A; git -C "$r" commit -q -m "config: outro comando"
+tl_espera 0 "cache: assinatura nova prova de novo" vrc "$r"
+tl_espera 0 "cache: contador 3" conta 3
+tl_espera 0 "cache: depois da nova assinatura usa o cache" vrc "$r"
+tl_espera 0 "cache: contador segue 3" conta 3
+
+# RED que passava nunca é guardado.
+r=$(prepara)
+echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "feat: soma antes do teste"
+teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 1 "cache: RED que passava não é guardado (1ª)" vrc "$r"
+tl_espera 1 "cache: RED que passava não é guardado (2ª)" vrc "$r"
+tl_contem "PASSAVAM" "cache: segue explicando"
+
+# Preparo com falha nunca é guardado.
+r=$(prepara); teste_red "$r"; echo 'CMD_PREPARAR_TESTE="exit 1"' >> "$r/agentic/config"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 1 "cache: preparo com falha bloqueia (1ª)" vrc "$r"
+tl_espera 1 "cache: preparo com falha bloqueia (2ª)" vrc "$r"
+tl_contem "CMD_PREPARAR_TESTE falhou" "cache: preparo com falha segue explicado"
+
+# Asserções removidas depois: verificadas mesmo com prova guardada.
+prepara_cache
+tl_espera 0 "cache: guarda a prova" vrc "$r"
+printf '. ./src/soma.sh\n' > "$r/tests/run.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "refactor: removi a asserção"
+tl_espera 1 "cache: contagem de asserções roda mesmo com cache" vrc "$r"
+tl_contem "asserções diminuíram" "cache: aponta a queda"
+tl_contem "já provado" "cache: e ainda usou a prova guardada"
+
+# Produção no RED: bloqueia mesmo com a prova guardada para esse SHA.
+r=$(prepara); teste_red "$r"; echo '# mexi' >> "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+red=$(git -C "$r" rev-parse HEAD)
+mkdir -p "$r/.git/agentic"
+sig=$(printf '%s\n%s\n%s\n' "" "" "sh tests/run.sh" | git hash-object --stdin)
+printf '%s %s %s\n' "$red" "$sig" '*suite*' > "$r/.git/agentic/red-provados"
+tl_espera 1 "cache: recusa de produção roda mesmo com prova guardada" vrc "$r"
+tl_contem "src/soma.sh" "cache: aponta a produção"
+
+# Modo degradado: a suíte inteira é guardada como *suite*.
+r=$(prepara); teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 0 "cache degradado: 1ª prova" vrc "$r"
+tl_espera 0 "cache degradado: 2ª usa o cache" vrc "$r"
+tl_contem "já provado (*suite*)" "cache degradado: diz que usou o cache"
+tl_espera 0 "cache degradado: arquivo guarda *suite* literal" grep -qF ' *suite*' "$r/.git/agentic/red-provados"
+
+# Review Focus 5: comando que lê stdin não come a lista de arquivos.
+r=$(prepara)
+echo 'CMD_TESTE_ARQUIVO="cat >/dev/null; sh {}"' >> "$r/agentic/config"
+git -C "$r" add -A; git -C "$r" commit -q -m "config: lê stdin"
+printf 'exit 1\nassert_igual\n' > "$r/tests/a.sh"; printf 'exit 1\nassert_igual\n' > "$r/tests/b.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a e b"
+tl_espera 0 "stdin: comando que lê stdin não come a lista de arquivos" vrc "$r"
+tl_contem "(tests/a.sh)" "stdin: provou a.sh"
+tl_contem "(tests/b.sh)" "stdin: provou b.sh"
+
 tl_fim
