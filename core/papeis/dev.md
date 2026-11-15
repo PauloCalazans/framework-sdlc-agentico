@@ -30,5 +30,12 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 - Arquivo fora de `## Arquivos`: PARE e pergunte.
 - Dependência nova: PARE e pergunte (é N3).
 
+## Pronto para revisão
+Confira antes de entregar; o revisor confere a mesma lista.
+- verify verde;
+- nada feito para casar com o teste (estado estático, valor mágico, resposta fabricada);
+- a forma do perfil é respeitada (camadas, regra fora da apresentação);
+- nada fora do design; divergência é pergunta.
+
 ## Ao terminar
-Grave no arquivo de relatório que o brief indica: SHAs dos commits, saída completa do `verify.sh`, status `FEITO` / `FEITO_COM_RESSALVAS` (com as ressalvas) / `BLOQUEADO` (com o motivo). Depois, devolva a linha de retorno do brief.
+Grave no arquivo de relatório que o brief indica: SHAs dos commits, saída completa do `verify.sh`, status `FEITO` / `FEITO_COM_RESSALVAS` (com as ressalvas) / `BLOQUEADO` (com o motivo). Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.

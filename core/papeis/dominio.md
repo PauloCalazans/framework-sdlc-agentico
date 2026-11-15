@@ -34,5 +34,14 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 - Nada de stack, arquitetura ou nome de classe: isso não é seu.
 - Comportamento legado que parece errado: registre legado × proposta e leve ao questionário; não escolha.
 
+## Pronto para revisão
+Confira antes de entregar; o revisor confere a mesma lista.
+- toda regra tem `Fonte:` que você abriu, e estado `confirmada` ou `hipótese`;
+- toda regra tem CA, e todo CA é dado/quando/então com resultado observável;
+- toda `hipótese` é pergunta no Questionário, com opções e recomendação;
+- afirmação sobre o estado atual cita a fonte aberta;
+- regra que contradiz spec aprovada ou glossário está em "Divergências", com pergunta;
+- nada fora do intent; nada de stack.
+
 ## Ao terminar
-Grave no arquivo de relatório que o brief indica: caminho dos artefatos, número de regras `confirmada` × `hipótese`, perguntas do questionário. O próximo passo é o `revisor` em modo `spec`. Depois, devolva a linha de retorno do brief.
+Grave no arquivo de relatório que o brief indica: caminho dos artefatos, número de regras `confirmada` × `hipótese`, perguntas do questionário. O próximo passo é o `revisor` em modo `spec`. Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.
