@@ -91,7 +91,7 @@ if [ -n "$base" ]; then
   invalidos=$(git log --format='%h %s' "$base..HEAD" | grep -F 'Gate 1 delegado' | while IFS= read -r c; do
     n=$(printf '%s\n' "$c" | sed -n 's/.*Gate 1 delegado, D\([0-9][0-9]*\)).*/\1/p')
     { [ -n "$n" ] && [ -n "$ligado" ] && [ "$n" = "$delegada" ]; } && continue
-    # Gate 1 humano registrado depois na mesma branch ("<tipo>: <nome> aprovada (Gate 1)") substitui o delegado.
+    # Gate 1 humano do mesmo artefato registrado na mesma branch, em qualquer posição ("<tipo>: <nome> aprovada (Gate 1)") substitui o delegado.
     assunto=${c#* }
     printf '%s\n' "$assuntos" | grep -qxF "${assunto%% (Gate 1 delegado*} (Gate 1)" && continue
     printf '  %s\n' "$c"

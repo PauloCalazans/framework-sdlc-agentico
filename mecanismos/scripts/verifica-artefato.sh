@@ -1,7 +1,7 @@
 #!/bin/sh
 # verifica-artefato.sh <spec|design|mudanca> <caminho> — barreira mecânica antes do Gate 1 e do revisor.
 #   spec    <dir da spec>            regras ↔ critérios de aceite, fontes
-#   design  <dir da spec>            checagens 1–7 (CA ↔ task, caminhos, branch, aprovação, N3, contrato)
+#   design  <dir da spec>            checagens 1–7 (CA ↔ task, caminhos, branch, aprovação, N3, símbolos de Produz, contrato)
 #   mudanca <documento da mudança>   regras ↔ critérios, caminhos, branch, aprovação, N3, contrato
 # Roda só antes do Gate 1; artefato aprovado antes desta versão do kit não é verificado.
 # Saída 0 = OK, 1 = bloqueado (todas as falhas são listadas), 2 = uso errado.

@@ -17,8 +17,11 @@
 #       do arquivo em X, mesmo com várias declarações; o limite passa a ser (asserções no RED - créditos).
 #   (4) cache: a prova de (2) é guardada por SHA do RED e assinatura dos comandos de teste, e reaproveitada (ver
 #       "Cache (4)" mais abaixo); AGENTIC_RED_SEM_CACHE=1 ignora a leitura. (1) e (3) rodam sempre.
-#   (5) vínculo CA → teste: cada CA da task da branch (**Branch:**) tem "→ test: <arquivo>::<nome>" e o arquivo é
-#       tocado por commit RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa.
+#   (5) vínculo CA → teste: cada CA da task (AGENTIC_TASK, exportada pelo verify.sh, inclusive com --task; ou a
+#       task de **Branch:** igual à branch atual) tem "→ test: <arquivo>::<nome>" e o arquivo é tocado por commit
+#       RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa. Task com CA e nenhum commit
+#       RED bloqueia quando a branch tem código além de docs só de documentação, chore e test: só de teste (GREEN sem RED), salvo
+#       task de remoção de comportamento (trailer Assercoes-removidas:).
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 if [ -n "${1:-}" ]; then
@@ -30,7 +33,89 @@ fi
 git rev-parse --verify -q "$base^{commit}" >/dev/null || agentic_falha "base inválida: $base"
 
 reds=$(git log --format=%H --grep='^test(red):' "$base..HEAD") || agentic_falha "falha ao listar commits"
+# Task da branch: AGENTIC_TASK (exportada pelo verify.sh, inclusive com --task) ou **Branch:** igual ao HEAD.
+vinc_task=""
+if [ -n "${AGENTIC_TASK:-}" ] && [ -f "$AGENTIC_TASK" ]; then
+  vinc_task=$AGENTIC_TASK
+else
+  vinc_br=$(git symbolic-ref --short -q HEAD)
+  if [ -n "$vinc_br" ]; then
+    for vinc_f in agentic/projeto/specs/*/tasks/*.md; do
+      [ -f "$vinc_f" ] || continue
+      vinc_b=$(sed -n 's/^\*\*Branch:\*\*[[:space:]]*//p' "$vinc_f" | head -n 1 | tr -d '\r`' | sed 's/[[:space:]]*$//')
+      [ "$vinc_b" = "$vinc_br" ] && { vinc_task=$vinc_f; break; }
+    done
+  fi
+fi
+# ref_registrada <rev> <ref>: a referência aparece numa linha acrescentada sob agentic/projeto/ entre a base e <rev>.
+ref_registrada() {
+  git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
+    | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]]|$)"
+}
+
+# CAs da task (mesma definição para "GREEN sem RED" e para o vínculo).
+vinc_ca=""
+if [ -n "$vinc_task" ]; then
+  # Seção "Critérios de pronto" (task) ou, sem ela, "Critérios de aceite" (mudança); sem \r, backticks e comentários HTML.
+  vinc_secao=""
+  for vinc_t in 'Critérios de pronto' 'Critérios de aceite'; do
+    vinc_secao=$(tr -d '\r`' < "$vinc_task" | awk -v t="## $vinc_t" '
+      BEGIN { achou = 0 }
+      /^## / { if (dentro) exit; dentro = ($0 == t); if (dentro) achou = 1; next }
+      dentro {
+        l = $0
+        while (1) {
+          if (com) { i = index(l, "-->"); if (!i) { l = ""; break } l = substr(l, i + 3); com = 0 }
+          i = index(l, "<!--"); if (!i) break
+          j = index(substr(l, i + 4), "-->")
+          if (j) l = substr(l, 1, i - 1) substr(l, i + 4 + j + 2); else { l = substr(l, 1, i - 1); com = 1 }
+        }
+        print l
+      }')
+    [ -z "$(printf '%s' "$vinc_secao" | grep -E 'CA[0-9]+')" ] || break
+  done
+  vinc_ca=$(printf '%s\n' "$vinc_secao" | grep -E '^[[:space:]]*[-*]?[[:space:]]*(\[[ xX]\][[:space:]]*)?CA[0-9]+')
+fi
 if [ -z "$reds" ]; then
+  # GREEN sem RED: task com CA e algum commit desta branch que ainda não está na principal (sem merges; o que um
+  # merge da principal trouxe não conta, o que um merge de sub-branch trouxe conta) e que não é registro (docs),
+  # contrato executável (chore) nem teste (test: só com arquivos de teste ou documentação). Task de remoção de
+  # comportamento (trailer Assercoes-removidas:) não tem RED por construção ("Remoção de comportamento" no ciclo).
+  if [ -n "$vinc_ca" ]; then
+    gr_nao=""
+    for gr_p in "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL"; do
+      git rev-parse --verify -q "$gr_p^{commit}" >/dev/null 2>&1 && gr_nao="$gr_nao $gr_p"
+    done
+    gr_commits=$(git log --no-merges --format=%H "$base..HEAD" ${gr_nao:+--not $gr_nao})
+    gr_remocao=""; gr_green=""
+    for c in $gr_commits; do
+      # Remoção só vale com a referência registrada sob agentic/projeto/ antes do commit (ciclo, "Remoção de comportamento").
+      for gr_ref in $(git log -1 --format='%(trailers:key=Assercoes-removidas,valueonly)' "$c" | sed -n 's/.*(\([^)]*\)).*/\1/p'); do
+        ref_registrada "$c^" "$gr_ref" && gr_remocao=1
+      done
+      gr_s=$(git log -1 --format=%s "$c")
+      case "$gr_s" in
+        chore:*|chore\(*) continue ;; # contrato executável: o esqueleto é conferido pelo revisor (limite declarado)
+        docs:*|docs\(*|test:*|test\(*)
+          # docs só com documentação (*.md, docs/, agentic/projeto/); test: também com arquivos de teste.
+          gr_tipo=${gr_s%%[(:]*}
+          gr_prod=$(git -c core.quotepath=off diff-tree --no-commit-id --name-only -r "$c" | while IFS= read -r f; do
+            case "$f" in docs/*|agentic/projeto/*|*.md) continue ;; esac
+            gr_t=""
+            if [ "$gr_tipo" = test ]; then
+              set -f; for d in $DIRS_TESTE; do case "$f" in "$d"*) gr_t=1 ;; esac; done; set +f
+            fi
+            [ -n "$gr_t" ] || echo "$f"
+          done)
+          [ -n "$gr_prod" ] && gr_green="$gr_green ${c%"${c#???????}"}" ;;
+        *) gr_green="$gr_green ${c%"${c#???????}"}" ;;
+      esac
+    done
+    if [ -n "$gr_green" ] && [ -z "$gr_remocao" ]; then
+      echo "agentic: BLOQUEADO — a task $vinc_task tem CA e a branch tem código sem nenhum test(red): (commits:$gr_green)"
+      exit 1
+    fi
+  fi
   echo "verifica-red: nenhum commit test(red): na branch"
   exit 0
 fi
@@ -53,12 +138,6 @@ conta_assercoes() {
 # ignora_trailer <portador> <motivo> <linha>: explica por que uma declaração não conta (em stderr).
 ignora_trailer() {
   echo "verifica-red: trailer Assercoes-removidas ignorado em $(git rev-parse --short "$1") ($2): $3" >&2
-}
-
-# ref_registrada <rev> <ref>: a referência aparece numa linha acrescentada sob agentic/projeto/ entre a base e <rev>.
-ref_registrada() {
-  git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
-    | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]]|$)"
 }
 
 # removidas_autorizadas <rev-red> <arquivo>: créditos de remoção autorizada do arquivo para esse RED, a partir
@@ -277,35 +356,8 @@ done
 # --- Vínculo CA -> teste (task da branch): cada CA da seção precisa de "→ test: <arquivo>::<nome>", e o arquivo
 # anotado precisa ter sido tocado por um commit RED. Task sem nenhuma anotação (anterior a esta versão do kit)
 # só gera aviso; branch sem task (trilha rápida) não é checada.
-vinc_task=""
-vinc_br=$(git symbolic-ref --short -q HEAD)
-if [ -n "$vinc_br" ]; then
-  for vinc_f in agentic/projeto/specs/*/tasks/*.md; do
-    [ -f "$vinc_f" ] || continue
-    vinc_b=$(sed -n 's/^\*\*Branch:\*\*[[:space:]]*//p' "$vinc_f" | head -n 1 | tr -d '\r`' | sed 's/[[:space:]]*$//')
-    [ "$vinc_b" = "$vinc_br" ] && { vinc_task=$vinc_f; break; }
-  done
-fi
+# (vinc_task é resolvida antes da lista de commits RED.)
 if [ -n "$vinc_task" ]; then
-  # Seção "Critérios de pronto" (task) ou, sem ela, "Critérios de aceite" (mudança); sem \r, backticks e comentários HTML.
-  vinc_secao=""
-  for vinc_t in 'Critérios de pronto' 'Critérios de aceite'; do
-    vinc_secao=$(tr -d '\r`' < "$vinc_task" | awk -v t="## $vinc_t" '
-      BEGIN { achou = 0 }
-      /^## / { if (dentro) exit; dentro = ($0 == t); if (dentro) achou = 1; next }
-      dentro {
-        l = $0
-        while (1) {
-          if (com) { i = index(l, "-->"); if (!i) { l = ""; break } l = substr(l, i + 3); com = 0 }
-          i = index(l, "<!--"); if (!i) break
-          j = index(substr(l, i + 4), "-->")
-          if (j) l = substr(l, 1, i - 1) substr(l, i + 4 + j + 2); else { l = substr(l, 1, i - 1); com = 1 }
-        }
-        print l
-      }')
-    [ -z "$(printf '%s' "$vinc_secao" | grep -E 'CA[0-9]+')" ] || break
-  done
-  vinc_ca=$(printf '%s\n' "$vinc_secao" | grep -E '^[[:space:]]*[-*]?[[:space:]]*(\[[ xX]\][[:space:]]*)?CA[0-9]+')
   if [ -n "$vinc_ca" ]; then
     vinc_ann=$(printf '%s\n' "$vinc_ca" | grep -c '→ test:')
     if [ "$vinc_ann" -eq 0 ]; then

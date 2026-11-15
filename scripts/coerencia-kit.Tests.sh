@@ -185,10 +185,11 @@ tl_espera 0 "coerência: ciclo descreve os níveis (completo só no revisor diff
 tl_espera 0 "coerência: revisor roda o verify completo, nunca --rapido" tem core/papeis/revisor.md 'Rode o `verify.sh` completo você mesmo — nunca `--rapido`'
 tl_espera 1 "coerência: dev não exige o completo antes de devolver" tem core/papeis/dev.md 'antes de devolver'
 tl_espera 0 "coerência: testes prova o RED com verifica-red, sem verify completo" tem core/papeis/testes.md 'verifica-red.sh` verde; o verify completo não é exigido de você'
-tl_espera 0 "coerência: verifica-artefato sempre e no worktree do autor (brief)" tem core/templates/brief.md 'no worktree do autor: `cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh'
-tl_espera 0 "coerência: verifica-artefato no worktree do autor (ciclo)" tem core/processo/ciclo.md 'no worktree do autor: `cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh'
+tl_espera 0 "coerência: verifica-artefato na árvore do autor (brief)" tem core/templates/brief.md '`cd <árvore> && sh agentic/mecanismos/scripts/verifica-artefato.sh'
+tl_espera 0 "coerência: verifica-artefato na árvore do autor (ciclo)" tem core/processo/ciclo.md '`cd <árvore> && sh agentic/mecanismos/scripts/verifica-artefato.sh'
 tl_espera 0 "coerência: /mudanca roda verifica-artefato no worktree do autor" tem adapters/claude-code/commands/mudanca.md 'cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh mudanca'
-tl_espera 0 "coerência: README esclarece Impacto e Pronto para revisão só em artefatos novos" tem README.md 'exigidas dos artefatos escritos depois da atualização'
+tl_espera 0 "coerência: README esclarece Impacto só em artefatos novos" tem README.md 'exigida dos designs e documentos de mudança escritos depois da atualização'
+tl_espera 0 "coerência: README põe Pronto para revisão no contrato, não no artefato" tem README.md '`## Pronto para revisão` é seção dos contratos dos papéis'
 tl_espera 1 "coerência: verifica-red sem sed 's/; /\n/' (GNU-only)" tem mecanismos/scripts/verifica-red.sh "sed 's/; /\n/g'"
 tl_espera 0 "coerência: config.padrao tem CMD_VERIFY_RAPIDO" tem bootstrap/config.padrao 'CMD_VERIFY_RAPIDO='
 tl_espera 0 "coerência: entrevista pergunta o comando rápido" tem bootstrap/entrevista.md 'CMD_VERIFY_RAPIDO'
@@ -216,5 +217,53 @@ tl_espera 0 "verifica-red: mensagem de CA sem anotação" tem mecanismos/scripts
 
 # --- Revisão que converge, Task 10: nota de atualização
 tl_espera 0 "README: nota de atualização" tem README.md '## O que muda ao atualizar o kit'
+
+# --- Varredura de coerência (2026-11-15): cada contradição corrigida ganha uma checagem que impede a volta.
+# Enumerações que precisam casar com os arquivos.
+for c in "$raiz"/adapters/claude-code/commands/*.md; do
+  n=$(basename "$c" .md)
+  tl_espera 0 "CLAUDE.md lista o comando /$n" tem adapters/claude-code/CLAUDE.md "\`/$n\`"
+done
+for c in "$raiz"/adapters/copilot/prompts/*.prompt.md; do
+  n=$(basename "$c" .prompt.md)
+  tl_espera 0 "copilot-instructions lista o prompt $n" tem adapters/copilot/copilot-instructions.md "\`$n\`"
+done
+for a in "$raiz"/adapters/claude-code/agents/*.md; do
+  n=$(basename "$a" .md)
+  tl_espera 0 "agente $n existe nos dois adaptadores" test -f "$raiz/adapters/copilot/agents/$n.agent.md"
+done
+tl_espera 0 "oráculo: template de agente nos dois adaptadores" test -f "$raiz/adapters/copilot/agente-oraculo.tmpl.md"
+tl_espera 0 "oráculo: instalado com o Copilot" tem bootstrap/instalar.sh 'adapters/copilot/agente-oraculo.tmpl.md'
+tl_espera 0 "oráculo: consulta pelo orquestrador (ciclo)" tem core/processo/ciclo.md '**Oráculo:** um papel não consulta oráculo direto'
+tl_espera 0 "oráculo: responde ao orquestrador" tem core/papeis/_oraculo.md 'Entregue a resposta ao orquestrador'
+# Formatos e termos que não podem voltar.
+tl_espera 0 "ID de critério é CA<n>, nunca CA-n" nenhum '<CA-|CA-[0-9n]' core adapters README.md
+tl_espera 0 "sem referência a glossário inexistente" nenhum 'glossário' core adapters README.md bootstrap
+tl_espera 0 "sem 'worktree do autor' (na trilha padrão não há worktree antes do Gate 1)" nenhum 'worktree do autor' core adapters README.md
+tl_espera 0 "commits: test: e docs(mudanca): na lista do ciclo" linha core/processo/ciclo.md '^- \*\*Commits:\*\* .*`test:`.*`docs\(mudanca\):`'
+# Níveis de verify: ninguém exige o completo de testes/dev.
+tl_espera 0 "ciclo: fase 4 do dev é verify --rapido" linha core/processo/ciclo.md '^\| 4 \| GREEN.*`verify\.sh --rapido`'
+tl_espera 1 "ciclo: enxuta sem verify completo entre GREEN e revisão" tem core/processo/ciclo.md 'GREEN/REFACTOR → `verify` →'
+tl_espera 0 "copilot: verificação por nível" tem adapters/copilot/copilot-instructions.md 'VERIFY RÁPIDO: OK'
+tl_espera 0 "brief: verify completo só no revisor diff" tem core/templates/brief.md 'nunca tira do `revisor` modo `diff`'
+tl_espera 0 "AGENTS: verificação do passo, não só verify.sh" tem core/templates/AGENTS.md 'Nunca afirme sucesso sem ter visto a saída da verificação do seu passo'
+# Regras com exceção declarada nos dois lados.
+tl_espera 0 "AGENTS: exceção da remoção autorizada" tem core/templates/AGENTS.md 'Única exceção: a remoção autorizada de asserções'
+tl_espera 0 "dev: dependência aprovada no Gate 1 não para" tem core/papeis/dev.md 'Dependência nova fora de "N3 aprovados no Gate 1"'
+tl_espera 0 "dev: escopo ampliado pelo orquestrador" tem core/processo/ciclo.md 'Ampliar o escopo é decisão do orquestrador, nunca do papel'
+tl_espera 0 "divergência spec × código vai em Divergências" tem core/processo/ciclo.md 'registre em "Divergências" da spec'
+tl_espera 0 "empilhamento só com plataforma de PR" tem core/processo/ciclo.md '**Branches empilhadas:** só com plataforma de PR'
+tl_espera 0 "README: delegação com enabled: true" tem README.md 'grava `enabled: true` e `gate1: D<n>`'
+tl_espera 0 "spec: delegado coberto pelo plano usa plano:" tem core/templates/spec.md 'Fonte plano:<arquivo>:<linha>'
+tl_espera 0 "/intent: dominio não conversa com o humano" tem adapters/claude-code/commands/intent.md 'o `dominio` nunca conversa direto com o humano'
+tl_espera 0 "/nova-task: primeira task usa a branch do Gate 1" tem adapters/claude-code/commands/nova-task.md 'crie-o sem `-b`'
+tl_espera 0 "copilot: status no início da sessão" tem adapters/copilot/copilot-instructions.md 'status-projeto.sh` antes de escolher a task'
+tl_espera 0 "hook: barra o desvio dos githooks" tem adapters/claude-code/hooks/pre-tool-use.sh '--no-v|hookspath|config-env|GIT_CONFIG_'
+
+tl_espera 0 "empilhamento só com plataforma de PR (README)" tem README.md 'Com plataforma de PR, quando a task anterior'
+tl_espera 0 "empilhamento só com plataforma de PR (task)" tem core/templates/task.md 'só com plataforma de PR'
+tl_espera 0 "ampliação de escopo nunca é do papel (verifica-escopo)" tem mecanismos/scripts/verifica-escopo.sh 'decisão do orquestrador'
+tl_espera 0 "Ruling depois do último commit de papel vai ao Gate 2" tem core/processo/ciclo.md 'quem a confere é o humano, no Gate 2'
+tl_espera 0 "dominio não entrevista o humano" nenhum 'a partir da entrevista|conduz.{0,4} a entrevista' core adapters
 
 tl_fim
