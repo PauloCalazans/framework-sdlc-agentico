@@ -17,6 +17,7 @@
 
 ## Critérios de aceite
 - CA1 (R1): dado <contexto>, quando <ação>, então <resultado observável>
+<!-- Anote cada critério: `CA<n> (<R…>): <texto> → test: <arquivo>::<nome>` (mais de um teste: separe por `; `). O arquivo anotado precisa ser tocado por um commit test(red):. -->
 
 ## Arquivos
 - `<caminho/exato>`

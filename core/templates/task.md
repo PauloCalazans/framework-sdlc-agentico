@@ -24,6 +24,7 @@
 
 ## Critérios de pronto
 - <critério de aceite da spec coberto por esta task>
+<!-- Anote cada critério: `CA<n> (<R…>): <texto> → test: <arquivo>::<nome>` (mais de um teste: separe por `; `). O arquivo anotado precisa ser tocado por um commit test(red):. -->
 - `sh agentic/mecanismos/scripts/verify.sh` verde
 
 ## Questões em aberto

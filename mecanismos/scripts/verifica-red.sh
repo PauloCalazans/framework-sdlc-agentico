@@ -16,6 +16,8 @@
 #       entre a base e o pai de X (registrada antes da remoção). O crédito de X é no máximo a queda de asserções
 #       do arquivo em X, mesmo com várias declarações; o limite passa a ser (asserções no RED - créditos).
 #   (4) cache: a prova de (2) é guardada por SHA do RED e assinatura dos comandos de teste, e reaproveitada (ver
+#   (5) vínculo CA → teste: cada CA da task da branch (**Branch:**) tem "→ test: <arquivo>::<nome>" e o arquivo é
+#       tocado por commit RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa.
 #       "Cache (4)" mais abaixo); AGENTIC_RED_SEM_CACHE=1 ignora a leitura. (1) e (3) rodam sempre.
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
@@ -271,5 +273,63 @@ EOT
     fi
   done < "$lista"
 done
+
+# --- Vínculo CA -> teste (task da branch): cada CA da seção precisa de "→ test: <arquivo>::<nome>", e o arquivo
+# anotado precisa ter sido tocado por um commit RED. Task sem nenhuma anotação (anterior a esta versão do kit)
+# só gera aviso; branch sem task (trilha rápida) não é checada.
+vinc_task=""
+vinc_br=$(git symbolic-ref --short -q HEAD)
+if [ -n "$vinc_br" ]; then
+  for vinc_f in agentic/projeto/specs/*/tasks/*.md; do
+    [ -f "$vinc_f" ] || continue
+    vinc_b=$(sed -n 's/^\*\*Branch:\*\*[[:space:]]*//p' "$vinc_f" | head -n 1 | tr -d '\r`' | sed 's/[[:space:]]*$//')
+    [ "$vinc_b" = "$vinc_br" ] && { vinc_task=$vinc_f; break; }
+  done
+fi
+if [ -n "$vinc_task" ]; then
+  # Seção "Critérios de pronto" (task) ou, sem ela, "Critérios de aceite" (mudança); sem \r, backticks e comentários HTML.
+  vinc_secao=""
+  for vinc_t in 'Critérios de pronto' 'Critérios de aceite'; do
+    vinc_secao=$(tr -d '\r`' < "$vinc_task" | awk -v t="## $vinc_t" '
+      BEGIN { achou = 0 }
+      /^## / { if (dentro) exit; dentro = ($0 == t); if (dentro) achou = 1; next }
+      dentro {
+        l = $0
+        while (1) {
+          if (com) { i = index(l, "-->"); if (!i) { l = ""; break } l = substr(l, i + 3); com = 0 }
+          i = index(l, "<!--"); if (!i) break
+          j = index(substr(l, i + 4), "-->")
+          if (j) l = substr(l, 1, i - 1) substr(l, i + 4 + j + 2); else { l = substr(l, 1, i - 1); com = 1 }
+        }
+        print l
+      }')
+    [ -z "$(printf '%s' "$vinc_secao" | grep -E 'CA[0-9]+')" ] || break
+  done
+  vinc_ca=$(printf '%s\n' "$vinc_secao" | grep -E '^[[:space:]]*[-*]?[[:space:]]*CA[0-9]+')
+  if [ -n "$vinc_ca" ]; then
+    vinc_ann=$(printf '%s\n' "$vinc_ca" | grep -c '→ test:')
+    if [ "$vinc_ann" -eq 0 ]; then
+      echo "aviso: task sem anotação → test: (anterior a esta versão do kit) — vínculo CA → teste não verificado"
+    else
+      vinc_tocados=$(for c in $reds; do git -c core.quotepath=off diff-tree --no-commit-id --name-only -r "$c"; done | sort -u)
+      printf '%s\n' "$vinc_ca" | while IFS= read -r vinc_l; do
+        vinc_id=$(printf '%s' "$vinc_l" | grep -oE 'CA[0-9]+' | head -n 1)
+        case "$vinc_l" in
+          *"→ test:"*) ;;
+          *) echo "agentic: BLOQUEADO — $vinc_id sem → test: na task $vinc_task"; continue ;;
+        esac
+        vinc_resto=${vinc_l#*→ test:}
+        printf '%s\n' "$vinc_resto" | sed 's/; /\n/g' | while IFS= read -r vinc_i; do
+          vinc_a=${vinc_i%%::*}
+          vinc_a=$(printf '%s' "$vinc_a" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+          [ -n "$vinc_a" ] || continue
+          printf '%s\n' "$vinc_tocados" | grep -qxF -- "$vinc_a" \
+            || echo "agentic: BLOQUEADO — $vinc_a anotado em $vinc_id não foi tocado por commit test(red):"
+        done
+      done > "$lista"
+      if [ -s "$lista" ]; then cat "$lista"; status=1; fi
+    fi
+  fi
+fi
 rm -f "$lista" "$pend"
 exit $status

@@ -196,4 +196,11 @@ tl_espera 1 "mudanca: sem em-andamento na lista do passo 6" tem adapters/claude-
 
 tl_espera 1 "README: sem commit docs(task) de em-andamento" tem README.md 'docs(task): ... em-andamento'
 
+
+# --- Revisão que converge, Task 9: vínculo CA → teste no commit RED
+tl_espera 0 "testes: CA anotado com → test: no RED" tem core/papeis/testes.md '→ test: <arquivo>::<nome>'
+tl_espera 0 "template task: formato da anotação" tem core/templates/task.md '→ test: <arquivo>::<nome>'
+tl_espera 0 "template mudanca: formato da anotação" tem core/templates/mudanca.md '→ test: <arquivo>::<nome>'
+tl_espera 0 "verifica-red: mensagem de CA sem anotação" tem mecanismos/scripts/verifica-red.sh 'sem → test: na task'
+
 tl_fim
