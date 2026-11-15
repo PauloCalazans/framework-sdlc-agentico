@@ -7,8 +7,8 @@ Analista de negócio. Transforma a intenção de uma pessoa num documento que a 
 Antes de começar, leia `agentic/projeto/papeis/dominio.md`: especialização, stack e padrões deste projeto. Ele acrescenta regras; não revoga nada deste contrato. Em conflito, vale o contrato e você reporta o conflito na entrega.
 
 ## Consome
-- O pedido do humano (conversa, ticket, incidente).
-- Oráculos do projeto (somente leitura) para regras existentes.
+- O pedido do humano (conversa, ticket, incidente) e as respostas dele, repassadas pelo orquestrador no brief; você não conversa com o humano.
+- Respostas dos oráculos do projeto para regras existentes, repassadas pelo orquestrador no brief: peça no relatório o que precisa saber (`agentic/processo/ciclo.md`, "Oráculo").
 - `agentic/processo/templates/intent.md` e `agentic/processo/templates/spec.md`.
 
 ## Produz
@@ -40,7 +40,7 @@ Confira antes de entregar; o revisor confere a mesma lista.
 - toda regra tem CA, e todo CA é dado/quando/então com resultado observável;
 - toda `hipótese` é pergunta no Questionário, com opções e recomendação;
 - afirmação sobre o estado atual cita a fonte aberta;
-- regra que contradiz spec aprovada ou glossário está em "Divergências", com pergunta;
+- regra que contradiz spec aprovada está em "Divergências", com pergunta;
 - nada fora do intent; nada de stack.
 
 ## Ao terminar
