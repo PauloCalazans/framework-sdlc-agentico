@@ -203,4 +203,7 @@ tl_espera 0 "template task: formato da anotação" tem core/templates/task.md '�
 tl_espera 0 "template mudanca: formato da anotação" tem core/templates/mudanca.md '→ test: <arquivo>::<nome>'
 tl_espera 0 "verifica-red: mensagem de CA sem anotação" tem mecanismos/scripts/verifica-red.sh 'sem → test: na task'
 
+# --- Revisão que converge, Task 10: nota de atualização
+tl_espera 0 "README: nota de atualização" tem README.md '## O que muda ao atualizar o kit'
+
 tl_fim
