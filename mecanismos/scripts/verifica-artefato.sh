@@ -124,8 +124,10 @@ existe_ou_criado() {
 # cita_caminhos <arquivo> <seção> <arquivo de padrões>
 cita_caminhos() {
   secao "$1" "$2" | grep -o '`[^`]*`' | sed 's/^`//;s/`$//' | while IFS= read -r c; do
-    case "$c" in "<"*|*" "*) continue ;; */*) ;; *) continue ;; esac
-    printf '%s\n' "$c" | sed 's/:[0-9][0-9]*\(-[0-9][0-9]*\)\{0,1\}$//'
+    # rota (/api/...), chave ({id}) e <placeholder> não são caminhos do repositório
+    case "$c" in "<"*|"/"*|*" "*|*"{"*|*"}"*) continue ;; */*) ;; *) continue ;; esac
+    # tira ::teste, #âncora e :linha[-linha]
+    printf '%s\n' "$c" | sed 's/::.*$//; s/#.*$//; s/:[0-9][0-9]*\(-[0-9][0-9]*\)\{0,1\}$//'
   done | sort -u > "$T/cit"
   while IFS= read -r c; do
     [ -n "$c" ] || continue
@@ -189,7 +191,11 @@ ck_sem_aprovacao() {  # 4
   fi
   if [ "$modo" = mudanca ]; then
     for s in Rulings 'Questões em aberto'; do
-      secao "$doc" "$s" | grep -v '^[[:space:]]*$' | grep -vE '^[[:space:]]*-[[:space:]]*Nenhuma\.?[[:space:]]*$' > "$T/sec"
+      # linha só de <placeholders> (cópia antiga do template, com o exemplo R-1 vivo) conta como vazia
+      secao "$doc" "$s" | grep -v '^[[:space:]]*$' | grep -vE '^[[:space:]]*-[[:space:]]*Nenhuma\.?[[:space:]]*$' | while IFS= read -r l; do
+        resto=$(printf '%s' "$l" | sed 's/<[^>]*>//g; s/R-[0-9][0-9]*//g; s/por quê//g; s/descartado//g' | tr -d '[:space:][:punct:]—')
+        { [ -z "$resto" ] && printf '%s' "$l" | grep -q '<[^>]*>'; } || printf '%s\n' "$l"
+      done > "$T/sec"
       ! [ -s "$T/sec" ] || falha "'$s' não está vazia antes do Gate 1 ($doc)"
     done
     if secao "$doc" Questionário | grep -qE '^[[:space:]]*Resposta'; then

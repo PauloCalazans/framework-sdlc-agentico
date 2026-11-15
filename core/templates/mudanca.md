@@ -67,5 +67,5 @@
 
 ## Rulings
 <!-- Só o orquestrador escreve, depois do Gate 1: decisões não previstas neste documento (agentic/processo/ciclo.md, "Rulings"). Ruling não aprova N3. -->
-- R-1 (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>
-<!-- ou: - Nenhuma. -->
+- Nenhuma.
+<!-- Quando houver, uma linha por ruling: - R-1 (<fase>): <o quê> — por quê: <…> — descartado: <alternativa> -->
