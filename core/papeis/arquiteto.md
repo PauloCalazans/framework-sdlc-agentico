@@ -63,6 +63,11 @@ Confira antes de entregar; o revisor confere a mesma lista.
 - decisões do design sem prefixo `D`;
 - "Decisão do humano", "Questões em aberto" e "Rulings" vazias; nada afirma aprovação;
 - `verifica-artefato.sh` verde.
+- Na mudança (trilha enxuta), também:
+  - toda regra tem `Fonte:` aberta por você, ou `Q<n>` com a pergunta no "Questionário";
+  - as perguntas são objetivas, com opções e recomendação, e nenhuma foi respondida por você;
+  - todo acréscimo a contrato público está em "Itens N3" e é só acréscimo: nada removido, renomeado ou com tipo ou semântica alterados;
+  - decisões novas estão listadas em "Decisões novas" do documento.
 
 ## Ao terminar
 Grave no arquivo de relatório que o brief indica: caminho do design, saída da validação do contrato, declaração de corpos (vazia ou com o porquê de cada item), lista de tasks com escopo. O próximo passo é o `revisor` em modo `design`, depois o Gate 1. Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.

@@ -156,4 +156,7 @@ tl_espera 1 "revisor: modo mudanca não repete a lista do autor" tem core/papeis
 tl_espera 1 "revisor: modo design não repete a lista do autor" tem core/papeis/revisor.md 'está em "Itens N3 (aprovação no Gate 1)", e cada task cita'
 tl_espera 0 "revisor: mudanca mantém a classificação errada como Importante" tem core/papeis/revisor.md 'mais de uma task) é achado **Importante**'
 
+tl_espera 0 "arquiteto: Pronto cobre acréscimo só acréscimo" tem core/papeis/arquiteto.md 'nada removido, renomeado ou com tipo ou semântica alterados'
+tl_espera 0 "arquiteto: Pronto cobre decisões novas da mudança" tem core/papeis/arquiteto.md 'listadas em "Decisões novas"'
+
 tl_fim
