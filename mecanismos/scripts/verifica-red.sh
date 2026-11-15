@@ -17,7 +17,11 @@
 #       do arquivo em X, mesmo com várias declarações; o limite passa a ser (asserções no RED - créditos).
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
-base=${1:-$(agentic_base)}
+if [ -n "${1:-}" ]; then
+  base=$(git merge-base HEAD "$1") || agentic_falha "base inválida: $1"
+else
+  base=$(agentic_base)
+fi
 [ -n "$base" ] || agentic_falha "sem base de comparação (a branch principal '$BRANCH_PRINCIPAL' existe?)"
 git rev-parse --verify -q "$base^{commit}" >/dev/null || agentic_falha "base inválida: $base"
 

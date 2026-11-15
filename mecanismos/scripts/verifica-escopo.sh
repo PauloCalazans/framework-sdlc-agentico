@@ -5,7 +5,11 @@
 cd "$agentic_raiz" || exit 1
 task=${1:-}
 [ -n "$task" ] && [ -f "$task" ] || { echo "uso: verifica-escopo.sh <task.md relativo à raiz> [base]" >&2; exit 2; }
-base=${2:-$(agentic_base)}
+if [ -n "${2:-}" ]; then
+  base=$(git merge-base HEAD "$2") || agentic_falha "base inválida: $2"
+else
+  base=$(agentic_base)
+fi
 [ -n "$base" ] || agentic_falha "sem base de comparação (a branch principal '$BRANCH_PRINCIPAL' existe?)"
 git rev-parse --verify -q "$base^{commit}" >/dev/null || agentic_falha "base inválida: $base"
 
