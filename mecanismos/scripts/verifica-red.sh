@@ -119,33 +119,30 @@ removidas_autorizadas() {
 # CMD_PREPARAR_TESTE, CMD_TESTE_ARQUIVO e CMD_TESTE, então mudar qualquer um invalida a prova. O diretório comum
 # é compartilhado entre worktrees. Nunca se guarda RED que passava, comando não encontrado nem preparo com falha.
 # A recusa de produção e a contagem de asserções rodam sempre. AGENTIC_RED_SEM_CACHE=1 ignora a leitura.
-cache_dir=$(git rev-parse --git-common-dir 2>/dev/null | tr -d '')
+cache_dir=$(git rev-parse --git-common-dir 2>/dev/null | tr -d '\r')
 case "$cache_dir" in
-  /*|?:*) ;;
-  *) cache_dir="$agentic_raiz/$cache_dir" ;;
+  "") cache_arq="" ;; # sem diretório comum: cache desligado (nem leitura nem gravação)
+  /*|?:*) cache_arq="$cache_dir/agentic/red-provados" ;;
+  *) cache_dir="$agentic_raiz/$cache_dir"; cache_arq="$cache_dir/agentic/red-provados" ;;
 esac
-cache_arq="$cache_dir/agentic/red-provados"
-assinatura=$(printf '%s
-%s
-%s
-' "$CMD_PREPARAR_TESTE" "$CMD_TESTE_ARQUIVO" "$CMD_TESTE" | git hash-object --stdin)
+assinatura=$(printf '%s\n%s\n%s\n' "$CMD_PREPARAR_TESTE" "$CMD_TESTE_ARQUIVO" "$CMD_TESTE" | git hash-object --stdin) || cache_arq=""
 
 # red_provado <sha> <arquivo>: 0 se há prova guardada com a assinatura atual (e o cache não está desligado).
 red_provado() {
   [ "${AGENTIC_RED_SEM_CACHE:-}" = 1 ] && return 1
-  [ -f "$cache_arq" ] || return 1
+  [ -n "$cache_arq" ] && [ -f "$cache_arq" ] || return 1
   RP_SHA=$1 RP_SIG=$assinatura RP_ARQ=$2 awk '
     BEGIN { sha = ENVIRON["RP_SHA"]; sig = ENVIRON["RP_SIG"]; arq = ENVIRON["RP_ARQ"] }
-    { sub(/$/, "") }
+    { sub(/\r$/, "") }
     $1 == sha && $2 == sig && substr($0, length(sha) + length(sig) + 3) == arq { ok = 1 }
     END { exit ok ? 0 : 1 }' "$cache_arq"
 }
 
 # guarda_prova <sha> <arquivo>: acrescenta a prova ao cache (falha de gravação não derruba a verificação).
 guarda_prova() {
+  [ -n "$cache_arq" ] || return 0
   mkdir -p "$cache_dir/agentic" 2>/dev/null || return 0
-  printf '%s %s %s
-' "$1" "$assinatura" "$2" >> "$cache_arq" 2>/dev/null
+  printf '%s %s %s\n' "$1" "$assinatura" "$2" >> "$cache_arq" 2>/dev/null
   return 0
 }
 
@@ -177,7 +174,8 @@ avalia_rc() {
       status=1 ;;
     *)
       echo "RED $curto: falhava ($2) (ok)"
-      guarda_prova "$c" "$4" ;;
+      # rc >= 124 é timeout (124) ou sinal (>= 128): execução interrompida não é prova permanente.
+      [ "$1" -ge 124 ] || guarda_prova "$c" "$4" ;;
   esac
 }
 
@@ -225,8 +223,7 @@ EOT
       if red_provado "$c" "$f"; then
         echo "RED $curto: já provado ($f) (ok)"
       else
-        printf '%s
-' "$f" >> "$pend"
+        printf '%s\n' "$f" >> "$pend"
       fi
     done < "$lista"
   elif red_provado "$c" '*suite*'; then
