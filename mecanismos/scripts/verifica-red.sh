@@ -20,7 +20,7 @@
 #   (5) vínculo CA → teste: cada CA da task (AGENTIC_TASK, exportada pelo verify.sh, inclusive com --task; ou a
 #       task de **Branch:** igual à branch atual) tem "→ test: <arquivo>::<nome>" e o arquivo é tocado por commit
 #       RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa. Task com CA e nenhum commit
-#       RED bloqueia quando a branch tem código além de docs, chore e test: só de teste (GREEN sem RED), salvo
+#       RED bloqueia quando a branch tem código além de docs só de documentação, chore e test: só de teste (GREEN sem RED), salvo
 #       task de remoção de comportamento (trailer Assercoes-removidas:).
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
@@ -47,6 +47,12 @@ else
     done
   fi
 fi
+# ref_registrada <rev> <ref>: a referência aparece numa linha acrescentada sob agentic/projeto/ entre a base e <rev>.
+ref_registrada() {
+  git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
+    | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]]|$)"
+}
+
 # CAs da task (mesma definição para "GREEN sem RED" e para o vínculo).
 vinc_ca=""
 if [ -n "$vinc_task" ]; then
@@ -76,18 +82,29 @@ if [ -z "$reds" ]; then
   # contrato executável (chore) nem teste (test: só com arquivos de teste ou documentação). Task de remoção de
   # comportamento (trailer Assercoes-removidas:) não tem RED por construção ("Remoção de comportamento" no ciclo).
   if [ -n "$vinc_ca" ]; then
-    gr_commits=$(git log --no-merges --format=%H "$base..HEAD" --not "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL" 2>/dev/null \
-      || git log --no-merges --format=%H "$base..HEAD")
+    gr_nao=""
+    for gr_p in "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL"; do
+      git rev-parse --verify -q "$gr_p^{commit}" >/dev/null 2>&1 && gr_nao="$gr_nao $gr_p"
+    done
+    gr_commits=$(git log --no-merges --format=%H "$base..HEAD" ${gr_nao:+--not $gr_nao})
     gr_remocao=""; gr_green=""
     for c in $gr_commits; do
-      git log -1 --format=%B "$c" | grep -q '^Assercoes-removidas:' && gr_remocao=1
+      # Remoção só vale com a referência registrada sob agentic/projeto/ antes do commit (ciclo, "Remoção de comportamento").
+      for gr_ref in $(git log -1 --format='%(trailers:key=Assercoes-removidas,valueonly)' "$c" | sed -n 's/.*(\([^)]*\)).*/\1/p'); do
+        ref_registrada "$c^" "$gr_ref" && gr_remocao=1
+      done
       gr_s=$(git log -1 --format=%s "$c")
       case "$gr_s" in
-        docs:*|docs\(*|chore:*|chore\(*) continue ;;
-        test:*|test\(*)
+        chore:*|chore\(*) continue ;; # contrato executável: o esqueleto é conferido pelo revisor (limite declarado)
+        docs:*|docs\(*|test:*|test\(*)
+          # docs só com documentação (*.md, docs/, agentic/projeto/); test: também com arquivos de teste.
+          gr_tipo=${gr_s%%[(:]*}
           gr_prod=$(git -c core.quotepath=off diff-tree --no-commit-id --name-only -r "$c" | while IFS= read -r f; do
-            case "$f" in docs/*|agentic/projeto/*) continue ;; esac
-            gr_t=""; set -f; for d in $DIRS_TESTE; do case "$f" in "$d"*) gr_t=1 ;; esac; done; set +f
+            case "$f" in docs/*|agentic/projeto/*|*.md) continue ;; esac
+            gr_t=""
+            if [ "$gr_tipo" = test ]; then
+              set -f; for d in $DIRS_TESTE; do case "$f" in "$d"*) gr_t=1 ;; esac; done; set +f
+            fi
             [ -n "$gr_t" ] || echo "$f"
           done)
           [ -n "$gr_prod" ] && gr_green="$gr_green ${c%"${c#???????}"}" ;;
@@ -121,12 +138,6 @@ conta_assercoes() {
 # ignora_trailer <portador> <motivo> <linha>: explica por que uma declaração não conta (em stderr).
 ignora_trailer() {
   echo "verifica-red: trailer Assercoes-removidas ignorado em $(git rev-parse --short "$1") ($2): $3" >&2
-}
-
-# ref_registrada <rev> <ref>: a referência aparece numa linha acrescentada sob agentic/projeto/ entre a base e <rev>.
-ref_registrada() {
-  git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
-    | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]]|$)"
 }
 
 # removidas_autorizadas <rev-red> <arquivo>: créditos de remoção autorizada do arquivo para esse RED, a partir

@@ -27,5 +27,5 @@ Merge na branch principal e permissões do agente pertencem ao humano.
 **Verificado por:** revisão.
 
 ## 7. Erros pequenos, visíveis e reversíveis
-Cada task ou mudança é executada num worktree isolado (antes do Gate 1 da trilha padrão, intent, spec, design, tasks e o esqueleto do contrato executável são escritos na árvore principal, sem commit); tasks têm escopo declarado; descartar uma execução ruim deve ser barato.
+Cada task ou mudança é executada num worktree isolado (antes do Gate 1 da trilha padrão, intent, spec, design, tasks, decisões novas e o esqueleto do contrato executável são escritos na árvore principal, sem commit); tasks têm escopo declarado; descartar uma execução ruim deve ser barato.
 **Verificado por:** `verifica-escopo.sh` (escopo); revisão (isolamento por worktree).

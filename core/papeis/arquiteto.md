@@ -20,6 +20,8 @@ Antes de começar, leia `agentic/projeto/papeis/arquiteto.md`: especialização,
   - Todo outro corpo de método ou função é o stub da stack (o perfil diz qual), citando a task que o implementa — inclusive na infraestrutura: handlers de erro, segurança/autorização, links, configuração, facades, casos de uso, agregados.
   - Invariante e regra vão documentadas (comentário de assinatura e critério da task), não implementadas.
   - Rode a validação e registre a saída no design (`medido`).
+  - Todo arquivo do esqueleto entra em `## Arquivos` da primeira task: o esqueleto inteiro é commitado na branch dela (`chore: contrato executável`, logo depois do registro do Gate 1), e o `verifica-escopo.sh` compara com essa lista.
+  - Com decisão nova, `agentic/projeto/decisoes.md` (e `AGENTS.md`, quando ela mexe em gatilho N3) entram no registro do Gate 1 e em `## Arquivos` da primeira task.
 - **Declaração de corpos:** no design (seção "Contrato executável"), a lista de todo corpo do contrato que não é stub, com o porquê. Esperado: vazia ou só acessos triviais.
 - `## Impacto` no design: cada símbolo, rota, schema ou regra alterada; quem usa hoje (`arquivo:linha`, achado por busca, `medido`); em que task está; que teste existente quebra; que regra de outra spec aprovada muda — com a emenda, que vira item do Gate 1.
 - `agentic/projeto/specs/<nome>/tasks/NNN-<nome>.md`: cada task com `**Branch:**`, `## Arquivos` (escopo exato, globs permitidos), interfaces produzidas/consumidas, "N3 aprovados no Gate 1" (quais itens N3 do design ela usa, ou `- Nenhum.`) e critérios de pronto.

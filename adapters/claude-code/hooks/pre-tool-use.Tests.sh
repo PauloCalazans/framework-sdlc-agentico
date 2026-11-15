@@ -52,4 +52,15 @@ tl_espera 2 "bloqueia opção depois de tab" roda 'git commit -m x\t--no-verify'
 tl_espera 0 "permite git log --grep commit -n 5" roda 'git log --grep commit -n 5'
 tl_espera 0 "permite heredoc de commit com -n no corpo, em outra linha" roda 'git commit -F - <<EOF\nusa head -n 1\nEOF'
 
+# Re-revisão 2: git.exe, linha continuada, opção global com argumento separado.
+tl_espera 2 "bloqueia git.exe --no-verify" roda 'git.exe commit -m x --no-verify'
+tl_espera 2 "bloqueia git.exe commit -n" roda 'git.exe commit -m x -n'
+tl_espera 2 "bloqueia -n em linha continuada" roda 'git commit -m x \\n  -n'
+tl_espera 2 "bloqueia --git-dir dir commit -n" roda 'git --git-dir .git commit -n'
+tl_espera 2 "bloqueia --work-tree dir commit -n" roda 'git --work-tree . commit -n'
+tl_espera 0 "permite git.exe log -n 3" roda 'git.exe log -n 3'
+tl_espera 2 "bloqueia --no-verify ofuscado com aspas vazias" roda 'git commit -m x --n\"\"o-verify'
+tl_espera 2 "bloqueia --no-verify ofuscado com barra invertida" roda 'git commit -m x --\\\\no-verify'
+tl_espera 2 "bloqueia git<tab>commit -n" roda 'git\tcommit -m x -n'
+
 tl_fim
