@@ -126,4 +126,19 @@ tl_espera 0 "brief: lista Ao receber cita verifica-artefato.sh" tem core/templat
 tl_espera 0 "ciclo: cita verifica-artefato.sh" tem core/processo/ciclo.md 'verifica-artefato.sh'
 tl_espera 0 "config.padrao: CAMINHOS_N3" tem bootstrap/config.padrao 'CAMINHOS_N3='
 
+# --- Revisão que converge, Task 2: impacto é entrega do arquiteto
+for t in core/templates/design.md core/templates/mudanca.md; do
+  tl_espera 0 "$t: seção ## Impacto" tem $t '## Impacto'
+  tl_espera 0 "$t: colunas do Impacto" tem $t '| Alterado (símbolo, rota, schema, regra) | Quem usa hoje (arquivo:linha, medido) |'
+done
+tl_espera 0 "design: Impacto depois do contrato" ordem core/templates/design.md '## Contrato executável' '## Impacto'
+tl_espera 0 "mudança: Impacto depois de Arquivos" ordem core/templates/mudanca.md '## Arquivos' '## Impacto'
+tl_espera 0 "design: decisões sem prefixo D" tem core/templates/design.md 'sem o prefixo `D`'
+tl_espera 0 "arquiteto consome o código e as specs afetadas" tem core/papeis/arquiteto.md 'specs aprovadas que a mudança toca'
+tl_espera 0 "arquiteto produz o Impacto" tem core/papeis/arquiteto.md '## Impacto'
+tl_espera 0 "dominio: estado atual com fonte" tem core/papeis/dominio.md 'estado atual'
+tl_espera 0 "ciclo: emenda a outra spec" tem core/processo/ciclo.md 'Emenda a outra spec'
+tl_espera 1 "arquiteto: Produz sem item com mais de 400 caracteres" sh -c \
+  "tr -d '\r' < '$raiz/core/papeis/arquiteto.md' | sed -n '/^## Produz/,/^## /p' | awk 'length > 400' | grep -q ."
+
 tl_fim

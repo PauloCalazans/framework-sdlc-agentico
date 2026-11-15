@@ -10,11 +10,18 @@ Antes de começar, leia `agentic/projeto/papeis/arquiteto.md`: especialização,
 - `spec.md` revisada.
 - `agentic/projeto/decisoes.md` (decisões vigentes; nunca contradiga uma sem registrar a revogação).
 - `agentic/processo/templates/design.md` e `agentic/processo/templates/task.md`.
+- O código do repositório e as specs aprovadas que a mudança toca (leia antes de desenhar; o que você afirma sobre eles é medido).
 
 ## Produz
 - `agentic/projeto/specs/<nome>/design.md`: decisões numeradas, o que não muda, "o desconfortável, declarado", e a lista "Itens N3 (aprovação no Gate 1)" com todo gatilho N3 já visível no desenho (vazia se não houver) — o humano aprova cada item no Gate 1.
-- **Contrato executável:** assinaturas que compilam/validam com o comando da stack, **sem comportamento**. Só têm conteúdo os tipos sem comportamento (records, enums, constantes, anotações, DTOs), o schema/DDL e as rotas declaradas; corpo permitido é só acesso trivial a dado (getter, acessor, fábrica que só chama o construtor). Todo outro corpo de método ou função é o stub da stack (o perfil diz qual), citando a task que o implementa — inclusive na infraestrutura: handlers de erro, segurança/autorização, links, configuração, facades, casos de uso, agregados. Invariante e regra vão documentadas (comentário de assinatura e critério da task), não implementadas. Rode a validação e registre a saída no design (`medido`).
+- **Contrato executável:** assinaturas que compilam/validam com o comando da stack, **sem comportamento**.
+  - O que é contrato: tipos sem comportamento (records, enums, constantes, anotações, DTOs), o schema/DDL e as rotas declaradas.
+  - O que pode ter corpo: só acesso trivial a dado (getter, acessor, fábrica que só chama o construtor).
+  - Todo outro corpo de método ou função é o stub da stack (o perfil diz qual), citando a task que o implementa — inclusive na infraestrutura: handlers de erro, segurança/autorização, links, configuração, facades, casos de uso, agregados.
+  - Invariante e regra vão documentadas (comentário de assinatura e critério da task), não implementadas.
+  - Rode a validação e registre a saída no design (`medido`).
 - **Declaração de corpos:** no design (seção "Contrato executável"), a lista de todo corpo do contrato que não é stub, com o porquê. Esperado: vazia ou só acessos triviais.
+- `## Impacto` no design: cada símbolo, rota, schema ou regra alterada; quem usa hoje (`arquivo:linha`, achado por busca, `medido`); em que task está; que teste existente quebra; que regra de outra spec aprovada muda — com a emenda, que vira item do Gate 1.
 - `agentic/projeto/specs/<nome>/tasks/NNN-<nome>.md`: cada task com `**Branch:**`, `## Arquivos` (escopo exato, globs permitidos), interfaces produzidas/consumidas, "N3 aprovados no Gate 1" (quais itens N3 do design ela usa, ou `- Nenhum.`) e critérios de pronto.
 - Novas entradas em `agentic/projeto/decisoes.md` quando uma decisão vale além desta spec.
 
@@ -25,6 +32,7 @@ Na trilha enxuta (`agentic/processo/ciclo.md`, "Trilha enxuta") você escreve **
 - Acréscimo a contrato público (constante, campo opcional, rota, símbolo novo) é N3: liste em "Itens N3 (aprovação no Gate 1)" com o porquê de ser só acréscimo. Qualquer outro gatilho N3, ou mudança que não cabe numa única task: recuse a trilha enxuta e diga por quê; a mudança segue pela trilha padrão.
 - Contrato executável, quando houver interface nova ou alterada: esqueleto no worktree (mesma definição de "Produz": corpos são o stub da stack, com a declaração de corpos), só em arquivos de `## Arquivos`, validado com o comando da stack, saída na seção "Contrato executável" (`medido`). Nenhum outro arquivo de produção antes do Gate 1.
 - Decisão nova: proponha em "Decisões novas" e escreva em `agentic/projeto/decisoes.md` no worktree (com o arquivo em `## Arquivos`); ela só vale depois de aprovada no Gate 1.
+- `## Impacto` no documento único, depois de `## Arquivos`: a mesma tabela do design (símbolo alterado, quem usa hoje `medido`, task, teste afetado, regra de outra spec → emenda).
 - Não escreva respostas do questionário, a coluna "Decisão do humano", "Questões em aberto" nem "Rulings", e nunca escreva que algo foi aprovado: essas partes são do orquestrador, e o Gate 1 é o commit de registro.
 - Grave no arquivo de relatório que o brief indica: caminho do documento, perguntas abertas (quantas), itens N3 (quantos), contrato executável (`medido` e declaração de corpos, ou "não há"), decisões novas propostas. O próximo passo é o `revisor` em modo `mudanca`, depois o Gate 1.
 
