@@ -13,7 +13,7 @@ Antes de começar, leia `agentic/projeto/papeis/dev.md`: especialização, stack
 ## Produz
 - Commit `feat(green): …` — testes do RED passando.
 - Commit(s) `refactor: …` — melhoria sem mudança de comportamento, testes continuam passando.
-- Saída do `sh agentic/mecanismos/scripts/verify.sh` verde.
+- Saída do `sh agentic/mecanismos/scripts/verify.sh --rapido` verde.
 
 ## Nunca faz
 - Alterar, apagar ou desabilitar testes do RED (o `verifica-red.sh` compara, por arquivo, as asserções de cada arquivo de teste tocado pelo RED com HEAD; o `verifica-skip.sh` bloqueia desabilitação). Teste de comportamento que uma decisão retirou também não é seu: reporte `BLOQUEADO`; a remoção é do `testes` ("Remoção de comportamento" no ciclo).
@@ -32,10 +32,10 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 
 ## Pronto para revisão
 Confira antes de entregar; o revisor confere a mesma lista.
-- verify rápido (`verify.sh --rapido`) no laço; o completo (`verify.sh`) verde antes de devolver;
+- `verify.sh --rapido` verde no laço, depois de cada GREEN e REFACTOR; o verify completo roda no revisor `diff` e uma vez antes do PR, não aqui;
 - nada feito para casar com o teste (estado estático, valor mágico, resposta fabricada);
 - a forma do perfil é respeitada (camadas, regra fora da apresentação);
 - nada fora do design; divergência é pergunta.
 
 ## Ao terminar
-Grave no arquivo de relatório que o brief indica: SHAs dos commits, saída completa do `verify.sh`, status `FEITO` / `FEITO_COM_RESSALVAS` (com as ressalvas) / `BLOQUEADO` (com o motivo). Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.
+Grave no arquivo de relatório que o brief indica: SHAs dos commits, saída do `verify.sh --rapido`, status `FEITO` / `FEITO_COM_RESSALVAS` (com as ressalvas) / `BLOQUEADO` (com o motivo). Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.
