@@ -15,6 +15,8 @@ CMD_PREPARAR_TESTE=""
 CMD_TESTE=""
 CMD_TESTE_ARQUIVO=""
 CMD_VERIFY_STACK=""
+CMD_VALIDA_CONTRATO=""
+CAMINHOS_N3=""
 GITLEAKS_BIN="gitleaks"
 
 if [ -f "$agentic_raiz/agentic/config" ]; then

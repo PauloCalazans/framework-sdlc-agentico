@@ -121,4 +121,9 @@ tl_espera 0 "testes: No brief mantém a ressalva do símbolo ausente" sh -c \
 tl_espera 0 "06-dev: escopo inclui erros.*" sh -c \
   "tr -d '\r' < '$raiz/docs/exemplos-brief/06-dev-brief.md' | sed -n '/^## Escopo/,/^## /p' | grep -q 'src/pedidos/erros'"
 
+# --- Revisão que converge, Task 1
+tl_espera 0 "brief: lista Ao receber cita verifica-artefato.sh" tem core/templates/brief.md 'verifica-artefato.sh'
+tl_espera 0 "ciclo: cita verifica-artefato.sh" tem core/processo/ciclo.md 'verifica-artefato.sh'
+tl_espera 0 "config.padrao: CAMINHOS_N3" tem bootstrap/config.padrao 'CAMINHOS_N3='
+
 tl_fim
