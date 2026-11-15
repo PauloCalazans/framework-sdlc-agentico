@@ -1,15 +1,24 @@
 #!/bin/sh
-# verify.sh [--task <task.md>] — ponto único de verificação do projeto. Só reporta; nunca conserta.
+# verify.sh [--rapido] [--task <task.md>] — ponto único de verificação do projeto. Só reporta; nunca conserta.
 # Task com **Base:** <branch> (branch empilhada): enquanto essa branch não estiver na principal, as etapas
 # comparam com ela; depois, com a principal.
 # Etapas (as baratas primeiro): hooks → escopo → decisões → red → stack → skip (skip lê os JUnit que a stack produz).
+# --rapido (o laço): troca a stack por CMD_VERIFY_RAPIDO (vazio = CMD_VERIFY_STACK, com aviso), não roda skip e fecha com
+# "VERIFY RÁPIDO: …". O completo roda antes do PR e no revisor diff.
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 
-task=""
-[ "${1:-}" = "--task" ] && task=${2:-}
+task=""; modo=completo
+while [ $# -gt 0 ]; do
+  case $1 in
+    --rapido) modo=rapido; shift ;;
+    --task) task=${2:-}; shift; [ $# -gt 0 ] && shift ;;
+    *) echo "uso: verify.sh [--rapido] [--task <task.md>]" >&2; exit 2 ;;
+  esac
+done
 [ -n "$CMD_VERIFY_STACK" ] || agentic_falha "CMD_VERIFY_STACK não configurado em agentic/config (rode /bootstrap)"
+case "$CMD_VERIFY_RAPIDO" in "{{"*) CMD_VERIFY_RAPIDO="" ;; esac
 
 mkdir -p agentic/.estado
 lock="agentic/.estado/verify.lock"
@@ -71,13 +80,23 @@ else
 fi
 etapa decisoes sh "$dir/verifica-decisoes.sh"
 etapa red sh "$dir/verifica-red.sh"
-etapa stack sh -c "$CMD_VERIFY_STACK"
-etapa skip sh "$dir/verifica-skip.sh"
+if [ "$modo" = rapido ]; then
+  if [ -z "$CMD_VERIFY_RAPIDO" ]; then
+    echo; echo "aviso: CMD_VERIFY_RAPIDO não configurado — usando CMD_VERIFY_STACK"
+    CMD_VERIFY_RAPIDO=$CMD_VERIFY_STACK
+  fi
+  etapa stack-rapido sh -c "$CMD_VERIFY_RAPIDO"
+  rotulo="VERIFY RÁPIDO"
+else
+  etapa stack sh -c "$CMD_VERIFY_STACK"
+  etapa skip sh "$dir/verifica-skip.sh"
+  rotulo="VERIFY"
+fi
 
 echo
 if [ -z "$falhas" ]; then
-  echo "VERIFY: OK"
+  echo "$rotulo: OK"
 else
-  echo "VERIFY: FALHOU em:$falhas"
+  echo "$rotulo: FALHOU em:$falhas"
   exit 1
 fi

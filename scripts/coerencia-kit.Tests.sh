@@ -176,4 +176,15 @@ tl_espera 0 "ciclo: 3ª devolução vai ao humano" tem core/processo/ciclo.md '3
 tl_espera 0 "kit: Menor não abre rodada" tem core/processo/ciclo.md 'Menor não abre rodada'
 tl_espera 0 "kit sem Menor só na revisão final" nenhum 'Menor.{0,60}revisão final da branch' core adapters
 
+# --- Revisão que converge, Task 7: verify em dois níveis
+tl_espera 0 "coerência: Ao receber pede o rápido no laço" tem core/templates/brief.md 'verify.sh --rapido'
+tl_espera 0 "coerência: Ao receber pede o completo antes do revisor diff e do PR" tem core/templates/brief.md 'verify.sh` completo'
+tl_espera 0 "coerência: ciclo descreve os dois níveis" tem core/processo/ciclo.md 'o completo roda uma vez antes do PR e no revisor `diff`; no laço, o rápido'
+tl_espera 0 "coerência: config.padrao tem CMD_VERIFY_RAPIDO" tem bootstrap/config.padrao 'CMD_VERIFY_RAPIDO='
+tl_espera 0 "coerência: entrevista pergunta o comando rápido" tem bootstrap/entrevista.md 'CMD_VERIFY_RAPIDO'
+tl_espera 0 "coerência: dev usa o rápido no laço" tem core/papeis/dev.md 'verify.sh --rapido'
+tl_espera 0 "coerência: testes usa o rápido no laço" tem core/papeis/testes.md 'verify.sh --rapido'
+tl_espera 0 "coerência: /verify do claude aceita --rapido" tem adapters/claude-code/commands/verify.md '--rapido'
+tl_espera 0 "coerência: /verify do copilot aceita --rapido" tem adapters/copilot/prompts/verify.prompt.md '--rapido'
+
 tl_fim
