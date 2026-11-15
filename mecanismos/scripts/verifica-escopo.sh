@@ -48,7 +48,7 @@ fora=$(
 if [ -n "$fora" ]; then
   echo "agentic: BLOQUEADO — arquivos fora do escopo de $task:"
   printf '%s\n' "$fora"
-  echo "Se a ampliação for legítima, acrescente-os em '## Arquivos' via commit docs(task):."
+  echo "Ampliar o escopo é decisão do orquestrador (Ruling): pare e pergunte; ele acrescenta o arquivo em '## Arquivos' da task."
   exit 1
 fi
 echo "escopo: OK ($task)"

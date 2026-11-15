@@ -250,7 +250,7 @@ tl_espera 0 "AGENTS: verificação do passo, não só verify.sh" tem core/templa
 # Regras com exceção declarada nos dois lados.
 tl_espera 0 "AGENTS: exceção da remoção autorizada" tem core/templates/AGENTS.md 'Única exceção: a remoção autorizada de asserções'
 tl_espera 0 "dev: dependência aprovada no Gate 1 não para" tem core/papeis/dev.md 'Dependência nova fora de "N3 aprovados no Gate 1"'
-tl_espera 0 "dev: escopo ampliado pelo orquestrador" tem core/processo/ciclo.md 'feito pelo orquestrador: o papel que precisa de outro arquivo para e pergunta'
+tl_espera 0 "dev: escopo ampliado pelo orquestrador" tem core/processo/ciclo.md 'Ampliar o escopo é decisão do orquestrador, nunca do papel'
 tl_espera 0 "divergência spec × código vai em Divergências" tem core/processo/ciclo.md 'registre em "Divergências" da spec'
 tl_espera 0 "empilhamento só com plataforma de PR" tem core/processo/ciclo.md '**Branches empilhadas:** só com plataforma de PR'
 tl_espera 0 "README: delegação com enabled: true" tem README.md 'grava `enabled: true` e `gate1: D<n>`'
@@ -258,6 +258,12 @@ tl_espera 0 "spec: delegado coberto pelo plano usa plano:" tem core/templates/sp
 tl_espera 0 "/intent: dominio não conversa com o humano" tem adapters/claude-code/commands/intent.md 'o `dominio` nunca conversa direto com o humano'
 tl_espera 0 "/nova-task: primeira task usa a branch do Gate 1" tem adapters/claude-code/commands/nova-task.md 'crie-o sem `-b`'
 tl_espera 0 "copilot: status no início da sessão" tem adapters/copilot/copilot-instructions.md 'status-projeto.sh` antes de escolher a task'
-tl_espera 0 "hook: barra o desvio dos githooks" tem adapters/claude-code/hooks/pre-tool-use.sh '--no-v[a-z]*'
+tl_espera 0 "hook: barra o desvio dos githooks" tem adapters/claude-code/hooks/pre-tool-use.sh '--config-env|GIT_CONFIG_'
+
+tl_espera 0 "empilhamento só com plataforma de PR (README)" tem README.md 'Com plataforma de PR, quando a task anterior'
+tl_espera 0 "empilhamento só com plataforma de PR (task)" tem core/templates/task.md 'só com plataforma de PR'
+tl_espera 0 "ampliação de escopo nunca é do papel (verifica-escopo)" tem mecanismos/scripts/verifica-escopo.sh 'decisão do orquestrador'
+tl_espera 0 "Ruling depois do último commit de papel vai ao Gate 2" tem core/processo/ciclo.md 'quem a confere é o humano, no Gate 2'
+tl_espera 0 "dominio não entrevista o humano" nenhum 'a partir da entrevista|conduz.{0,4} a entrevista' core adapters
 
 tl_fim

@@ -21,7 +21,7 @@ Perfil: <caminho absoluto de agentic/projeto/papeis/<papel>.md>[; <outro perfil 
 Task: <caminho da task ou do documento enxuto> — fase <n>
 
 ## Escopo
-Worktree: <caminho absoluto> (branch <branch>). Escreva só em: <caminhos>. Precisa de outro arquivo: PARE e pergunte pelo canal de dúvida.
+Worktree: <caminho absoluto> (branch <branch>; antes do Gate 1 da trilha padrão: a árvore principal, sem branch). Escreva só em: <caminhos>. Precisa de outro arquivo: PARE e pergunte pelo canal de dúvida.
 
 ## O que fazer
 <até 5 linhas; cada uma, uma entrega verificável — a entrega, nunca a solução: valor, nome, caminho de implementação só se vier de "Já decidido">

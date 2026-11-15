@@ -587,6 +587,26 @@ tl_espera 1 "sem RED: task com CA e GREEN sem RED bloqueia" vv "$r"
 tl_contem "sem nenhum test(red):" "sem RED: explica"
 r=$(prepara); echo 'soma() { echo 1; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "fix: sem task"
 tl_espera 0 "sem RED: branch sem task (trilha rápida) não bloqueia" vv "$r"
+# Revisão: mesma definição de CA do vínculo; test: e o que um merge trouxe não contam como GREEN.
+semred_task() {
+  r=$(prepara)
+  mkdir -p "$r/agentic/projeto/specs/x/tasks"
+  printf '%b\n' "$1" > "$r/agentic/projeto/specs/x/tasks/001-x.md"
+  git -C "$r" add -A; git -C "$r" commit -q -m "docs(spec): x aprovada (Gate 1)"
+}
+semred_task '# Task 001\n**Branch:** feat/soma\n\n## Critérios de pronto\n<!-- - CA1 (R1): exemplo -->\n- `sh verify.sh` verde'
+echo 'soma() { echo 1; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat: x"
+tl_espera 0 "sem RED: CA só em comentário HTML não conta" vv "$r"
+semred_task '# Task 001\n**Branch:** feat/soma\n\n## Contexto\n- CA1 citado fora dos critérios\n\n## Critérios de pronto\n- `sh verify.sh` verde'
+echo 'soma() { echo 1; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat: x"
+tl_espera 0 "sem RED: CA fora da seção de critérios não conta" vv "$r"
+semred
+printf 'assert_igual\n' > "$r/tests/carac.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test: caracterização do legado"
+tl_espera 0 "sem RED: commit test: (caracterização) não é GREEN" vv "$r"
+semred
+git -C "$r" checkout -q -b outra main; echo y > "$r/src/outro.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat: de outra task"
+git -C "$r" checkout -q feat/soma; git -C "$r" merge -q --no-edit outra
+tl_espera 0 "sem RED: commits trazidos por merge não contam" vv "$r"
 
 # Varredura de coerência: verify.sh --task exporta AGENTIC_TASK; a task chega ao vínculo numa branch de nome imposto.
 vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b sem anotação'
