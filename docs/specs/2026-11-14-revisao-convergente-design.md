@@ -1,7 +1,7 @@
 # Revisão que converge — Design
 
 **Data:** 2026-11-14
-**Status:** draft
+**Status:** aprovado (2026-11-15)
 **Autor:** mantenedor do framework (decisões) · Claude (redação e análise)
 **Origem:** 227 achados bloqueantes de 157 pareceres reais de duas instâncias, pareceres de orquestradores de outras duas instâncias e o SWEBOK v4.0a (texto integral).
 
@@ -220,7 +220,7 @@ Adotar a primeira leva do parecer de D (parecer externo de 2026-11; os detalhes 
    - o argumento posicional também passa pelo merge-base;
    - a base é derivada e exportada antes da etapa `stack` (hoje ela roda antes, em `verify.sh:45`), e o `CMD_VERIFY_STACK` passa a receber `AGENTIC_BASE`.
 2. **Ordem barata primeiro:** hooks → escopo → skip → decisões → red → stack.
-3. **Cache da prova de RED por SHA** (protótipo em D, com 31 testes no `testlib.sh` do kit; os 64 casos do `verifica-red.Tests.sh` passam contra ele):
+3. **Cache da prova de RED por SHA.** Existe um protótipo em D, mas o kit **reimplementa a partir desta descrição** (decisão do mantenedor, 2026-11-15). Os 64 casos atuais do `verifica-red.Tests.sh` têm de continuar passando, e os casos novos são escritos no kit:
    - cada arquivo provado falhando grava `<sha do RED> <assinatura> <arquivo>` em `<git common dir>/agentic/red-provados`;
    - a assinatura é o hash de `CMD_PREPARAR_TESTE` mais o comando de teste;
    - arquivo já provado não sobe worktree;
