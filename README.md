@@ -122,7 +122,6 @@ O `arquiteto` recusa a trilha enxuta: "mudança em regra de desconto" é gatilho
 
    ```
    docs(mudanca): ... aprovada (Gate 1)   ← registro da aprovação
-   docs(task): ... em-andamento
    test(red): ...                         ← testes falhando, sem código de produção
    feat(green): ...                       ← testes passando
    fix: ...                               ← achado do revisor: espaço sem quebra (NBSP) no "R$ 10,00"

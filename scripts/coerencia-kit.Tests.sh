@@ -194,4 +194,6 @@ tl_espera 1 "enxuta: sem commit de em-andamento" tem core/processo/ciclo.md '`do
 tl_espera 0 "testes: caracterização antes do RED" tem core/papeis/testes.md 'caracterização'
 tl_espera 1 "mudanca: sem em-andamento na lista do passo 6" tem adapters/claude-code/commands/mudanca.md '`em-andamento`, fases RED'
 
+tl_espera 1 "README: sem commit docs(task) de em-andamento" tem README.md 'docs(task): ... em-andamento'
+
 tl_fim
