@@ -22,6 +22,12 @@
 - `<caminho/exato>`
 - `<diretorio/*>`
 
+## Impacto
+<!-- Toda linha `medido` (busca no repositório, com arquivo:linha). Sem impacto fora dos arquivos novos: escreva `- Nenhum (só arquivos novos).` -->
+| Alterado (símbolo, rota, schema, regra) | Quem usa hoje (arquivo:linha, medido) | Em ## Arquivos de | Teste existente afetado | Regra de outra spec → emenda |
+|---|---|---|---|---|
+| <símbolo alterado> | <arquivo:linha> | <task NNN> | <teste ou "nenhum"> | <spec e regra, ou "nenhuma"> |
+
 ## Contrato executável
 <!-- Quando a mudança cria ou altera interface: esqueleto escrito no worktree, dentro de ## Arquivos, sem commit até o Gate 1; entra no commit `chore: contrato executável`. Sem interface nova: "- Não há." -->
 - O que é: <interfaces/tipos/constantes/rotas>
