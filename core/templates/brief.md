@@ -24,10 +24,10 @@ Task: <caminho da task ou do documento enxuto> — fase <n>
 Worktree: <caminho absoluto> (branch <branch>). Escreva só em: <caminhos>. Precisa de outro arquivo: PARE e pergunte pelo canal de dúvida.
 
 ## O que fazer
-<até 5 linhas; cada uma, uma entrega verificável>
+<até 5 linhas; cada uma, uma entrega verificável — a entrega, nunca a solução: valor, nome, caminho de implementação só se vier de "Já decidido">
 
 ## Já decidido
-<Rulings, respostas do humano e itens N3 que você não reabre, um por linha, ou: nenhum>
+<só o que tem origem citável, um por linha com a origem: resposta do humano (data), R-n, D<n>, item N3 aprovado; ou: nenhum>
 
 ## Nunca faz
 <as linhas de "No brief" do contrato que valem nesta rodada, coladas; mais os itens de "Padrões" e "Nunca faz neste
@@ -52,9 +52,12 @@ projeto" do perfil que se aplicam. Em forma de ação: "PARE e diga", nunca um l
 - Retorno, uma linha: <linha de retorno com os campos deste papel>.
 - Dúvida que trava: <canal>; espere a resposta.
 
+## Casos a cobrir
+<condicional; casos de borda e ataques que o orquestrador quer cobertos: o MESMO texto vai no brief do autor e no do revisor>
+
 ## Desde a rodada anterior
 <só em rodada de correção, obrigatória: brief anterior (caminho), o parecer ou relatório que motivou a rodada (caminho
-e IDs dos achados) e o que mudou. Não substitui nenhuma seção acima>
+e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferência para tudo que a correção mudou. Não substitui nenhuma seção acima>
 
 ## Assinaturas
 <testes e dev, quando há contrato executável: tipos, métodos e records colados, para o papel não procurar>
@@ -67,7 +70,9 @@ e IDs dos achados) e o que mudou. Não substitui nenhuma seção acima>
 - [ ] em correção: copiado do brief anterior, com "Desde a rodada anterior";
 - [ ] toda leitura com intervalo; todo comando com saída limitada;
 - [ ] teto declarado;
-- [ ] "Nunca faz" colado, não linkado.
+- [ ] "Nunca faz" colado, não linkado;
+- [ ] nenhuma linha decide algo sem origem citável;
+- [ ] "Casos a cobrir" igual no brief do autor e no do revisor.
 
 Ao receber (antes de passar a entrega adiante):
 - [ ] antes do revisor de spec, design ou mudanca: `sh agentic/mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` verde; com falha, o trabalho volta ao autor sem despachar o revisor;
