@@ -41,11 +41,19 @@ find agentic/projeto/intent agentic/projeto/specs -name '*.md' ! -name '_*' 2>/d
     pendente*)
       # em-andamento não é escrito (ciclo.md, "Status dos artefatos"): pendente com branch própria à frente da
       # principal está em andamento. Sem branch, branch inexistente ou ainda sem commit à frente: continua pendente.
+      # Só conta commit além do registro do Gate 1 (docs(…): … aprovada (Gate 1)). Task empilhada (**Base:** com
+      # branch existente) conta a partir da branch-base, não da principal.
       br=$(grep -m1 '^\*\*Branch:\*\*' "$f" | tr -d '\r`' | sed 's/^\*\*Branch:\*\*[[:space:]]*//; s/[[:space:]]*$//')
+      base=$(grep -m1 '^\*\*Base:\*\*' "$f" | tr -d '\r`' | sed 's/^\*\*Base:\*\*[[:space:]]*//; s/[[:space:]]*$//')
       if [ -n "$br" ] && git rev-parse --verify -q "$br^{commit}" >/dev/null 2>&1; then
-        for p in "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL"; do
+        if [ -n "$base" ] && git rev-parse --verify -q "$base^{commit}" >/dev/null 2>&1; then
+          cmp_com="$base"
+        else
+          cmp_com="$BRANCH_PRINCIPAL origin/$BRANCH_PRINCIPAL"
+        fi
+        for p in $cmp_com; do
           git rev-parse --verify -q "$p^{commit}" >/dev/null 2>&1 || continue
-          n=$(git rev-list --count "$p..$br" 2>/dev/null || echo 0)
+          n=$(git log --format=%s "$p..$br" 2>/dev/null | grep -vc 'aprovada (Gate 1')
           [ "${n:-0}" -gt 0 ] 2>/dev/null && s="em-andamento (derivado do git)"
           break
         done
