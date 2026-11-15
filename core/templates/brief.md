@@ -70,6 +70,7 @@ e IDs dos achados) e o que mudou. Não substitui nenhuma seção acima>
 - [ ] "Nunca faz" colado, não linkado.
 
 Ao receber (antes de passar a entrega adiante):
+- [ ] antes do revisor de spec, design ou mudanca: `sh agentic/mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` verde; com falha, o trabalho volta ao autor sem despachar o revisor;
 - [ ] `sh agentic/mecanismos/scripts/verifica-escopo.sh <task.md>` na branch do papel;
 - [ ] depois do RED: `sh agentic/mecanismos/scripts/verifica-red.sh`; depois da GREEN: `sh agentic/mecanismos/scripts/verify.sh`;
 - [ ] revisor, modo diff: `git rev-parse HEAD` no worktree igual ao SHA final do intervalo do brief (o revisor não
