@@ -152,4 +152,8 @@ done
 tl_espera 0 "revisor: modos usam a lista do autor" tem core/papeis/revisor.md '"Pronto para revisão"'
 tl_espera 0 "perfil: padrão do revisor espelhado no autor" tem core/templates/perfil-papel.md 'Pronto para revisão'
 
+tl_espera 1 "revisor: modo mudanca não repete a lista do autor" tem core/papeis/revisor.md '"Questões em aberto", "Rulings" e a coluna "Decisão do humano" estão vazias'
+tl_espera 1 "revisor: modo design não repete a lista do autor" tem core/papeis/revisor.md 'está em "Itens N3 (aprovação no Gate 1)", e cada task cita'
+tl_espera 0 "revisor: mudanca mantém a classificação errada como Importante" tem core/papeis/revisor.md 'mais de uma task) é achado **Importante**'
+
 tl_fim
