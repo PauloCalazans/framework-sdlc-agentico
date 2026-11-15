@@ -32,7 +32,7 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 
 ## Pronto para revisão
 Confira antes de entregar; o revisor confere a mesma lista.
-- verify verde;
+- verify rápido (`verify.sh --rapido`) no laço; o completo (`verify.sh`) verde antes de devolver;
 - nada feito para casar com o teste (estado estático, valor mágico, resposta fabricada);
 - a forma do perfil é respeitada (camadas, regra fora da apresentação);
 - nada fora do design; divergência é pergunta.

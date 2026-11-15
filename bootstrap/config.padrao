@@ -4,6 +4,8 @@ BRANCH_PRINCIPAL="main"
 BRANCHES_PROTEGIDAS="main master"
 # Comando que roda build + lint + testes + arquitetura da stack (usado pelo verify.sh).
 CMD_VERIFY_STACK="{{CMD_VERIFY_STACK}}"
+# Opcional. Comando rápido do laço (lint e testes tocados). Vazio = o verify --rapido usa o CMD_VERIFY_STACK.
+CMD_VERIFY_RAPIDO="{{CMD_VERIFY_RAPIDO}}"
 # Comando que roda só os testes (usado pelo verifica-red.sh no commit RED).
 CMD_TESTE="{{CMD_TESTE}}"
 # Opcional: comando que roda só UM arquivo/classe de teste; {} é trocado pelo caminho relativo do arquivo

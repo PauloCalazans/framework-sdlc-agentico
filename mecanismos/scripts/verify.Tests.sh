@@ -154,4 +154,37 @@ tl_espera 0 "Base apagada depois de integrada cai para a principal" sh -c "cd '$
 tl_contem "base: principal" "Base integrada e apagada: declara a principal"
 tl_contem "VERIFY: OK" "Base integrada e apagada: verify ok"
 
+
+# --- Nível rápido: hooks → escopo → decisões → red → stack-rapido; sem skip; rótulo próprio.
+r=$(prepara)
+# o config é reescrito a cada cenário: entra no escopo da task deste repositório de teste
+echo "- agentic/config" >> "$r/agentic/projeto/specs/x/tasks/001-t.md"
+printf 'CMD_VERIFY_STACK="echo STACK_COMPLETA"\nCMD_VERIFY_RAPIDO="echo STACK_RAPIDA"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
+tl_espera 0 "rápido usa CMD_VERIFY_RAPIDO" sh -c "cd '$r' && sh '$dir/verify.sh' --rapido"
+tl_contem "STACK_RAPIDA" "roda o comando rápido"
+tl_contem "VERIFY RÁPIDO: OK" "linha final própria"
+copia=$(mktemp); cp "$TL_SAIDA" "$copia"
+tl_espera 1 "rápido não imprime VERIFY: OK" grep -q "^VERIFY: OK" "$copia"
+tl_espera 1 "rápido não roda skip" grep -q "== skip" "$copia"
+tl_espera 1 "rápido não roda a stack completa" grep -q "STACK_COMPLETA" "$copia"
+tl_espera 0 "completo continua com o rótulo de sempre" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "VERIFY: OK" "completo: VERIFY: OK"
+tl_contem "STACK_COMPLETA" "completo roda a stack completa"
+printf 'CMD_VERIFY_STACK="echo STACK_COMPLETA"\nCMD_VERIFY_RAPIDO="exit 1"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
+tl_espera 1 "rápido falha quando o comando rápido falha" sh -c "cd '$r' && sh '$dir/verify.sh' --rapido"
+tl_contem "VERIFY RÁPIDO: FALHOU em: stack-rapido" "nomeia a etapa stack-rapido"
+printf 'CMD_VERIFY_STACK="echo STACK_COMPLETA"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
+tl_espera 0 "rápido sem a variável usa o stack completo com aviso" sh -c "cd '$r' && sh '$dir/verify.sh' --rapido"
+tl_contem "aviso: CMD_VERIFY_RAPIDO não configurado — usando CMD_VERIFY_STACK" "avisa"
+tl_contem "STACK_COMPLETA" "usou o stack completo"
+printf 'CMD_VERIFY_STACK="echo STACK_COMPLETA"\nCMD_VERIFY_RAPIDO="{{CMD_VERIFY_RAPIDO}}"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
+tl_espera 0 "rápido com placeholder não preenchido conta como não configurado" sh -c "cd '$r' && sh '$dir/verify.sh' --rapido"
+tl_contem "aviso: CMD_VERIFY_RAPIDO" "avisa com placeholder"
+tl_espera 0 "--task e --rapido em qualquer ordem (1)" sh -c "cd '$r' && sh '$dir/verify.sh' --rapido --task agentic/projeto/specs/x/tasks/001-t.md"
+tl_contem "escopo: OK" "--rapido --task: escopo verificado"
+tl_espera 0 "--task e --rapido em qualquer ordem (2)" sh -c "cd '$r' && sh '$dir/verify.sh' --task agentic/projeto/specs/x/tasks/001-t.md --rapido"
+tl_contem "VERIFY RÁPIDO: OK" "--task --rapido: rótulo rápido"
+tl_espera 2 "opção desconhecida é erro de uso" sh -c "cd '$r' && sh '$dir/verify.sh' --foo"
+tl_contem "uso: verify.sh [--rapido] [--task <task.md>]" "mostra o uso"
+
 tl_fim

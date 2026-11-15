@@ -77,7 +77,8 @@ e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferênci
 Ao receber (antes de passar a entrega adiante):
 - [ ] antes do revisor de spec, design ou mudanca: `sh agentic/mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` verde; com falha, o trabalho volta ao autor sem despachar o revisor;
 - [ ] `sh agentic/mecanismos/scripts/verifica-escopo.sh <task.md>` na branch do papel;
-- [ ] depois do RED: `sh agentic/mecanismos/scripts/verifica-red.sh`; depois da GREEN: `sh agentic/mecanismos/scripts/verify.sh`;
+- [ ] depois do RED: `sh agentic/mecanismos/scripts/verifica-red.sh`; depois de cada GREEN no laço: `sh agentic/mecanismos/scripts/verify.sh --rapido`;
+- [ ] antes de despachar o revisor `diff` e antes do PR: `sh agentic/mecanismos/scripts/verify.sh` completo;
 - [ ] revisor, modo diff: `git rev-parse HEAD` no worktree igual ao SHA final do intervalo do brief (o revisor não
   comita) e `git status --porcelain` vazio;
 - [ ] revisor, modos spec, design e mudanca (nada commitado): `git status --porcelain` e
