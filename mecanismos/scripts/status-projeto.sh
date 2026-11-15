@@ -12,12 +12,41 @@ echo "### Worktrees"
 git worktree list 2>/dev/null
 
 echo
+echo "### Branch principal (remota conforme o último fetch)"
+remota="origin/$BRANCH_PRINCIPAL"
+tem_remota=""; git rev-parse --verify -q "$remota^{commit}" >/dev/null 2>&1 && tem_remota=1
+if ! git rev-parse --verify -q "$BRANCH_PRINCIPAL^{commit}" >/dev/null 2>&1; then
+  echo "- (branch principal '$BRANCH_PRINCIPAL' ainda não existe)"
+elif [ -z "$tem_remota" ]; then
+  echo "- $BRANCH_PRINCIPAL: sem $remota"
+else
+  atras=$(git rev-list --count "$BRANCH_PRINCIPAL..$remota" 2>/dev/null || echo "?")
+  frente=$(git rev-list --count "$remota..$BRANCH_PRINCIPAL" 2>/dev/null || echo "?")
+  if [ "$atras" = "0" ] && [ "$frente" = "0" ]; then
+    echo "- $BRANCH_PRINCIPAL: em dia com $remota"
+  else
+    [ "$atras" = "0" ] || echo "- $BRANCH_PRINCIPAL: $atras commit(s) atrás de $remota — atualize: git merge --ff-only $remota"
+    [ "$frente" = "0" ] || echo "- $BRANCH_PRINCIPAL: $frente commit(s) à frente de $remota"
+  fi
+fi
+
+echo
 echo "### Branches à frente de $BRANCH_PRINCIPAL"
-if git rev-parse --verify -q "$BRANCH_PRINCIPAL" >/dev/null; then
-  git for-each-ref --format='%(refname:short)' refs/heads | while read -r b; do
+if git rev-parse --verify -q "$BRANCH_PRINCIPAL^{commit}" >/dev/null 2>&1; then
+  # Conta o que não está nem na principal local nem na remota: branch integrada no remoto com a principal local
+  # atrasada não aparece à frente. Upstream [gone] = remota apagada (em geral depois do merge do PR).
+  git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads | while read -r b trilha; do
     [ "$b" = "$BRANCH_PRINCIPAL" ] && continue
-    n=$(git rev-list --count "$BRANCH_PRINCIPAL..$b" 2>/dev/null || echo "?")
-    [ "$n" = "0" ] || echo "- $b: $n commit(s)"
+    n=$(git rev-list --count "$b" --not "$BRANCH_PRINCIPAL" ${tem_remota:+"$remota"} 2>/dev/null || echo "?")
+    if [ "$n" = "0" ]; then
+      if [ -n "$tem_remota" ] && [ "$(git rev-list --count "$BRANCH_PRINCIPAL..$b" 2>/dev/null)" != "0" ]; then
+        echo "- $b: integrada em $remota — atualize a principal e apague com git branch -d $b"
+      fi
+    elif [ "$trilha" = "[gone]" ]; then
+      echo "- $b: $n commit(s) — remota apagada"
+    else
+      echo "- $b: $n commit(s)"
+    fi
   done
 else
   echo "- (branch principal '$BRANCH_PRINCIPAL' ainda não existe)"
