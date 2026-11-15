@@ -242,6 +242,14 @@ r=$(prepara_spec)
 mkdir -p "$r/agentic"; cfg 'CMD_VALIDA_CONTRATO="true"'
 tl_espera 0 "design: CMD_VALIDA_CONTRATO verde passa" roda design $S
 
+r=$(prepara_spec)
+mkdir -p "$r/agentic"; cfg 'CMD_VALIDA_CONTRATO="ls src/pedidos/*.py >/dev/null"'
+tl_espera 0 "design: CMD_VALIDA_CONTRATO com glob roda com globbing" roda design $S
+r=$(prepara_spec)
+mkdir -p "$r/agentic"; cfg 'CMD_VALIDA_CONTRATO="{{CMD_VALIDA_CONTRATO}}"'
+tl_espera 0 "design: placeholder não preenchido conta como vazio" roda design $S
+tl_contem "aviso: CMD_VALIDA_CONTRATO" "avisa"
+
 # modo mudanca
 r=$(prepara_mudanca)
 tl_espera 0 "mudança válida passa" roda mudanca $M
@@ -264,6 +272,13 @@ r=$(prepara_mudanca)
 sub 's/^- CA1 (R1).*/&\n- CA2 (R7): dado, quando, então/' $M
 tl_espera 1 "mudança: CA cita regra inexistente" roda mudanca $M
 
+r=$(prepara_mudanca)
+sub 's|^## Contrato executável|## Impacto\n- `docs/inexistente.md` muda\n\n&|' $M
+tl_espera 1 "mudança: Impacto cita caminho inexistente fora de Arquivos" roda mudanca $M
+tl_contem "docs/inexistente.md" "nomeia o caminho"
+r=$(prepara_mudanca)
+sub 's|^## Contrato executável|## Impacto\n- `src/ajuste.py:4-9` muda\n\n&|' $M
+tl_espera 0 "mudança: Impacto cita caminho dentro de Arquivos passa" roda mudanca $M
 # Review Focus 1–3
 r=$(prepara_spec)
 for f in spec.md design.md tasks/001-criar.md; do sed 's/$/\r/' "$r/$S/$f" > "$r/$S/$f.crlf" && mv "$r/$S/$f.crlf" "$r/$S/$f"; done

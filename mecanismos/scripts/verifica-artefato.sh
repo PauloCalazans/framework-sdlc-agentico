@@ -142,9 +142,12 @@ ck_caminhos() {  # 2
   else
     entradas "$alvo" > "$T/pad"
     cita_caminhos "$alvo" Arquivos "$T/pad"
+    for s in Impacto 'Contrato executável'; do cita_caminhos "$alvo" "$s" "$T/pad"; done
   fi
 }
 
+case "$CMD_VALIDA_CONTRATO" in "{{"*) CMD_VALIDA_CONTRATO="" ;; esac
+case "$CAMINHOS_N3" in "{{"*) CAMINHOS_N3="" ;; esac
 ramo=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 ck_branch() {  # 3
   if [ "$modo" = mudanca ]; then
@@ -249,7 +252,7 @@ ck_contrato() {  # 7
     return
   fi
   if [ "$modo" = mudanca ] && secao "$alvo" 'Contrato executável' | grep -qi 'não há'; then return; fi
-  if ( eval "$CMD_VALIDA_CONTRATO" ) </dev/null > "$T/contrato.out" 2>&1; then :; else
+  if ( set +f; eval "$CMD_VALIDA_CONTRATO" ) </dev/null > "$T/contrato.out" 2>&1; then :; else
     falha "CMD_VALIDA_CONTRATO falhou: $CMD_VALIDA_CONTRATO"
     tail -n 20 "$T/contrato.out" | sed 's/^/    | /'
   fi
