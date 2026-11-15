@@ -159,4 +159,21 @@ tl_espera 0 "revisor: mudanca mantém a classificação errada como Importante" 
 tl_espera 0 "arquiteto: Pronto cobre acréscimo só acréscimo" tem core/papeis/arquiteto.md 'nada removido, renomeado ou com tipo ou semântica alterados'
 tl_espera 0 "arquiteto: Pronto cobre decisões novas da mudança" tem core/papeis/arquiteto.md 'listadas em "Decisões novas"'
 
+# --- Revisão que converge, Task 4: brief sem desenho, parecer sem prescrição, causa medida
+tl_espera 0 "pr: resumo por rodada" tem core/templates/pr.md 'r<k> <modo>: <veredito> · C n I n M n · causas:'
+b=core/templates/brief.md
+tl_espera 0 "brief: seção Casos a cobrir" tem $b '## Casos a cobrir'
+tl_espera 0 "brief: Casos a cobrir é condicional (depois de Entrega)" ordem $b '## Entrega' '## Casos a cobrir'
+tl_espera 0 "brief: Já decidido só com origem citável" tem $b 'origem citável'
+tl_espera 0 "brief: Antes de enviar confere decisão sem origem" tem $b 'nenhuma linha decide algo sem origem citável'
+p=core/templates/parecer.md
+tl_espera 0 "parecer: coluna Causa" tem $p '| ID | Classe | Causa | Onde | Problema | Evidência |'
+tl_espera 0 "parecer: valores de Causa" tem $p 'defeito | contrato | não conferido | sem contrato | forma'
+tl_espera 0 "parecer: marca já na rodada 1" tem $p 'já na rodada 1'
+tl_espera 1 "parecer: não prescreve correção" tem $p 'o que outro papel deve fazer'
+tl_espera 0 "revisor: rodada de correção" tem core/papeis/revisor.md '## Rodada de correção'
+tl_espera 0 "ciclo: 3ª devolução vai ao humano" tem core/processo/ciclo.md '3ª devolução'
+tl_espera 0 "kit: Menor não abre rodada" tem core/processo/ciclo.md 'Menor não abre rodada'
+tl_espera 0 "kit sem Menor só na revisão final" nenhum 'Menor.{0,60}revisão final da branch' core adapters
+
 tl_fim

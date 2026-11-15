@@ -24,8 +24,8 @@ Na dúvida, trilha padrão.
 | 6 | Publicação | orquestrador | push + PR pelo template `agentic/processo/templates/pr.md` | — |
 | G2 | **Gate 2** | humano | merge **sem squash** | merge negado ao agente |
 
-- Achado **Crítico** ou **Importante** devolve o trabalho ao papel autor; a revisão roda de novo no diff corrigido.
-- Achados **Menores** ficam registrados e são tratados na revisão final da branch, antes da publicação.
+- Achado **Crítico** ou **Importante** devolve o trabalho ao papel autor, que atualiza o Impacto e a autoconferência do que mudou; a revisão roda de novo no diff corrigido. Na **3ª devolução** do mesmo artefato, o orquestrador para e leva ao humano as causas por rodada antes de despachar a 4ª.
+- **Menor não abre rodada**: vai com a próxima correção ou, sem ela, no PR.
 - **Gate 1 não aceita hipótese:** toda regra da spec chega ao Gate 1 com estado `confirmada`.
 - **Registro do Gate 1:** depois da aprovação, o orquestrador cria a branch e o worktree da primeira task, e o primeiro commit da branch é `docs(spec): <nome> aprovada (Gate 1)` (com o Gate 1 delegado: `docs(spec): <nome> aprovada (Gate 1 delegado, D<n>)`), com intent, spec, design e tasks (`**Status:** aprovado` em intent, spec e design). As tasks seguintes da mesma spec saem da principal depois que a primeira é integrada; no modo automático, podem sair da branch da task anterior ("Branches empilhadas").
 - **Gate 2 sem plataforma de PR:** o orquestrador commita na branch o parecer final aprovado em `agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md` ("Orquestração") e deixa a branch rebaseada na principal; o humano integra com `git merge --ff-only <branch>`.
@@ -109,7 +109,7 @@ O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador exter
    - **ao receber** — antes de passar a entrega adiante, o orquestrador roda a lista "Ao receber" do template (`agentic/processo/templates/brief.md`): as verificações do papel e, no revisor, a conferência de que nada mudou no que ele revisou;
    - **parecer** — fica local, como os briefs. Sem plataforma de PR, o parecer final aprovado do modo `diff` é copiado para `agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md` (`<NNN>` = número da task, para não sobrescrever o de outra task da mesma spec) e commitado na branch da task antes do Gate 2;
    - `Verificado por:` revisão (lista "Antes de enviar" do template; nenhum mecanismo confere o brief, que não é commitado); a entrega, pela lista "Ao receber" (`verifica-escopo.sh`, `verifica-red.sh`, `verify.sh` e a conferência do revisor); a cópia em `pareceres/`, por revisão no Gate 2;
-3. despacha cada papel com o brief; nunca implementa ele mesmo;
+3. despacha cada papel com o brief, que não decide nada sem origem citável; nunca implementa ele mesmo;
 4. registra uma **Ruling** sempre que decide algo não previsto na spec, no design ou na task (seção "Rulings");
 5. escolhe o modelo de cada papel por `agentic/processo/modelos.md` (nível de partida, ajuste por dado, composição do time com mais de um produto).
 
@@ -120,7 +120,7 @@ O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador exter
 Ruling é a decisão do orquestrador que a spec, o design e a task não previam: ordem ou divisão das tasks, empilhamento de branches, devolução a um papel, escolha entre pareceres, promoção de trilha.
 
 - **Onde:** seção `## Rulings` do documento da task (`agentic/projeto/specs/<nome>/tasks/NNN-<nome>.md`), uma linha por decisão: `R-<n> (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>`. Entra no commit seguinte da branch (`docs(task): …`). O `progress.md` guarda só o estado da execução.
-- **Limite:** Ruling não muda regra de negócio nem aprova item N3: regra de negócio segue a regra de divergência; item N3 é aprovado no Gate 1 (humano ou delegado), e N3 fora da lista para a execução.
+- **Limite:** Ruling não contradiz spec nem design aprovados; se precisaria, é pergunta ao humano. Ruling não muda regra de negócio nem aprova item N3: regra de negócio segue a regra de divergência; item N3 é aprovado no Gate 1 (humano ou delegado), e N3 fora da lista para a execução.
 - **Trilha enxuta:** a seção `## Rulings` do documento é só do orquestrador e começa vazia no Gate 1; o `arquiteto` não a escreve. Ruling não mantém a trilha enxuta diante de N3 ("Trilha enxuta").
 - **PR:** a seção "Decisões do orquestrador" do template lista as Rulings da task (ou `nenhuma`). No último PR de uma série empilhada, lista também as das tasks anteriores da mesma spec.
 - **Relatório ao humano:** ao publicar, o orquestrador lista as Rulings da task e aponta as que pedem confirmação.

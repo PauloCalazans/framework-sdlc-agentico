@@ -2,7 +2,8 @@
 - Onde: no caminho que o brief dá, agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/NN-revisor-<modo>-parecer.md, fora do
   worktree revisado. O parecer é local (agentic/.estado/ não é versionado); o PR leva o veredito e os achados menores.
   Sem plataforma de PR, o orquestrador copia o parecer final aprovado para agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md (NNN = número da task).
-- Escala do kit: Crítico e Importante bloqueiam; Menor fica registrado para a revisão final da branch.
+- Escala do kit: Crítico e Importante bloqueiam; Menor não abre rodada: vai com a próxima correção ou, sem ela, no PR.
+- Causa (coluna da tabela de achados): defeito | contrato | não conferido | sem contrato | forma. Na rodada >= 2, acrescente `· já na rodada 1` quando o defeito já estava no artefato da rodada 1. `sem contrato` diz em Problema onde a regra deveria estar.
 - Toda evidência é `medido` (você abriu ou rodou) ou `inferido` (dedução). Aprovar sem abrir as citações e rodar a
   verificação não vale.
 -->
@@ -29,9 +30,9 @@
 ## Achados
 <ou: nenhum>
 
-| ID | Classe | Onde | Problema | Evidência |
-|---|---|---|---|---|
-| <C1 \| I1 \| M1> | <Crítico \| Importante \| Menor> | <arquivo:linha> | <o que está errado e o que outro papel deve fazer> | <medido \| inferido>: <o que você viu> |
+| ID | Classe | Causa | Onde | Problema | Evidência |
+|---|---|---|---|---|---|
+| <C1 \| I1 \| M1> | <Crítico \| Importante \| Menor> | <valor de Causa> | <arquivo:linha> | <o que está errado e o que precisa passar a ser verdade; nunca a correção> | <medido \| inferido>: <o que você viu> |
 
 ## Verificação
 ```
