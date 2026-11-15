@@ -37,12 +37,39 @@ agentic_falha() {
   exit 1
 }
 
-# agentic_base: ponto de divergência entre HEAD e a branch principal. Sem a principal local (clone de CI
-# ou de agente de nuvem, que só traz origin/<principal>), usa a remota. Com AGENTIC_BASE (branch empilhada,
-# definido pelo verify.sh a partir do **Base:** da task), o ponto de divergência é com essa branch.
+# agentic_base_task: imprime a ref da **Base:** da task da branch atual (branch empilhada) enquanto ela
+# não estiver integrada na principal; senão, nada (quem chama cai para a principal). Nunca falha.
+# Com $1 (caminho de uma task), usa essa task em vez de procurar pela branch.
+agentic_base_task() {
+  agentic_t=${1:-}
+  if [ -z "$agentic_t" ]; then
+    agentic_br=$(git symbolic-ref --short -q HEAD)
+    [ -n "$agentic_br" ] || return 0
+    agentic_t=$(grep -l "^\*\*Branch:\*\*[[:space:]]*$agentic_br[[:space:]]*$" agentic/projeto/specs/*/tasks/*.md 2>/dev/null | head -n 1)
+  fi
+  [ -n "$agentic_t" ] || return 0
+  agentic_bt=$(sed -n 's/^\*\*Base:\*\*[[:space:]]*//p' "$agentic_t" | head -n 1 | tr -d '\r`' | sed 's/[[:space:]]*$//')
+  [ -n "$agentic_bt" ] || return 0
+  for agentic_c in "$agentic_bt" "origin/$agentic_bt"; do
+    if git rev-parse --verify -q "$agentic_c^{commit}" >/dev/null; then
+      agentic_pr=$(agentic_principal_ref)
+      if [ -n "$agentic_pr" ] && git merge-base --is-ancestor "$agentic_c" "$agentic_pr"; then
+        return 0
+      fi
+      printf '%s\n' "$agentic_c"
+      return 0
+    fi
+  done
+  return 0
+}
+
+# agentic_base: ponto de divergência entre HEAD e a base de comparação. Ordem: AGENTIC_BASE, a **Base:**
+# da task (branch empilhada ainda não integrada) e a principal (local ou, em clone de CI, origin/).
 agentic_base() {
-  if [ -n "${AGENTIC_BASE:-}" ]; then
-    git merge-base HEAD "$AGENTIC_BASE" 2>/dev/null
+  agentic_ref=${AGENTIC_BASE:-}
+  [ -n "$agentic_ref" ] || agentic_ref=$(agentic_base_task)
+  if [ -n "$agentic_ref" ]; then
+    git merge-base HEAD "$agentic_ref" 2>/dev/null
     return
   fi
   git merge-base HEAD "$BRANCH_PRINCIPAL" 2>/dev/null || git merge-base HEAD "origin/$BRANCH_PRINCIPAL" 2>/dev/null

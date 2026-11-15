@@ -361,4 +361,23 @@ grava_t "$r" "t_soma x.sh" "soma 2 3|5"
 commita "$r" "test: soma sem o caso 1+1 (R-1)" "Assercoes-removidas: tests/t_soma x.sh 1 (R-1)"
 tl_espera 0 "remoção: caminho com espaço no trailer" vr "$r"
 
+# Branch empilhada: o RED da base (que passa no HEAD da base) não é cobrado da task empilhada, que não o fez.
+r=$(prepara)
+echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "feat: soma antes do teste"
+teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+git -C "$r" branch -q pedidos/001
+mkdir -p "$r/agentic/projeto/specs/pedidos/tasks"
+printf '# T2
+**Status:** em-andamento
+**Branch:** feat/soma
+**Base:** pedidos/001
+
+## Arquivos
+- src/*
+' > "$r/agentic/projeto/specs/pedidos/tasks/002-t.md"
+git -C "$r" add -A; git -C "$r" commit -q -m "task 2"
+tl_espera 0 "avulso em branch empilhada não prova o RED da base" env -u AGENTIC_BASE sh -c "cd '$r' && sh '$dir/verifica-red.sh'"
+tl_contem "nenhum commit test(red):" "avulso empilhado: só os REDs da própria task"
+
 tl_fim

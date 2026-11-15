@@ -2,7 +2,7 @@
 # verify.sh [--task <task.md>] — ponto único de verificação do projeto. Só reporta; nunca conserta.
 # Task com **Base:** <branch> (branch empilhada): enquanto essa branch não estiver na principal, as etapas
 # comparam com ela; depois, com a principal.
-# Etapas: hooks → stack (CMD_VERIFY_STACK) → escopo → skip → red → decisões.
+# Etapas (as baratas primeiro): hooks → escopo → decisões → red → stack → skip (skip lê os JUnit que a stack produz).
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
@@ -41,9 +41,8 @@ verifica_hooks() {
   echo "Ligue com: git config core.hooksPath agentic/mecanismos/githooks (ação humana; o agente não altera as próprias proteções)."
   return 1
 }
-etapa hooks verifica_hooks
-etapa stack sh -c "$CMD_VERIFY_STACK"
-
+# Base única: todas as etapas comparam com a mesma base (a **Base:** da task empilhada, ainda não integrada,
+# ou a principal), calculada uma vez, antes das etapas.
 if [ -z "$task" ]; then
   branch=$(git symbolic-ref --short -q HEAD)
   [ -n "$branch" ] && task=$(grep -l "^\*\*Branch:\*\*[[:space:]]*$branch[[:space:]]*$" agentic/projeto/specs/*/tasks/*.md 2>/dev/null | head -n 1)
@@ -51,18 +50,18 @@ fi
 if [ -n "$task" ]; then
   base_task=$(sed -n 's/^\*\*Base:\*\*[[:space:]]*//p' "$task" | head -n 1 | tr -d '\r`' | sed 's/[[:space:]]*$//')
   if [ -n "$base_task" ]; then
-    ref=""
-    for c in "$base_task" "origin/$base_task"; do
-      git rev-parse --verify -q "$c^{commit}" >/dev/null && { ref=$c; break; }
-    done
-    principal=$(agentic_principal_ref)
-    if [ -n "$ref" ] && ! { [ -n "$principal" ] && git merge-base --is-ancestor "$ref" "$principal"; }; then
+    ref=$(agentic_base_task "$task")
+    if [ -n "$ref" ]; then
       AGENTIC_BASE=$ref; export AGENTIC_BASE
       echo; echo "base: $ref (branch empilhada, **Base:** da task)"
     else
       echo; echo "base: principal (**Base:** $base_task já integrada ou ausente)"
     fi
   fi
+fi
+
+etapa hooks verifica_hooks
+if [ -n "$task" ]; then
   etapa escopo sh "$dir/verifica-escopo.sh" "$task"
 else
   if [ -n "$(ls agentic/projeto/specs/*/tasks/*.md 2>/dev/null | head -n 1)" ]; then
@@ -70,10 +69,10 @@ else
   fi
   echo; echo "== escopo: nenhuma task associada à branch (trilha rápida) — pulado"
 fi
-
-etapa skip sh "$dir/verifica-skip.sh"
-etapa red sh "$dir/verifica-red.sh"
 etapa decisoes sh "$dir/verifica-decisoes.sh"
+etapa red sh "$dir/verifica-red.sh"
+etapa stack sh -c "$CMD_VERIFY_STACK"
+etapa skip sh "$dir/verifica-skip.sh"
 
 echo
 if [ -z "$falhas" ]; then
