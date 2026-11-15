@@ -297,7 +297,9 @@ Run: `sh scripts/coerencia-kit.Tests.sh` → FALHA nas novas.
   - cada CA da task tem teste que falha pelo motivo do CA, não por símbolo ausente do contrato;
   - só a resposta certa satisfaz a asserção;
   - as bordas citadas no CA são exercitadas;
-  - teste de caracterização (passa no HEAD) não entra no RED.
+  - teste de caracterização (passa no HEAD) não entra no RED;
+  - os limites das regras têm caso no valor limite;
+  - cada CA anotado com `→ test: <arquivo>::<nome>` no commit RED (Task 9).
 - **`dev` (GREEN):**
   - verify verde;
   - nada feito para casar com o teste (estado estático, valor mágico, resposta fabricada);
@@ -337,11 +339,13 @@ Design §7.4, §7.5 e §7.6. É um objetivo só: o que circula entre as rodadas 
 - Modify: `core/papeis/revisor.md` (seção "## Rodada de correção"; em "Produz", Menor passa a "vai com a próxima correção ou no PR")
 - Modify: `core/processo/ciclo.md` (tabela da trilha padrão: as duas linhas sob ela; "Orquestração"; "Rulings")
 - Modify: `adapters/claude-code/CLAUDE.md` e `adapters/copilot/copilot-instructions.md`, só onde repetem "Menores … revisão final da branch". Conferir com `grep -rn "revisão final" adapters core`.
+- Modify: `core/templates/pr.md` ("Parecer do revisor": uma linha por rodada)
 - Modify: `scripts/coerencia-kit.Tests.sh`
 
 - [ ] **Step 1: Escrever as asserções**
 
 ```sh
+tl_espera 0 "pr: resumo por rodada" tem core/templates/pr.md 'r<k> <modo>: <veredito> · C n I n M n · causas:'
 b=core/templates/brief.md
 tl_espera 0 "brief: seção Casos a cobrir" tem $b '## Casos a cobrir'
 tl_espera 0 "brief: Casos a cobrir é condicional (depois de Entrega)" ordem $b '## Entrega' '## Casos a cobrir'
@@ -383,6 +387,7 @@ Run: `sh scripts/coerencia-kit.Tests.sh` → FALHA nas novas.
   - na **3ª devolução** do mesmo artefato, o orquestrador para e leva ao humano as causas por rodada antes de despachar a 4ª;
   - "Orquestração", item 3: o brief não decide sem origem citável;
   - "Rulings": Ruling não contradiz spec nem design aprovados; se precisaria, é pergunta.
+- **`pr.md`, "Parecer do revisor":** linha `- Rodadas: <uma por rodada de todos os modos da task: r<k> <modo>: <veredito> · C n I n M n · causas: <valor>=<n> …>`. É o registro durável da coluna Causa (design §7.6).
 
 - [ ] **Step 4: Rodar e ver passar**
 
@@ -391,7 +396,7 @@ Run: `sh scripts/verify.sh` → `verify: OK`. Os exemplos de `docs/exemplos-brie
 - [ ] **Step 5: Commit**
 
 ```bash
-git add core/templates/brief.md core/templates/parecer.md core/papeis/revisor.md core/processo/ciclo.md adapters scripts/coerencia-kit.Tests.sh docs/exemplos-brief
+git add core/templates/brief.md core/templates/parecer.md core/templates/pr.md core/papeis/revisor.md core/processo/ciclo.md adapters scripts/coerencia-kit.Tests.sh docs/exemplos-brief
 git commit -m "docs(revisao): brief sem desenho, parecer sem prescrição, causa medida e rodadas que convergem"
 ```
 
@@ -635,7 +640,60 @@ git commit -m "refactor(processo): Ruling e em-andamento sem commit próprio; ca
 
 ---
 
-### Task 9: Nota de atualização para as instâncias
+### Task 9: Vínculo CA → teste no commit RED
+
+Design §7.9 (avaliação normativa, proposta 5.1).
+
+**Files:**
+- Modify: `mecanismos/scripts/verifica-red.sh` (checagem nova, item (5) do cabeçalho)
+- Test: `mecanismos/scripts/verifica-red.Tests.sh`
+- Modify: `core/papeis/testes.md` ("Produz": a anotação no commit RED)
+- Modify: `core/templates/task.md` e `core/templates/mudanca.md` (comentário com o formato da anotação)
+- Modify: `scripts/coerencia-kit.Tests.sh`
+
+**Interfaces:**
+- Consumes: a task da branch atual, achada pelo `**Branch:**` (a mesma busca de `agentic_base_task`, Task 5).
+- Produces:
+  - formato da anotação, numa linha de `## Critérios de pronto` (task) ou `## Critérios de aceite` (mudança): `CA<n> (<R…>): <texto> → test: <arquivo>::<nome>`. Mais de um teste fica separado por `; `;
+  - mensagens `agentic: BLOQUEADO — CA<n> sem → test: na task <arquivo>` e `agentic: BLOQUEADO — <arquivo> anotado em CA<n> não foi tocado por commit test(red):`;
+  - task sem nenhuma anotação: `aviso: task sem anotação → test: (anterior a esta versão do kit) — vínculo CA → teste não verificado`.
+
+- [ ] **Step 1: Escrever os testes**
+
+```sh
+tl_espera 0 "todo CA anotado com arquivo do RED passa" …
+tl_espera 1 "CA sem anotação, com outro anotado, bloqueia" …;   tl_contem "CA2 sem → test:" "nomeia o CA"
+tl_espera 1 "arquivo anotado fora dos commits RED bloqueia" …; tl_contem "tests/outro.sh" "nomeia o arquivo"
+tl_espera 0 "task sem nenhuma anotação passa com aviso" …;      tl_contem "aviso: task sem anotação" "avisa"
+tl_espera 0 "dois testes num CA separados por ; " …
+tl_espera 0 "anotação com CRLF" …
+tl_espera 0 "branch sem task (trilha rápida) não checa" …
+```
+
+- [ ] **Step 2: Rodar e ver falhar** — `sh mecanismos/scripts/verifica-red.Tests.sh` → FALHA nos novos.
+
+- [ ] **Step 3: Implementar**
+
+- Ao fim do `verifica-red.sh`, se há commits RED e a task da branch existe:
+  - extrai as linhas `CA<n>` da seção, sem `` e sem comentários;
+  - os arquivos anotados são o texto depois de `→ test:`, até `::`, para cada item separado por `; `;
+  - o conjunto dos tocados é a união de `git diff-tree --name-only -r` dos commits RED.
+- **Texto:**
+  - `testes.md`, "Produz": a anotação no mesmo commit `test(red):`;
+  - comentário nos templates com o formato.
+
+- [ ] **Step 4: Rodar e ver passar** — `sh scripts/verify.sh` → `verify: OK`
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add mecanismos/scripts/verifica-red.sh mecanismos/scripts/verifica-red.Tests.sh core/papeis/testes.md core/templates/task.md core/templates/mudanca.md scripts/coerencia-kit.Tests.sh
+git commit -m "feat(verifica-red): vínculo CA → teste anotado no commit RED"
+```
+
+---
+
+### Task 10: Nota de atualização para as instâncias
 
 Design §10.
 
@@ -651,7 +709,8 @@ Até 15 linhas:
 - as três variáveis novas e opcionais (`CMD_VALIDA_CONTRATO`, `CAMINHOS_N3`, `CMD_VERIFY_RAPIDO`) e o efeito de deixá-las vazias;
 - o `verifica-artefato.sh` na lista "Ao receber";
 - a seção Impacto e "Pronto para revisão";
-- a coluna Causa no parecer;
+- a coluna Causa no parecer e o resumo das rodadas no PR;
+- a anotação `CA → test:` no commit RED;
 - `em-andamento` derivado;
 - Ruling sem commit próprio;
 - artefatos aprovados antes da atualização não são verificados de novo;

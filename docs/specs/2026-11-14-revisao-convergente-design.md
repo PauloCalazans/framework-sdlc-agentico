@@ -3,7 +3,7 @@
 **Data:** 2026-11-14
 **Status:** aprovado (2026-11-15)
 **Autor:** mantenedor do framework (decisões) · Claude (redação e análise)
-**Origem:** 227 achados bloqueantes de 157 pareceres reais de duas instâncias, pareceres de orquestradores de outras duas instâncias e o SWEBOK v4.0a (texto integral).
+**Origem:** 227 achados bloqueantes de 157 pareceres reais de duas instâncias, pareceres de orquestradores de outras duas instâncias, o SWEBOK v4.0a (texto integral) e a avaliação normativa do kit (`docs/avaliacao-normativa-swebok-iso.md`, propostas 5.1, 5.2, 5.3 e 5.6 confirmadas pelos dados).
 
 ## 1. Intenção
 
@@ -211,6 +211,7 @@ Fica fora: "esqueleto sem comportamento" e "CA que já passa no HEAD". Os dois d
   - `forma`.
 - **Achado `sem contrato`:** o próprio parecer aponta onde a regra deveria estar. O mantenedor decide se ela entra no contrato ou no perfil. É a ação preventiva do SWEBOK 2.4.
 - **Sem script de métrica.** A contagem é `grep` nos pareceres locais. A instância A removeu um `metricas-task.sh` por ser cerimônia, e isso não volta.
+- **O registro tem de durar.** Os pareceres ficam em `agentic/.estado/`, que é local. Em C não há registro de execução nenhum, e em B briefs de várias rodadas seguiram por mensagem e não ficaram gravados. Por isso o template de PR ganha, em "Parecer do revisor", uma linha por rodada: `r<k> <modo>: <veredito> · C n I n M n · causas: <valor>=<n> …`. O PR é durável. Sem plataforma de PR, o parecer final já é copiado para `pareceres/`. Não há commit novo (avaliação normativa, proposta 5.6, na versão mínima; os trailers `Papel:`/`Modelo:` ficam para quando a pergunta for comparar modelos).
 
 ### 7.7 Verify em dois níveis e com base única (instâncias B e D)
 
@@ -248,6 +249,13 @@ Os demais itens do parecer de D (baseline de falhas conhecidas, verify em segund
   - `em-revisão` (revisão aprovada, aguardando publicação) e `publicada` continuam escritos e com o mesmo significado. Derivá-los dependeria do registro de execução, que é local e diverge entre clones.
 - **Ampliação de escopo continua em `docs(task)`,** porque muda o que o `verifica-escopo.sh` aceita. Ela fica mais rara com a seção Impacto.
 
+### 7.9 Vínculo CA → teste no commit RED (avaliação normativa, proposta 5.1)
+
+- **Dado.** Na revisão de `diff`, os achados de `testes` repetem uma classe: teste que não exercita a borda do CA, teste que não mede o que o CA pede, asserção que casa o próprio rótulo. Hoje quem monta a tabela CA ↔ teste é o revisor, no parecer local.
+- **No commit `test(red):`, o `testes` anota cada critério** em `## Critérios de pronto` da task (ou em `## Critérios de aceite` do documento enxuto): `CA1 (R1): … → test: <arquivo>::<nome>`. A cadeia R → CA → teste → RED → GREEN fica no git: é a matriz de rastreabilidade da ISO/IEC/IEEE 29148 (3.1.24), sem arquivo novo.
+- **Mecanismo, no `verifica-red.sh`:** quando a task da branch tem ao menos uma anotação `→ test:`, todo CA dela tem anotação, e todo arquivo anotado foi tocado por um commit RED da branch. Task sem nenhuma anotação (aprovada antes desta versão) é pulada com aviso.
+- **Proposta 5.2, só como item da lista "Pronto para revisão" do `testes`** (conferido por revisão): os limites das regras têm caso no valor limite.
+
 ## 8. Ordem sugerida e meta de cada bloco
 
 Medir nas duas próximas execuções de cada instância, com a coluna "Causa".
@@ -262,6 +270,7 @@ Medir nas duas próximas execuções de cada instância, com a coluna "Causa".
 | 6 | 7.6 causa no parecer | 100% dos pareceres com a coluna |
 | 7 | 7.7 verify | completo ≤ 2 por task; tempo de espera por task medido antes e depois em D |
 | 8 | 7.8 cerimônia | commits `docs(*)` ≤ 15% |
+| 9 | 7.9 CA → teste | achados de `testes` com causa `contrato` ou `defeito` sobre cobertura de CA caem pela metade |
 
 Meta de conjunto: (a) passa a ser a maior fatia dos achados. É a revisão gastando o tempo com o que só ela pega.
 
