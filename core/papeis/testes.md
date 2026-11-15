@@ -32,5 +32,13 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 - Critério de aceite que não dá para testar como está escrito: PARE e reporte `BLOQUEADO` com a pergunta.
 - Só tire asserção de teste do RED com a referência de "Já decidido": um trailer `Assercoes-removidas: <arquivo> <n> (<ref>)` por arquivo, com n igual ao que saiu, e a lista no relatório. Sem referência: PARE e reporte `BLOQUEADO`.
 
+## Pronto para revisão
+Confira antes de entregar; o revisor confere a mesma lista.
+- cada CA da task tem teste que falha pelo motivo do CA, não por símbolo ausente do contrato;
+- só a resposta certa satisfaz a asserção;
+- as bordas citadas no CA são exercitadas;
+- teste de caracterização (passa no HEAD) não entra no RED;
+- os limites das regras têm caso no valor limite.
+
 ## Ao terminar
-Grave no arquivo de relatório que o brief indica: SHA do commit RED, saída da execução mostrando a falha, mapa critério de aceite → teste. Na remoção de comportamento, também cada asserção removida (arquivo, teste, referência) e o total por arquivo, igual ao do trailer. Depois, devolva a linha de retorno do brief.
+Grave no arquivo de relatório que o brief indica: SHA do commit RED, saída da execução mostrando a falha, mapa critério de aceite → teste. Na remoção de comportamento, também cada asserção removida (arquivo, teste, referência) e o total por arquivo, igual ao do trailer. Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.

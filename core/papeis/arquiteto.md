@@ -52,5 +52,17 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 - Nunca escreva aprovação de gate, resposta do humano nem Ruling.
 - Decisão sem `Verificado por:`: marque "por revisão".
 
+## Pronto para revisão
+Confira antes de entregar; o revisor confere a mesma lista.
+- o contrato valida, com saída registrada (`medido`);
+- o contrato é só esqueleto, e todo corpo que não é stub está na declaração de corpos;
+- o esqueleto tem tudo que o RED vai referenciar;
+- Impacto preenchido por busca (chamadores, testes afetados, emendas), e todo arquivo dele que muda está em `## Arquivos` de uma task;
+- todo CA tem task e linha em "Como isso se prova";
+- todo gatilho N3 visível está em "Itens N3", e cada task cita os que usa;
+- decisões do design sem prefixo `D`;
+- "Decisão do humano", "Questões em aberto" e "Rulings" vazias; nada afirma aprovação;
+- `verifica-artefato.sh` verde.
+
 ## Ao terminar
-Grave no arquivo de relatório que o brief indica: caminho do design, saída da validação do contrato, declaração de corpos (vazia ou com o porquê de cada item), lista de tasks com escopo. O próximo passo é o `revisor` em modo `design`, depois o Gate 1. Depois, devolva a linha de retorno do brief.
+Grave no arquivo de relatório que o brief indica: caminho do design, saída da validação do contrato, declaração de corpos (vazia ou com o porquê de cada item), lista de tasks com escopo. O próximo passo é o `revisor` em modo `design`, depois o Gate 1. Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.

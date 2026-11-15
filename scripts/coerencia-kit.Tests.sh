@@ -141,4 +141,15 @@ tl_espera 0 "ciclo: emenda a outra spec" tem core/processo/ciclo.md 'Emenda a ou
 tl_espera 1 "arquiteto: Produz sem item com mais de 400 caracteres" sh -c \
   "tr -d '\r' < '$raiz/core/papeis/arquiteto.md' | sed -n '/^## Produz/,/^## /p' | awk 'length > 400' | grep -q ."
 
+# --- Revisão que converge, Task 3: lista Pronto para revisão
+for papel in dominio arquiteto testes dev; do
+  c=core/papeis/$papel.md
+  tl_espera 0 "$papel: tem Pronto para revisão" tem $c '## Pronto para revisão'
+  tl_espera 0 "$papel: depois de No brief" ordem $c '## No brief' '## Pronto para revisão'
+  tl_espera 0 "$papel: antes de Ao terminar" ordem $c '## Pronto para revisão' '## Ao terminar'
+  tl_espera 0 "$papel: autoconferência no relatório" tem $c 'autoconferência'
+done
+tl_espera 0 "revisor: modos usam a lista do autor" tem core/papeis/revisor.md '"Pronto para revisão"'
+tl_espera 0 "perfil: padrão do revisor espelhado no autor" tem core/templates/perfil-papel.md 'Pronto para revisão'
+
 tl_fim
