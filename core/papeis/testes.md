@@ -41,7 +41,7 @@ Confira antes de entregar; o revisor confere a mesma lista.
 - as bordas citadas no CA são exercitadas;
 - teste de caracterização (passa no HEAD) não entra no RED;
 - os limites das regras têm caso no valor limite;
-- verify rápido (`verify.sh --rapido`) no laço; o completo (`verify.sh`) antes de devolver.
+- prova do RED: `sh agentic/mecanismos/scripts/verifica-red.sh` verde; o verify completo não é exigido de você (depois de um commit RED a stack fica vermelha por construção).
 
 ## Ao terminar
 Grave no arquivo de relatório que o brief indica: SHA do commit RED, saída da execução mostrando a falha, mapa critério de aceite → teste. Na remoção de comportamento, também cada asserção removida (arquivo, teste, referência) e o total por arquivo, igual ao do trailer. Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.

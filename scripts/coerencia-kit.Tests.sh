@@ -178,18 +178,29 @@ tl_espera 0 "kit sem Menor só na revisão final" nenhum 'Menor.{0,60}revisão f
 
 # --- Revisão que converge, Task 7: verify em dois níveis
 tl_espera 0 "coerência: Ao receber pede o rápido no laço" tem core/templates/brief.md 'verify.sh --rapido'
-tl_espera 0 "coerência: Ao receber pede o completo antes do revisor diff e do PR" tem core/templates/brief.md 'verify.sh` completo'
-tl_espera 0 "coerência: ciclo descreve os dois níveis" tem core/processo/ciclo.md 'o completo roda uma vez antes do PR e no revisor `diff`; no laço, o rápido'
+tl_espera 0 "coerência: Ao receber pede o completo uma vez antes do PR" tem core/templates/brief.md 'verify.sh` completo, uma vez'
+tl_espera 1 "coerência: Ao receber não pede o completo antes de despachar o revisor diff" tem core/templates/brief.md 'antes de despachar o revisor `diff`'
+tl_espera 0 "coerência: Ao receber manda verifica-red depois do RED" tem core/templates/brief.md 'depois do RED: `sh agentic/mecanismos/scripts/verifica-red.sh`'
+tl_espera 0 "coerência: ciclo descreve os níveis (completo só no revisor diff e antes do PR)" tem core/processo/ciclo.md 'o completo roda só no revisor `diff` (ele mesmo, nunca `--rapido`) e uma vez, pelo orquestrador, antes do PR'
+tl_espera 0 "coerência: revisor roda o verify completo, nunca --rapido" tem core/papeis/revisor.md 'Rode o `verify.sh` completo você mesmo — nunca `--rapido`'
+tl_espera 1 "coerência: dev não exige o completo antes de devolver" tem core/papeis/dev.md 'antes de devolver'
+tl_espera 0 "coerência: testes prova o RED com verifica-red, sem verify completo" tem core/papeis/testes.md 'verifica-red.sh` verde; o verify completo não é exigido de você'
+tl_espera 0 "coerência: verifica-artefato sempre e no worktree do autor (brief)" tem core/templates/brief.md 'no worktree do autor: `cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh'
+tl_espera 0 "coerência: verifica-artefato no worktree do autor (ciclo)" tem core/processo/ciclo.md 'no worktree do autor: `cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh'
+tl_espera 0 "coerência: /mudanca roda verifica-artefato no worktree do autor" tem adapters/claude-code/commands/mudanca.md 'cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh mudanca'
+tl_espera 0 "coerência: README esclarece Impacto e Pronto para revisão só em artefatos novos" tem README.md 'exigidas dos artefatos escritos depois da atualização'
+tl_espera 1 "coerência: verifica-red sem sed 's/; /\n/' (GNU-only)" tem mecanismos/scripts/verifica-red.sh "sed 's/; /\n/g'"
 tl_espera 0 "coerência: config.padrao tem CMD_VERIFY_RAPIDO" tem bootstrap/config.padrao 'CMD_VERIFY_RAPIDO='
 tl_espera 0 "coerência: entrevista pergunta o comando rápido" tem bootstrap/entrevista.md 'CMD_VERIFY_RAPIDO'
 tl_espera 0 "coerência: dev usa o rápido no laço" tem core/papeis/dev.md 'verify.sh --rapido'
-tl_espera 0 "coerência: testes usa o rápido no laço" tem core/papeis/testes.md 'verify.sh --rapido'
 tl_espera 0 "coerência: /verify do claude aceita --rapido" tem adapters/claude-code/commands/verify.md '--rapido'
 tl_espera 0 "coerência: /verify do copilot aceita --rapido" tem adapters/copilot/prompts/verify.prompt.md '--rapido'
 
 # --- Revisão que converge, Task 8: Ruling e em-andamento sem commit próprio; caracterização antes do RED
 tl_espera 1 "nova-task não escreve em-andamento" tem adapters/claude-code/commands/nova-task.md 'Marque a task `**Status:** em-andamento`'
-tl_espera 0 "ciclo: Ruling vai no próximo commit da task" tem core/processo/ciclo.md 'próximo commit da task'
+tl_espera 0 "ciclo: Ruling vai no próximo commit do papel seguinte, antes do revisor diff" tem core/processo/ciclo.md 'o brief do próximo papel manda incluir essa mudança no próximo commit dele'
+tl_espera 0 "brief: Ruling vai no próximo commit do papel" tem core/templates/brief.md 'o brief do próximo papel manda incluir essa mudança no próximo commit dele'
+tl_espera 0 "settings do claude nega Edit no cache da prova RED" tem adapters/claude-code/settings.json.tmpl '"Edit(**/.git/agentic/**)"'
 tl_espera 1 "enxuta: sem commit de em-andamento" tem core/processo/ciclo.md '`docs(task): … em-andamento`'
 tl_espera 0 "testes: caracterização antes do RED" tem core/papeis/testes.md 'caracterização'
 tl_espera 1 "mudanca: sem em-andamento na lista do passo 6" tem adapters/claude-code/commands/mudanca.md '`em-andamento`, fases RED'

@@ -27,7 +27,7 @@ Worktree: <caminho absoluto> (branch <branch>). Escreva só em: <caminhos>. Prec
 <até 5 linhas; cada uma, uma entrega verificável — a entrega, nunca a solução: valor, nome, caminho de implementação só se vier de "Já decidido">
 
 ## Já decidido
-<só o que tem origem citável, um por linha com a origem: resposta do humano (data), R-n, D<n>, item N3 aprovado; ou: nenhum>
+<só o que tem origem citável, um por linha com a origem: resposta do humano (data), R-n, D<n>, item N3 aprovado; ou: nenhum. Ruling nova: o orquestrador a escreve em `## Rulings` da task no worktree e o brief do próximo papel manda incluir essa mudança no próximo commit dele (RED, GREEN ou correção); o revisor `diff` só é despachado com a Ruling já commitada>
 
 ## Nunca faz
 <as linhas de "No brief" do contrato que valem nesta rodada, coladas; mais os itens de "Padrões" e "Nunca faz neste
@@ -47,7 +47,7 @@ projeto" do perfil que se aplicam. Em forma de ação: "PARE e diga", nunca um l
 (se o seu papel comita) e reporte onde travou.
 
 ## Entrega
-- Commits (sem push): <tipo(escopo): mensagem>, ou: nenhum (o revisor não comita).
+- Commits (sem push): <tipo(escopo): mensagem>, ou: nenhum (o revisor não comita). Se `## Rulings` da task mudou no worktree, a mudança vai no primeiro commit desta entrega.
 - Relatório: <caminho absoluto do NN-…-relatorio.md ou NN-revisor-<modo>-parecer.md>.
 - Retorno, uma linha: <linha de retorno com os campos deste papel>.
 - Dúvida que trava: <canal>; espere a resposta.
@@ -75,10 +75,10 @@ e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferênci
 - [ ] "Casos a cobrir" igual no brief do autor e no do revisor.
 
 Ao receber (antes de passar a entrega adiante):
-- [ ] antes do revisor de spec, design ou mudanca: `sh agentic/mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` verde; com falha, o trabalho volta ao autor sem despachar o revisor;
+- [ ] antes do revisor de spec, design ou mudanca, sempre (também quando o revisor é opcional na trilha enxuta), no worktree do autor: `cd <worktree> && sh agentic/mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` verde; com falha, o trabalho volta ao autor sem despachar o revisor;
 - [ ] `sh agentic/mecanismos/scripts/verifica-escopo.sh <task.md>` na branch do papel;
 - [ ] depois do RED: `sh agentic/mecanismos/scripts/verifica-red.sh`; depois de cada GREEN no laço: `sh agentic/mecanismos/scripts/verify.sh --rapido`;
-- [ ] antes de despachar o revisor `diff` e antes do PR: `sh agentic/mecanismos/scripts/verify.sh` completo;
+- [ ] antes do PR (o revisor `diff` roda o seu próprio): `sh agentic/mecanismos/scripts/verify.sh` completo, uma vez;
 - [ ] revisor, modo diff: `git rev-parse HEAD` no worktree igual ao SHA final do intervalo do brief (o revisor não
   comita) e `git status --porcelain` vazio;
 - [ ] revisor, modos spec, design e mudanca (nada commitado): `git status --porcelain` e
