@@ -109,4 +109,33 @@ tl_espera 0 "status com um commit além do Gate 1" sh -c "cd '$r5' && sh '$dir/s
 tl_contem "002-b.md: em-andamento (derivado do git)" "um commit além do Gate 1 na empilhada: em andamento"
 tl_contem "001-a.md: pendente" "a base continua pendente"
 
+# A principal local é comparada com a remota (último fetch, sem rede): branch já integrada no remoto não aparece
+# à frente, principal atrasada é avisada e branch com a remota apagada é apontada.
+r6=$(tl_repo); git -C "$r6" remote add origin "$r6/nao-existe"
+git -C "$r6" checkout -q -b feita
+git -C "$r6" commit -q --allow-empty -m "feat: feita"
+git -C "$r6" update-ref refs/remotes/origin/main HEAD       # merge da feita no remoto
+git -C "$r6" config branch.feita.remote origin; git -C "$r6" config branch.feita.merge refs/heads/feita
+git -C "$r6" checkout -q -b aberta main
+git -C "$r6" commit -q --allow-empty -m "feat: aberta"
+git -C "$r6" update-ref refs/remotes/origin/aberta HEAD
+git -C "$r6" config branch.aberta.remote origin; git -C "$r6" config branch.aberta.merge refs/heads/aberta
+git -C "$r6" checkout -q -b orfa main
+git -C "$r6" commit -q --allow-empty -m "feat: orfa"
+git -C "$r6" config branch.orfa.remote origin; git -C "$r6" config branch.orfa.merge refs/heads/orfa
+git -C "$r6" checkout -q main
+tl_espera 0 "status com a principal atrás da remota sai com 0" sh -c "cd '$r6' && sh '$dir/status-projeto.sh'"
+tl_contem "main: 1 commit(s) atrás de origin/main" "avisa a principal local atrasada"
+tl_contem "aberta: 1 commit(s)" "branch não integrada continua à frente"
+tl_contem "orfa: 1 commit(s) — remota apagada" "branch não integrada com a remota apagada é apontada"
+tl_contem "feita: integrada em origin/main" "branch integrada só no remoto é apontada para limpeza"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "integrada no remoto não aparece à frente" grep -q "feita: 1 commit" "$copia_saida"
+tl_espera 1 "aberta com remota existente não é apontada" grep -q "aberta: 1 commit(s) —" "$copia_saida"
+git -C "$r6" merge -q --ff-only origin/main
+tl_espera 0 "status com a principal em dia sai com 0" sh -c "cd '$r6' && sh '$dir/status-projeto.sh'"
+tl_contem "main: em dia com origin/main" "principal em dia"
+tl_espera 0 "sem origin/main sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
+tl_contem "main: sem origin/main" "sem remota, diz que não há com o que comparar"
+
 tl_fim
