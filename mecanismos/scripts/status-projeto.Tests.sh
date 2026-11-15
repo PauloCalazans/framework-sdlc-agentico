@@ -67,4 +67,23 @@ tl_espera 1 "PR aberto não aparece como integrada" grep -q "002-aberta.md: inte
 tl_espera 0 "status diferente de publicada não muda" grep -q "003-andamento.md: em-andamento$" "$copia_saida"
 tl_espera 0 "publicada na principal remota (local desatualizada): integrada" grep -q "004-remota.md: integrada (derivado do git) — publicada$" "$copia_saida"
 
+
+# em-andamento deriva do git: task pendente cuja branch (**Branch:**) está à frente da principal.
+r4=$(tl_repo)
+t=agentic/projeto/specs/pedidos/tasks
+mkdir -p "$r4/$t"
+printf '# Task 001\r\n**Status:** pendente\r\n**Branch:** `pedidos/001`\r\n' > "$r4/$t/001-criar.md"
+printf '# Task 002\n**Status:** pendente\n**Branch:** pedidos/002\n' > "$r4/$t/002-sem-branch.md"
+printf '# Task 003\n**Status:** em-andamento\n**Branch:** pedidos/003\n' > "$r4/$t/003-legado.md"
+git -C "$r4" add -A; git -C "$r4" commit -q -m "Gate 1"
+git -C "$r4" checkout -q -b pedidos/001
+git -C "$r4" commit -q --allow-empty -m "test(red): x"
+git -C "$r4" checkout -q main
+tl_espera 0 "status deriva em-andamento do git" sh -c "cd '$r4' && sh '$dir/status-projeto.sh'"
+tl_contem "001-criar.md: em-andamento (derivado do git)" "mostra derivado"
+tl_contem "002-sem-branch.md: pendente" "pendente sem branch fica pendente"
+tl_contem "003-legado.md: em-andamento" "em-andamento escrito continua lido"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "pendente sem branch não é derivado" grep -q "002-sem-branch.md: em-andamento" "$copia_saida"
+
 tl_fim

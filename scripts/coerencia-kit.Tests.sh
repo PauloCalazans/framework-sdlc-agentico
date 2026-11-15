@@ -187,4 +187,11 @@ tl_espera 0 "coerência: testes usa o rápido no laço" tem core/papeis/testes.m
 tl_espera 0 "coerência: /verify do claude aceita --rapido" tem adapters/claude-code/commands/verify.md '--rapido'
 tl_espera 0 "coerência: /verify do copilot aceita --rapido" tem adapters/copilot/prompts/verify.prompt.md '--rapido'
 
+# --- Revisão que converge, Task 8: Ruling e em-andamento sem commit próprio; caracterização antes do RED
+tl_espera 1 "nova-task não escreve em-andamento" tem adapters/claude-code/commands/nova-task.md 'Marque a task `**Status:** em-andamento`'
+tl_espera 0 "ciclo: Ruling vai no próximo commit da task" tem core/processo/ciclo.md 'próximo commit da task'
+tl_espera 1 "enxuta: sem commit de em-andamento" tem core/processo/ciclo.md '`docs(task): … em-andamento`'
+tl_espera 0 "testes: caracterização antes do RED" tem core/papeis/testes.md 'caracterização'
+tl_espera 1 "mudanca: sem em-andamento na lista do passo 6" tem adapters/claude-code/commands/mudanca.md '`em-andamento`, fases RED'
+
 tl_fim

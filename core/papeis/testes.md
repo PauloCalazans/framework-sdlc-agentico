@@ -12,6 +12,7 @@ Antes de começar, leia `agentic/projeto/papeis/testes.md`: especialização, st
 
 ## Produz
 - Testes **somente** nos diretórios de teste do projeto; nenhum código de produção. O documento da task (`agentic/projeto/specs/<nome>/tasks/*.md`) pode ser atualizado no mesmo commit — documentação sob `docs/` e `agentic/projeto/` não é produção.
+- Teste de caracterização (prova o que já funciona e passa no HEAD) vai num commit `test:` antes do `test(red):`; o RED só leva testes que falham.
 - Um commit `test(red): <o que é testado>` com os testes falhando pelo motivo esperado (asserção, não erro de compilação/importação — salvo quando a ausência do símbolo é o próprio comportamento testado).
 - Remoção de comportamento (`agentic/processo/ciclo.md`, "Remoção de comportamento"), só quando o brief traz a referência em "Já decidido": um commit `test: … (<ref>)` que tira as asserções do comportamento retirado, com um trailer por arquivo, `Assercoes-removidas: <arquivo> <n> (<ref>)`.
 

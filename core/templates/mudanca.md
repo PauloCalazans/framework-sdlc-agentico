@@ -1,7 +1,7 @@
 # Mudança: <nome>
 
 **Status:** pendente
-<!-- pendente | em-andamento | em-revisão | publicada  (integrada não é escrito: deriva do git) -->
+<!-- pendente | em-revisão | publicada  (em-andamento e integrada não são escritos: derivam do git) -->
 **Branch:** <nome>/001-<nome>
 **Trilha:** enxuta
 <!-- Autoria (agentic/processo/ciclo.md, "Trilha enxuta"): o `arquiteto` escreve as seções; as respostas do Questionário, a coluna "Decisão do humano", "Questões em aberto" e "Rulings" são só do orquestrador. Ninguém escreve aprovação neste documento: o Gate 1 é o commit `docs(mudanca): <nome> aprovada (Gate 1)`. -->

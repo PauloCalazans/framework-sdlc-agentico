@@ -38,6 +38,19 @@ find agentic/projeto/intent agentic/projeto/specs -name '*.md' ! -name '_*' 2>/d
         esac
       done
       ;;
+    pendente*)
+      # em-andamento não é escrito (ciclo.md, "Status dos artefatos"): pendente com branch própria à frente da
+      # principal está em andamento. Sem branch, branch inexistente ou ainda sem commit à frente: continua pendente.
+      br=$(grep -m1 '^\*\*Branch:\*\*' "$f" | tr -d '\r`' | sed 's/^\*\*Branch:\*\*[[:space:]]*//; s/[[:space:]]*$//')
+      if [ -n "$br" ] && git rev-parse --verify -q "$br^{commit}" >/dev/null 2>&1; then
+        for p in "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL"; do
+          git rev-parse --verify -q "$p^{commit}" >/dev/null 2>&1 || continue
+          n=$(git rev-list --count "$p..$br" 2>/dev/null || echo 0)
+          [ "${n:-0}" -gt 0 ] 2>/dev/null && s="em-andamento (derivado do git)"
+          break
+        done
+      fi
+      ;;
   esac
   [ -n "$s" ] && echo "- $f: $s"
 done
