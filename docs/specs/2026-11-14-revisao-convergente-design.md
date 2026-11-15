@@ -219,7 +219,7 @@ Adotar a primeira leva do parecer de D (parecer externo de 2026-11; os detalhes 
    - `agentic_base` lê o `**Base:**` da task da branch atual, achada pelo `**Branch:**`;
    - o argumento posicional também passa pelo merge-base;
    - a base é derivada e exportada antes da etapa `stack` (hoje ela roda antes, em `verify.sh:45`), e o `CMD_VERIFY_STACK` passa a receber `AGENTIC_BASE`.
-2. **Ordem barata primeiro:** hooks → escopo → skip → decisões → red → stack.
+2. **Ordem barata primeiro:** hooks → escopo → decisões → red → stack → skip (o `skip` lê os relatórios do `stack`).
 3. **Cache da prova de RED por SHA.** Existe um protótipo em D, mas o kit **reimplementa a partir desta descrição** (decisão do mantenedor, 2026-11-15). Os 64 casos atuais do `verifica-red.Tests.sh` têm de continuar passando, e os casos novos são escritos no kit:
    - cada arquivo provado falhando grava `<sha do RED> <assinatura> <arquivo>` em `<git common dir>/agentic/red-provados`;
    - a assinatura é o hash de `CMD_PREPARAR_TESTE` mais o comando de teste;
@@ -234,7 +234,11 @@ Adotar a primeira leva do parecer de D (parecer externo de 2026-11; os detalhes 
 
 Os demais itens do parecer de D (baseline de falhas conhecidas, verify em segundo plano, reuso por `write-tree`, tempo por etapa) ficam para depois da medição.
 
-**Atrito medido em C, só documentação:** a sequência teste de caracterização (`test:`, verde) → `test(red):` entra em `testes.md`, porque o `verifica-red.sh` está certo em exigir que todo arquivo do RED falhe. O falso positivo do `verifica-decisoes.sh` com numeração de decisões dentro do design é reproduzido primeiro. Se confirmado, a correção é restringir a leitura a `decisoes.md`.
+**Atrito medido em C, só documentação:**
+- A sequência teste de caracterização (`test:`, verde) → `test(red):` entra em `testes.md`. O `verifica-red.sh` está certo em exigir que todo arquivo do RED falhe.
+- **O caso do `verifica-decisoes.sh` foi reproduzido na leitura (2026-11-15) e não é falso positivo.** O design de C numerou as próprias decisões como `D9` e `D11`. O prefixo `D` é das decisões do projeto: com ele, as de número 1 a 8 colidiam em silêncio com decisões vigentes, e o script recusou 9 e 11 como inexistentes. O humano de C já fixou a regra ("as decisões de design não levam prefixo D, apenas as de projeto"). Ela entra no template `design.md` e na lista "Pronto para revisão" do arquiteto; o script não muda.
+
+**Correção de ordem (2026-11-15):** a etapa `skip` lê os relatórios JUnit que o `stack` gera. Por isso ela fica depois do `stack`, e a ordem final é hooks → escopo → decisões → red → stack → skip.
 
 ### 7.8 Commits de cerimônia
 
