@@ -1,7 +1,7 @@
 # Mudança: <nome>
 
 **Status:** pendente
-<!-- pendente | em-andamento | em-revisão | publicada  (integrada não é escrito: deriva do git) -->
+<!-- pendente | em-revisão | publicada  (em-andamento e integrada não são escritos: derivam do git) -->
 **Branch:** <nome>/001-<nome>
 **Trilha:** enxuta
 <!-- Autoria (agentic/processo/ciclo.md, "Trilha enxuta"): o `arquiteto` escreve as seções; as respostas do Questionário, a coluna "Decisão do humano", "Questões em aberto" e "Rulings" são só do orquestrador. Ninguém escreve aprovação neste documento: o Gate 1 é o commit `docs(mudanca): <nome> aprovada (Gate 1)`. -->
@@ -17,10 +17,17 @@
 
 ## Critérios de aceite
 - CA1 (R1): dado <contexto>, quando <ação>, então <resultado observável>
+<!-- Anote cada critério: `CA<n> (<R…>): <texto> → test: <arquivo>::<nome>` (mais de um teste: separe por `; `). O arquivo anotado precisa ser tocado por um commit test(red):. -->
 
 ## Arquivos
 - `<caminho/exato>`
 - `<diretorio/*>`
+
+## Impacto
+<!-- Toda linha `medido` (busca no repositório, com arquivo:linha). Sem impacto fora dos arquivos novos: escreva `- Nenhum (só arquivos novos).` -->
+| Alterado (símbolo, rota, schema, regra) | Quem usa hoje (arquivo:linha, medido) | Em ## Arquivos de | Teste existente afetado | Regra de outra spec → emenda |
+|---|---|---|---|---|
+| <símbolo alterado> | <arquivo:linha> | <task NNN> | <teste ou "nenhum"> | <spec e regra, ou "nenhuma"> |
 
 ## Contrato executável
 <!-- Quando a mudança cria ou altera interface: esqueleto escrito no worktree, dentro de ## Arquivos, sem commit até o Gate 1; entra no commit `chore: contrato executável`. Sem interface nova: "- Não há." -->
@@ -60,5 +67,5 @@
 
 ## Rulings
 <!-- Só o orquestrador escreve, depois do Gate 1: decisões não previstas neste documento (agentic/processo/ciclo.md, "Rulings"). Ruling não aprova N3. -->
-- R-1 (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>
-<!-- ou: - Nenhuma. -->
+- Nenhuma.
+<!-- Quando houver, uma linha por ruling: - R-1 (<fase>): <o quê> — por quê: <…> — descartado: <alternativa> -->

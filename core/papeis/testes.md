@@ -12,6 +12,7 @@ Antes de começar, leia `agentic/projeto/papeis/testes.md`: especialização, st
 
 ## Produz
 - Testes **somente** nos diretórios de teste do projeto; nenhum código de produção. O documento da task (`agentic/projeto/specs/<nome>/tasks/*.md`) pode ser atualizado no mesmo commit — documentação sob `docs/` e `agentic/projeto/` não é produção.
+- Teste de caracterização (prova o que já funciona e passa no HEAD) vai num commit `test:` antes do `test(red):`; o RED só leva testes que falham.
 - Um commit `test(red): <o que é testado>` com os testes falhando pelo motivo esperado (asserção, não erro de compilação/importação — salvo quando a ausência do símbolo é o próprio comportamento testado).
 - Remoção de comportamento (`agentic/processo/ciclo.md`, "Remoção de comportamento"), só quando o brief traz a referência em "Já decidido": um commit `test: … (<ref>)` que tira as asserções do comportamento retirado, com um trailer por arquivo, `Assercoes-removidas: <arquivo> <n> (<ref>)`.
 
@@ -32,5 +33,15 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 - Critério de aceite que não dá para testar como está escrito: PARE e reporte `BLOQUEADO` com a pergunta.
 - Só tire asserção de teste do RED com a referência de "Já decidido": um trailer `Assercoes-removidas: <arquivo> <n> (<ref>)` por arquivo, com n igual ao que saiu, e a lista no relatório. Sem referência: PARE e reporte `BLOQUEADO`.
 
+## Pronto para revisão
+Confira antes de entregar; o revisor confere a mesma lista.
+- cada CA da task tem teste que falha pelo motivo do CA, não por símbolo ausente do contrato;
+- cada CA anotado com `→ test: <arquivo>::<nome>` no commit RED;
+- só a resposta certa satisfaz a asserção;
+- as bordas citadas no CA são exercitadas;
+- teste de caracterização (passa no HEAD) não entra no RED;
+- os limites das regras têm caso no valor limite;
+- prova do RED: `sh agentic/mecanismos/scripts/verifica-red.sh` verde; o verify completo não é exigido de você (depois de um commit RED a stack fica vermelha por construção).
+
 ## Ao terminar
-Grave no arquivo de relatório que o brief indica: SHA do commit RED, saída da execução mostrando a falha, mapa critério de aceite → teste. Na remoção de comportamento, também cada asserção removida (arquivo, teste, referência) e o total por arquivo, igual ao do trailer. Depois, devolva a linha de retorno do brief.
+Grave no arquivo de relatório que o brief indica: SHA do commit RED, saída da execução mostrando a falha, mapa critério de aceite → teste. Na remoção de comportamento, também cada asserção removida (arquivo, teste, referência) e o total por arquivo, igual ao do trailer. Depois, devolva a linha de retorno do brief. Grave no relatório a autoconferência: um item da lista "Pronto para revisão" (contrato e perfil) por linha, `ok` ou `n.a. — <motivo>`, com a evidência. Item sem marca conta como não feito.

@@ -94,4 +94,14 @@ printf '# Spec\n**Intent:** `agentic/projeto/intent/001-pedidos.md`\n' > "$r/age
 mkdir -p "$r/agentic/projeto/intent"; echo i > "$r/agentic/projeto/intent/001-pedidos.md"
 tl_espera 0 "Intent entre crases é isento" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' agentic/projeto/specs/pedidos/tasks/001-criar.md"
 
+# Base posicional pelo merge-base: o que só a base mudou depois do ponto de saída não conta.
+r=$(prepara)
+echo x > "$r/src/pedidos/criar.py"; git -C "$r" add -A; git -C "$r" commit -q -m "impl 001"
+git -C "$r" checkout -q -b pedidos/002
+echo y > "$r/src/pedidos/seg.py"; git -C "$r" add -A; git -C "$r" commit -q -m "impl 002"
+git -C "$r" checkout -q pedidos/001
+mkdir -p "$r/src"; echo o > "$r/src/outro.py"; git -C "$r" add -A; git -C "$r" commit -q -m "001 muda outro"
+git -C "$r" checkout -q pedidos/002
+tl_espera 0 "base posicional usa merge-base: arquivo que só a base mudou depois não conta" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' agentic/projeto/specs/pedidos/tasks/001-criar.md pedidos/001"
+
 tl_fim
