@@ -402,6 +402,7 @@ tl_contem "já provado (tests/run.sh) (ok)" "cache: diz que usou o cache"
 tl_espera 0 "cache: contador continua 1" conta 1
 git -C "$r" worktree add -q --detach "$r.wt" HEAD
 tl_espera 0 "cache: compartilhado entre worktrees" vrc "$r.wt"
+tl_contem "já provado" "cache: o worktree ligado usou a prova do diretório comum"
 tl_espera 0 "cache: contador inalterado no worktree ligado" conta 1
 git -C "$r" worktree remove --force "$r.wt"
 tl_espera 0 "cache: AGENTIC_RED_SEM_CACHE=1 prova de novo" env AGENTIC_RED_SEM_CACHE=1 sh -c "cd '$r' && sh '$dir/verifica-red.sh'" </dev/null
@@ -446,6 +447,7 @@ mkdir -p "$r/.git/agentic"
 sig=$(printf '%s\n%s\n%s\n' "" "" "sh tests/run.sh" | git hash-object --stdin)
 printf '%s %s %s\n' "$red" "$sig" '*suite*' > "$r/.git/agentic/red-provados"
 tl_espera 1 "cache: recusa de produção roda mesmo com prova guardada" vrc "$r"
+tl_contem "já provado (*suite*)" "cache: a prova guardada estava valendo (assinatura certa)"
 tl_contem "src/soma.sh" "cache: aponta a produção"
 
 # Modo degradado: a suíte inteira é guardada como *suite*.
@@ -454,6 +456,56 @@ tl_espera 0 "cache degradado: 1ª prova" vrc "$r"
 tl_espera 0 "cache degradado: 2ª usa o cache" vrc "$r"
 tl_contem "já provado (*suite*)" "cache degradado: diz que usou o cache"
 tl_espera 0 "cache degradado: arquivo guarda *suite* literal" grep -qF ' *suite*' "$r/.git/agentic/red-provados"
+
+# Execução interrompida (rc >= 124: timeout ou sinal) não vira prova permanente.
+r=$(prepara); cont=$(mktemp); : > "$cont"
+printf 'CMD_TESTE_ARQUIVO="echo x >> '"'%s'"'; exit 130"
+' "$cont" >> "$r/agentic/config"
+git -C "$r" add -A; git -C "$r" commit -q -m "config: interrompido"
+printf 'exit 1
+assert_igual
+' > "$r/tests/a.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 0 "cache: rc 130 mantém o veredicto (falhava)" vrc "$r"
+tl_contem "falhava (tests/a.sh) (ok)" "cache: rc 130 segue 'falhava (ok)'"
+tl_espera 0 "cache: rc 130 executou uma vez" conta 1
+tl_espera 0 "cache: rc 130 prova de novo na 2ª chamada" vrc "$r"
+tl_espera 0 "cache: rc 130 não imprime 'já provado'" sh -c "! grep -q 'já provado' '$TL_SAIDA'"
+tl_espera 0 "cache: rc 130 não foi guardado (contador 2)" conta 2
+
+# Cache parcial: um arquivo já provado e outro novo; só o novo executa.
+parcial() {
+  r=$(prepara); cont=$(mktemp); : > "$cont"
+  cmdarq="echo x >> '$cont'; sh {}"
+  printf 'CMD_TESTE_ARQUIVO="%s"
+' "$cmdarq" >> "$r/agentic/config"
+  git -C "$r" add -A; git -C "$r" commit -q -m "config: contador"
+  printf 'exit 1
+assert_igual
+' > "$r/tests/a.sh"
+  printf '%s
+assert_igual
+' "$1" > "$r/tests/b.sh"
+  git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a e b"
+  red=$(git -C "$r" rev-parse HEAD)
+  sig=$(printf '%s
+%s
+%s
+' "" "$cmdarq" "sh tests/run.sh" | git hash-object --stdin)
+  mkdir -p "$r/.git/agentic"
+  printf '%s %s %s
+' "$red" "$sig" 'tests/a.sh' > "$r/.git/agentic/red-provados"
+}
+parcial 'exit 1'
+tl_espera 0 "cache parcial: a provado, b novo" vrc "$r"
+tl_contem "já provado (tests/a.sh) (ok)" "cache parcial: a veio do cache"
+tl_contem "falhava (tests/b.sh) (ok)" "cache parcial: b foi provado"
+tl_espera 0 "cache parcial: só o novo executou" conta 1
+parcial 'exit 0'
+tl_espera 1 "cache parcial: b novo que passa bloqueia" vrc "$r"
+tl_contem "já provado (tests/a.sh)" "cache parcial: a segue do cache"
+tl_contem "PASSAVAM no RED" "cache parcial: explica que b passava"
+tl_espera 0 "cache parcial: b executou" conta 1
 
 # Review Focus 5: comando que lê stdin não come a lista de arquivos.
 r=$(prepara)
