@@ -16,9 +16,9 @@
 #       entre a base e o pai de X (registrada antes da remoção). O crédito de X é no máximo a queda de asserções
 #       do arquivo em X, mesmo com várias declarações; o limite passa a ser (asserções no RED - créditos).
 #   (4) cache: a prova de (2) é guardada por SHA do RED e assinatura dos comandos de teste, e reaproveitada (ver
+#       "Cache (4)" mais abaixo); AGENTIC_RED_SEM_CACHE=1 ignora a leitura. (1) e (3) rodam sempre.
 #   (5) vínculo CA → teste: cada CA da task da branch (**Branch:**) tem "→ test: <arquivo>::<nome>" e o arquivo é
 #       tocado por commit RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa.
-#       "Cache (4)" mais abaixo); AGENTIC_RED_SEM_CACHE=1 ignora a leitura. (1) e (3) rodam sempre.
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 if [ -n "${1:-}" ]; then
@@ -305,7 +305,7 @@ if [ -n "$vinc_task" ]; then
       }')
     [ -z "$(printf '%s' "$vinc_secao" | grep -E 'CA[0-9]+')" ] || break
   done
-  vinc_ca=$(printf '%s\n' "$vinc_secao" | grep -E '^[[:space:]]*[-*]?[[:space:]]*CA[0-9]+')
+  vinc_ca=$(printf '%s\n' "$vinc_secao" | grep -E '^[[:space:]]*[-*]?[[:space:]]*(\[[ xX]\][[:space:]]*)?CA[0-9]+')
   if [ -n "$vinc_ca" ]; then
     vinc_ann=$(printf '%s\n' "$vinc_ca" | grep -c '→ test:')
     if [ "$vinc_ann" -eq 0 ]; then
@@ -322,7 +322,7 @@ if [ -n "$vinc_task" ]; then
         printf '%s\n' "$vinc_resto" | sed 's/; /\n/g' | while IFS= read -r vinc_i; do
           vinc_a=${vinc_i%%::*}
           vinc_a=$(printf '%s' "$vinc_a" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-          [ -n "$vinc_a" ] || continue
+          [ -n "$vinc_a" ] || { echo "agentic: BLOQUEADO — $vinc_id com → test: sem arquivo na task $vinc_task"; continue; }
           printf '%s\n' "$vinc_tocados" | grep -qxF -- "$vinc_a" \
             || echo "agentic: BLOQUEADO — $vinc_a anotado em $vinc_id não foi tocado por commit test(red):"
         done
