@@ -20,7 +20,7 @@ tl_espera 0 "permite comandos comuns" roda 'git log --format=%H'
 
 # Desvio dos githooks: o deny casa por prefixo; o hook olha o comando inteiro.
 tl_espera 2 "bloqueia push com --no-verify depois do refspec" roda 'git push origin main --no-verify'
-tl_contem "pula os githooks" "explica o bloqueio do desvio"
+tl_contem "githooks" "explica o bloqueio do desvio"
 tl_espera 2 "bloqueia abreviação --no-veri" roda 'git push --no-veri origin x'
 tl_espera 2 "bloqueia commit -m ... --no-verify" roda 'git commit -m msg --no-verify'
 tl_espera 2 "bloqueia commit -n no fim" roda 'git commit -m msg -n'
@@ -31,5 +31,16 @@ tl_espera 0 "permite push comum" roda 'git push -u origin feat/x'
 tl_espera 0 "permite commit com mensagem que tem -n no texto entre aspas simples" roda "git commit -m 'teste'"
 tl_espera 0 "permite push -n (dry-run)" roda 'git push -n origin feat/x'
 tl_espera 0 "permite git log -n 5" roda 'git log -n 5'
+
+tl_espera 2 "bloqueia git -C dir commit -n" roda 'git -C sub commit -n -m x'
+tl_espera 2 "bloqueia -c core.HooksPath (maiúscula)" roda 'git -c core.HooksPath=/x push'
+tl_espera 2 "bloqueia -c entre aspas" roda 'git -c \"core.hooksPath=/x\" commit -m y'
+tl_espera 2 "bloqueia --config-env" roda 'git --config-env=core.hooksPath=X push'
+tl_espera 2 "bloqueia GIT_CONFIG_*" roda 'GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=/x git push'
+tl_espera 2 "bloqueia git config --local core.hooksPath" roda 'git config --local core.hooksPath /x'
+tl_espera 0 "permite -n dentro da mensagem entre aspas" roda 'git commit -m \"remove -n e --no-verify do texto\"'
+tl_espera 0 "permite heredoc com -n no corpo" roda 'git commit -F - <<EOF\nusa head -n 1\nEOF'
+tl_espera 2 "bloqueia --no-verify na linha que abre o heredoc" roda 'git commit --no-verify -F - <<EOF\nmsg\nEOF'
+tl_espera 0 "permite comando sem git com descrição citando git" sh -c "printf '{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"ls -n\",\"description\":\"git commit -n\"}}' | sh '$dir/pre-tool-use.sh'"
 
 tl_fim

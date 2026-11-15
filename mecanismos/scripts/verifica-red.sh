@@ -20,7 +20,7 @@
 #   (5) vínculo CA → teste: cada CA da task (AGENTIC_TASK, exportada pelo verify.sh, inclusive com --task; ou a
 #       task de **Branch:** igual à branch atual) tem "→ test: <arquivo>::<nome>" e o arquivo é tocado por commit
 #       RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa. Task com CA e nenhum commit
-#       RED bloqueia quando a branch tem commit além de docs(…), chore: e merge (GREEN sem RED).
+#       RED bloqueia quando a branch tem commit próprio além de docs, chore e test: (GREEN sem RED).
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 if [ -n "${1:-}" ]; then
@@ -46,10 +46,34 @@ else
     done
   fi
 fi
+# CAs da task (mesma definição para "GREEN sem RED" e para o vínculo).
+vinc_ca=""
+if [ -n "$vinc_task" ]; then
+  # Seção "Critérios de pronto" (task) ou, sem ela, "Critérios de aceite" (mudança); sem \r, backticks e comentários HTML.
+  vinc_secao=""
+  for vinc_t in 'Critérios de pronto' 'Critérios de aceite'; do
+    vinc_secao=$(tr -d '\r`' < "$vinc_task" | awk -v t="## $vinc_t" '
+      BEGIN { achou = 0 }
+      /^## / { if (dentro) exit; dentro = ($0 == t); if (dentro) achou = 1; next }
+      dentro {
+        l = $0
+        while (1) {
+          if (com) { i = index(l, "-->"); if (!i) { l = ""; break } l = substr(l, i + 3); com = 0 }
+          i = index(l, "<!--"); if (!i) break
+          j = index(substr(l, i + 4), "-->")
+          if (j) l = substr(l, 1, i - 1) substr(l, i + 4 + j + 2); else { l = substr(l, 1, i - 1); com = 1 }
+        }
+        print l
+      }')
+    [ -z "$(printf '%s' "$vinc_secao" | grep -E 'CA[0-9]+')" ] || break
+  done
+  vinc_ca=$(printf '%s\n' "$vinc_secao" | grep -E '^[[:space:]]*[-*]?[[:space:]]*(\[[ xX]\][[:space:]]*)?CA[0-9]+')
+fi
 if [ -z "$reds" ]; then
-  # GREEN sem RED: task com CA e algum commit que não é registro (docs), contrato executável (chore) nem merge.
-  if [ -n "$vinc_task" ] && tr -d '\r`' < "$vinc_task" | grep -qE '^[[:space:]]*[-*]?[[:space:]]*(\[[ xX]\][[:space:]]*)?CA[0-9]+'; then
-    if git log --format=%s "$base..HEAD" | grep -qvE '^(docs[(:]|chore[(:]|Merge )'; then
+  # GREEN sem RED: task com CA e algum commit da própria branch (primeiro pai, sem merges: o que um merge trouxe
+  # de outra branch não conta) que não é registro (docs), contrato executável (chore) nem teste (test:).
+  if [ -n "$vinc_ca" ]; then
+    if git log --first-parent --no-merges --format=%s "$base..HEAD" | grep -qvE '^(docs|chore|test)[(:]'; then
       echo "agentic: BLOQUEADO — a task $vinc_task tem CA e a branch tem commit além de docs/chore sem nenhum test(red):"
       exit 1
     fi
@@ -302,25 +326,6 @@ done
 # só gera aviso; branch sem task (trilha rápida) não é checada.
 # (vinc_task é resolvida antes da lista de commits RED.)
 if [ -n "$vinc_task" ]; then
-  # Seção "Critérios de pronto" (task) ou, sem ela, "Critérios de aceite" (mudança); sem \r, backticks e comentários HTML.
-  vinc_secao=""
-  for vinc_t in 'Critérios de pronto' 'Critérios de aceite'; do
-    vinc_secao=$(tr -d '\r`' < "$vinc_task" | awk -v t="## $vinc_t" '
-      BEGIN { achou = 0 }
-      /^## / { if (dentro) exit; dentro = ($0 == t); if (dentro) achou = 1; next }
-      dentro {
-        l = $0
-        while (1) {
-          if (com) { i = index(l, "-->"); if (!i) { l = ""; break } l = substr(l, i + 3); com = 0 }
-          i = index(l, "<!--"); if (!i) break
-          j = index(substr(l, i + 4), "-->")
-          if (j) l = substr(l, 1, i - 1) substr(l, i + 4 + j + 2); else { l = substr(l, 1, i - 1); com = 1 }
-        }
-        print l
-      }')
-    [ -z "$(printf '%s' "$vinc_secao" | grep -E 'CA[0-9]+')" ] || break
-  done
-  vinc_ca=$(printf '%s\n' "$vinc_secao" | grep -E '^[[:space:]]*[-*]?[[:space:]]*(\[[ xX]\][[:space:]]*)?CA[0-9]+')
   if [ -n "$vinc_ca" ]; then
     vinc_ann=$(printf '%s\n' "$vinc_ca" | grep -c '→ test:')
     if [ "$vinc_ann" -eq 0 ]; then
