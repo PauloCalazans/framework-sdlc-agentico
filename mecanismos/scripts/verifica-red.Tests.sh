@@ -604,9 +604,9 @@ semred
 printf 'assert_igual\n' > "$r/tests/carac.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test: caracterização do legado"
 tl_espera 0 "sem RED: commit test: (caracterização) não é GREEN" vv "$r"
 semred
-git -C "$r" checkout -q -b outra main; echo y > "$r/src/outro.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat: de outra task"
-git -C "$r" checkout -q feat/soma; git -C "$r" merge -q --no-edit outra
-tl_espera 0 "sem RED: commits trazidos por merge não contam" vv "$r"
+git -C "$r" checkout -q main; echo y > "$r/src/outro.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat: de outra task, já integrada"
+git -C "$r" checkout -q feat/soma; git -C "$r" merge -q --no-edit main
+tl_espera 0 "sem RED: commits da principal trazidos por merge não contam" vv "$r"
 
 # Varredura de coerência: verify.sh --task exporta AGENTIC_TASK; a task chega ao vínculo numa branch de nome imposto.
 vinculo '- CA1 (R1): a → test: tests/a.sh::um\n- CA2 (R2): b sem anotação'
@@ -615,5 +615,18 @@ tl_espera 0 "branch imposta sem AGENTIC_TASK: sem task associada, não checa" vv
 tl_espera 1 "branch imposta com AGENTIC_TASK: vínculo checado" sh -c "cd '$r' && AGENTIC_TASK=agentic/projeto/specs/x/tasks/001-x.md sh '$dir/verifica-red.sh'"
 tl_contem "CA2 sem → test:" "branch imposta: nomeia o CA"
 tl_espera 0 "verify.sh exporta a task para o verifica-red" grep -q 'AGENTIC_TASK=$task; export AGENTIC_TASK' "$dir/verify.sh"
+
+# Re-revisão: test: com produção conta; remoção autorizada não bloqueia; GREEN de sub-branch conta.
+semred
+echo 'soma() { echo 2; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test: disfarçado"
+tl_espera 1 "sem RED: test: que toca produção conta como GREEN" vv "$r"
+semred
+printf 'x\n' > "$r/tests/velho.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "test: remove x (R-1)" -m "Assercoes-removidas: tests/velho.sh 1 (R-1)"
+echo 'soma() { echo 3; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "refactor: tira comportamento"
+tl_espera 0 "sem RED: task de remoção de comportamento não bloqueia" vv "$r"
+semred
+git -C "$r" checkout -q -b sub; echo 'soma() { echo 4; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "feat(green): na sub"
+git -C "$r" checkout -q feat/soma; git -C "$r" merge -q --no-ff --no-edit sub
+tl_espera 1 "sem RED: GREEN trazido de sub-branch por merge conta" vv "$r"
 
 tl_fim

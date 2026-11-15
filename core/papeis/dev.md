@@ -17,7 +17,7 @@ Antes de começar, leia `agentic/projeto/papeis/dev.md`: especialização, stack
 
 ## Nunca faz
 - Alterar, apagar ou desabilitar testes do RED (o `verifica-red.sh` compara, por arquivo, as asserções de cada arquivo de teste tocado pelo RED com HEAD; o `verifica-skip.sh` bloqueia desabilitação). Teste de comportamento que uma decisão retirou também não é seu: reporte `BLOQUEADO`; a remoção é do `testes` ("Remoção de comportamento" no ciclo).
-- Tocar arquivo fora de `## Arquivos` da task: pare e pergunte; quem amplia a lista é o orquestrador, num commit `docs(task): …` (Ruling).
+- Tocar arquivo fora de `## Arquivos` da task: pare e pergunte; quem amplia a lista é o orquestrador, por Ruling (`agentic/processo/ciclo.md`, "Escopo"), e a mudança entra no seu próximo commit.
 - Adicionar dependência nova que não está em "N3 aprovados no Gate 1" da task sem escalonamento N3.
 
 ## Independência

@@ -258,7 +258,7 @@ tl_espera 0 "spec: delegado coberto pelo plano usa plano:" tem core/templates/sp
 tl_espera 0 "/intent: dominio não conversa com o humano" tem adapters/claude-code/commands/intent.md 'o `dominio` nunca conversa direto com o humano'
 tl_espera 0 "/nova-task: primeira task usa a branch do Gate 1" tem adapters/claude-code/commands/nova-task.md 'crie-o sem `-b`'
 tl_espera 0 "copilot: status no início da sessão" tem adapters/copilot/copilot-instructions.md 'status-projeto.sh` antes de escolher a task'
-tl_espera 0 "hook: barra o desvio dos githooks" tem adapters/claude-code/hooks/pre-tool-use.sh '--config-env|GIT_CONFIG_'
+tl_espera 0 "hook: barra o desvio dos githooks" tem adapters/claude-code/hooks/pre-tool-use.sh '--no-v|hookspath|config-env|GIT_CONFIG_'
 
 tl_espera 0 "empilhamento só com plataforma de PR (README)" tem README.md 'Com plataforma de PR, quando a task anterior'
 tl_espera 0 "empilhamento só com plataforma de PR (task)" tem core/templates/task.md 'só com plataforma de PR'
