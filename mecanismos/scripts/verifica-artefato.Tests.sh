@@ -279,6 +279,27 @@ tl_contem "docs/inexistente.md" "nomeia o caminho"
 r=$(prepara_mudanca)
 sub 's|^## Contrato executável|## Impacto\n- `src/ajuste.py:4-9` muda\n\n&|' $M
 tl_espera 0 "mudança: Impacto cita caminho dentro de Arquivos passa" roda mudanca $M
+
+# citações com ::teste, #âncora, rota e {chave} não são caminhos do repositório
+r=$(prepara_mudanca)
+mkdir -p "$r/tests"; : > "$r/tests/test_criar.py"
+sub 's|^## Contrato executável|## Impacto\n- `tests/test_criar.py::test_aberto` e `src/ajuste.py#L4` mudam; rota `/api/pedidos/{id}` e `src/{a,b}/x.py` são só texto\n\n\&|' $M
+tl_espera 0 "mudança: ::teste, #âncora, rota e {chave} em Impacto não são caminhos faltando" roda mudanca $M
+r=$(prepara_mudanca)
+sub 's|^## Contrato executável|## Impacto\n- `tests/test_nao_existe.py::test_x` muda\n\n\&|' $M
+tl_espera 1 "mudança: ::teste de arquivo inexistente continua bloqueando" roda mudanca $M
+tl_contem "tests/test_nao_existe.py" "nomeia o arquivo sem o ::teste"
+
+# mudança montada com Questões/Rulings do texto REAL do template passa a verificação 4
+r=$(prepara_mudanca)
+sed '/^## Questões em aberto/,$d' "$r/$M" > "$r/novo.md"
+sed -n '/^## Questões em aberto/,$p' "$dir/../../core/templates/mudanca.md" >> "$r/novo.md"
+mv "$r/novo.md" "$r/$M"
+tl_espera 0 "mudança com Questões/Rulings do template real passa" roda mudanca $M
+# cópia antiga do template: linha só de <placeholders> conta como vazia
+r=$(prepara_mudanca)
+sub '/^## Rulings/,$ s/^- Nenhuma\./- R-1 (<fase>): <o quê> — por quê: <…> — descartado: <alternativa>/' $M
+tl_espera 0 "mudança: linha só de <placeholders> em Rulings conta como vazia" roda mudanca $M
 # Review Focus 1–3
 r=$(prepara_spec)
 for f in spec.md design.md tasks/001-criar.md; do sed 's/$/\r/' "$r/$S/$f" > "$r/$S/$f.crlf" && mv "$r/$S/$f.crlf" "$r/$S/$f"; done
