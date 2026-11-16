@@ -2,6 +2,8 @@
 
 **Um kit que você instala no repositório do seu projeto para que agentes de IA (Claude Code, GitHub Copilot) desenvolvam seguindo um processo de engenharia com papéis separados, testes antes do código, dois gates humanos e controles que bloqueiam o agente de verdade.**
 
+**Site:** https://paulocalazans.github.io/framework-sdlc-agentico/ — o que o kit resolve e as medições que o justificam.
+
 ## Objetivo
 
 Este repositório é a **fonte do kit**. Ele não contém código de produto, não é uma biblioteca e não gera código para você. O que ele entrega é a estrutura que conduz o agente:

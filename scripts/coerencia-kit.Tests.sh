@@ -350,4 +350,9 @@ site_mec_ok() {
 }
 tl_espera 0 "site: frases de mecanismo iguais ao README" site_mec_ok
 
+w=.github/workflows/pages.yml
+tl_espera 0 "pages: publica só site/" linha $w 'path: *site$'
+tl_espera 0 "pages: deploy oficial" tem $w 'actions/deploy-pages@v4'
+tl_espera 0 "README: link do site" tem README.md 'paulocalazans.github.io/framework-sdlc-agentico'
+
 tl_fim
