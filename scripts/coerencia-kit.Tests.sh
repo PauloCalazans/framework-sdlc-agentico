@@ -313,4 +313,13 @@ tl_espera 0 "LICENSE: titular" tem LICENSE 'Copyright (c) 2026 Paulo Ricardo Cal
 tl_espera 0 "README: seção Licença" linha README.md '^## Licença$'
 tl_espera 0 "sem nome de projeto de origem" sem_nomes_proibidos README.md LICENSE docs core adapters bootstrap mecanismos scripts
 
+e=docs/evidencias.md
+for a in e1 e2 e3 e4 e5 e6 e7 e8 e9 e10; do
+  tl_espera 0 "evidências: âncora $a" tem $e "<a id=\"$a\"></a>"
+done
+tl_espera 0 "evidências: seção Limites" linha $e '^## Limites$'
+tl_espera 0 "evidências: data de corte" tem $e '2026-11-15'
+tl_espera 0 "evidências sem nome de projeto de origem" sem_nomes_proibidos $e
+tl_espera 0 "README cita as evidências" tem README.md 'docs/evidencias.md'
+
 tl_fim
