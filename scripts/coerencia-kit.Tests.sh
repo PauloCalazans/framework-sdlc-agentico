@@ -25,6 +25,7 @@ b=core/templates/brief.md
 for l in '^Papel: ' '^Contrato: ' '^Perfil: ' '^Task: '; do
   tl_espera 0 "brief: cabeçalho tem a linha $l" linha $b "$l"
 done
+tl_espera 0 "brief: cabeçalho ## Impacto" linha $b '^## Impacto$'
 for s in '## Escopo' '## O que fazer' '## Já decidido' '## Nunca faz' '## Leia só isto' \
          '## Comandos' '## Teto' '## Entrega' '## Desde a rodada anterior' '## Assinaturas' '## API externa'; do
   tl_espera 0 "brief: seção $s" tem $b "$s"
@@ -83,6 +84,7 @@ for f in "$raiz"/docs/exemplos-brief/*-brief.md; do
     "p=\$(head -n1 '$f' | tr -d '\r' | sed -n 's/^Papel: \([a-z]*\).*/\1/p'); [ -n \"\$p\" ] && [ -f '$raiz/core/papeis/'\$p.md ]"
   tl_espera 0 "$e: contrato com caminho absoluto" linha $e '^Contrato: (/|[A-Za-z]:/)'
   tl_espera 0 "$e: perfil com caminho absoluto" linha $e '^Perfil: (/|[A-Za-z]:/)'
+  tl_espera 0 "$e: cabeçalho ## Impacto" linha $e '^## Impacto$'
   for s in '## Escopo' '## O que fazer' '## Já decidido' '## Nunca faz' '## Leia só isto' '## Comandos' '## Teto' '## Entrega'; do
     tl_espera 0 "$e: seção $s" tem $e "$s"
   done
@@ -94,6 +96,28 @@ done
 tl_espera 0 "parecer de confirmação: Rodada anterior" tem docs/exemplos-brief/07-revisor-diff-parecer.md '## Rodada anterior'
 tl_espera 0 "exemplos sem nome de stack, de projeto de referência ou de ferramenta de orquestração" nenhum \
   'mocktail|worker_done|maestri|\borca\b|select-object|maven|\bmvn\b|flutter' docs/exemplos-brief
+
+# --- Impacto no brief e rodada por artefato (avaliação dos templates, 2026-11-15)
+# cab <arquivo> <cabeçalho>: número da primeira linha igual ao cabeçalho (linha inteira, sem \r).
+cab() { tr -d '\r' < "$raiz/$1" | grep -nxF -- "$2" | head -n 1 | cut -d: -f1; }
+# cab_entre <arquivo> <A> <B> <C>: os três cabeçalhos existem, nesta ordem.
+cab_entre() {
+  ce_a=$(cab "$1" "$2"); ce_b=$(cab "$1" "$3"); ce_c=$(cab "$1" "$4")
+  [ -n "$ce_a" ] && [ -n "$ce_b" ] && [ -n "$ce_c" ] && [ "$ce_a" -lt "$ce_b" ] && [ "$ce_b" -lt "$ce_c" ]
+}
+tl_espera 0 "brief: cabeçalho ## Impacto entre Leia só isto e Comandos" cab_entre core/templates/brief.md '## Leia só isto' '## Impacto' '## Comandos'
+for papel in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "$papel: consome o Impacto do brief" tem core/papeis/$papel.md '`## Impacto` do brief'
+done
+tl_espera 0 "parecer: rodada conta por artefato e nunca recomeça" tem core/templates/parecer.md 'nunca recomeça'
+tl_espera 0 "ciclo: 3ª devolução contada em todos os pareceres do artefato" tem core/processo/ciclo.md 'a contagem nunca recomeça'
+tl_espera 0 "ciclo: 3ª devolução é o 3º DEVOLVIDO" tem core/processo/ciclo.md 'o 3º parecer `DEVOLVIDO`'
+tl_espera 0 "brief: revisor recebe rodada e parecer anterior em O que fazer" tem core/templates/brief.md 'No `revisor`, antes das entregas, uma linha a mais: `Rodada <k>'
+for e in docs/exemplos-brief/05-revisor-diff-brief.md docs/exemplos-brief/07-revisor-diff-brief.md; do
+  tl_espera 0 "$e: rodada e parecer anterior em O que fazer" linha $e '^- Rodada [0-9]+ do .*; parecer anterior: (não há|/)'
+done
+tl_espera 0 "ciclo: teste existente afetado sai depois do RED, por Emenda ou Ruling" tem core/processo/ciclo.md 'a asserção antiga sai depois dele'
+tl_espera 0 "ciclo: verifica-red só confere arquivos tocados pelo RED" tem core/processo/ciclo.md 'só nos arquivos de teste tocados pelo RED'
 
 # --- Revisão final da branch (correções)
 # Revisor: ao receber, HEAD igual ao SHA do brief no modo diff; estado igual ao anotado nos modos sem commit.
@@ -134,7 +158,7 @@ done
 tl_espera 0 "design: Impacto depois do contrato" ordem core/templates/design.md '## Contrato executável' '## Impacto'
 tl_espera 0 "mudança: Impacto depois de Arquivos" ordem core/templates/mudanca.md '## Arquivos' '## Impacto'
 tl_espera 0 "design: decisões sem prefixo D" tem core/templates/design.md 'sem o prefixo `D`'
-tl_espera 0 "arquiteto consome o código e as specs afetadas" tem core/papeis/arquiteto.md 'specs aprovadas que a mudança toca'
+tl_espera 0 "arquiteto consome o código e as specs afetadas, pelas buscas do brief" tem core/papeis/arquiteto.md 'as specs aprovadas que citam a regra'
 tl_espera 0 "arquiteto produz o Impacto" tem core/papeis/arquiteto.md '## Impacto'
 tl_espera 0 "dominio: estado atual com fonte" tem core/papeis/dominio.md 'estado atual'
 tl_espera 0 "ciclo: emenda a outra spec" tem core/processo/ciclo.md 'Emenda a outra spec'

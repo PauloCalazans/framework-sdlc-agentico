@@ -244,6 +244,8 @@ Instâncias antigas continuam funcionando: as variáveis novas de `agentic/confi
 - No laço roda `verify.sh --rapido`; o `verify.sh` completo roda uma vez antes do PR e no revisor `diff`. A prova do RED fica em cache por SHA (`AGENTIC_RED_SEM_CACHE=1` força nova prova).
 - `em-andamento` é derivado do git; o Ruling vai no próximo commit da task, sem commit próprio.
 - O commit RED anota `CA<n> … → test: <arquivo>::<nome>`, conferido por `verifica-red.sh`; task sem anotação passa com `aviso:`.
+- O brief ganha `## Impacto`: antes do Gate 1, o orquestrador roda as buscas (quem usa o que muda, testes que o exercitam, specs aprovadas que citam a regra) e cola a saída, com os trechos em "Leia só isto"; depois do Gate 1, cola as linhas do Impacto aprovado que tocam a task, e o `testes` roda cada teste existente afetado antes do RED. A meta de ~40 linhas não conta essa seção.
+- A rodada do parecer conta todos os pareceres do mesmo artefato, também os de ajuste reaberto por Ruling; a 3ª devolução do `ciclo.md` é o 3º `DEVOLVIDO` entre esses mesmos pareceres, e a contagem nunca recomeça.
 - Para medir: `grep` da coluna Causa nos pareceres de `agentic/.estado/execucao/` e das linhas "Rodadas" nos PRs.
 
 ## Estrutura do framework

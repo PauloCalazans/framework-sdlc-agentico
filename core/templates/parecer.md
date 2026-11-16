@@ -3,6 +3,7 @@
   worktree revisado. O parecer é local (agentic/.estado/ não é versionado); o PR leva o veredito e os achados menores.
   Sem plataforma de PR, o orquestrador copia o parecer final aprovado para agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md (NNN = número da task).
 - Escala do kit: Crítico e Importante bloqueiam; Menor não abre rodada: vai com a próxima correção ou, sem ela, no PR.
+- Rodada `<k>`: conta todos os pareceres do mesmo artefato (a spec, o design, o documento enxuto ou o diff da task), também os de ajuste reaberto por Ruling, decisão ou achado a jusante; nunca recomeça. O número e o parecer anterior vêm na linha da rodada em "O que fazer" do brief: quem conta é o orquestrador. Com parecer anterior, a rodada é de confirmação.
 - Causa (coluna da tabela de achados): defeito | contrato | não conferido | sem contrato | forma. Na rodada >= 2, acrescente `· já na rodada 1` quando o defeito já estava no artefato da rodada 1. `sem contrato` diz em Problema onde a regra deveria estar.
 - Toda evidência é `medido` (você abriu ou rodou) ou `inferido` (dedução). Aprovar sem abrir as citações e rodar a
   verificação não vale.
@@ -11,10 +12,10 @@
 
 **Veredito:** <APROVADO | DEVOLVIDO> · C <n> I <n> M <n>
 **Revisado:** <intervalo de SHAs base..HEAD (modo diff) | caminho do artefato>
-**Parecer anterior:** <caminho, na rodada de confirmação | não há>
+**Parecer anterior:** <caminho do último parecer do mesmo artefato, na rodada de confirmação | não há (rodada 1)>
 
 ## Rodada anterior
-<só na confirmação; senão: não se aplica>
+<só na confirmação (com parecer anterior); senão: não se aplica>
 
 | Achado anterior | Situação | Evidência no HEAD |
 |---|---|---|

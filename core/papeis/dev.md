@@ -9,6 +9,7 @@ Antes de começar, leia `agentic/projeto/papeis/dev.md`: especialização, stack
 ## Consome
 - A task, o design e o contrato executável.
 - O commit RED (os testes são a especificação executável).
+- O `## Impacto` do brief: as linhas do Impacto aprovado que tocam a task (quem usa o que você muda, testes existentes afetados).
 
 ## Produz
 - Commit `feat(green): …` — testes do RED passando.

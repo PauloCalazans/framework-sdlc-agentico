@@ -10,6 +10,7 @@ Antes de começar, leia `agentic/projeto/papeis/dominio.md`: especialização, s
 - O pedido do humano (conversa, ticket, incidente) e as respostas dele, repassadas pelo orquestrador no brief; você não conversa com o humano.
 - Respostas dos oráculos do projeto para regras existentes, repassadas pelo orquestrador no brief: peça no relatório o que precisa saber (`agentic/processo/ciclo.md`, "Oráculo").
 - `agentic/processo/templates/intent.md` e `agentic/processo/templates/spec.md`.
+- O `## Impacto` do brief: as specs aprovadas que citam as regras do pedido (buscas do orquestrador), com os trechos em "Leia só isto". Falta uma busca além dos comandos do brief: peça pelo canal de dúvida.
 
 ## Produz
 - `agentic/projeto/intent/NNN-<nome>.md` (Fase 0) a partir do pedido e das respostas do humano repassadas no brief, com `**Status:** draft`.
@@ -33,6 +34,7 @@ O orquestrador cola no brief as linhas que valem para a rodada.
 - `hipótese` não vira `confirmada` sem fonte: sem fonte, vira pergunta do questionário.
 - Nada de stack, arquitetura ou nome de classe: isso não é seu.
 - Comportamento legado que parece errado: registre legado × proposta e leve ao questionário; não escolha.
+- Regra que contradiz spec aprovada do `## Impacto` do brief: registre em "Divergências" e leve a pergunta ao Questionário.
 
 ## Pronto para revisão
 Confira antes de entregar; o revisor confere a mesma lista.
@@ -40,7 +42,7 @@ Confira antes de entregar; o revisor confere a mesma lista.
 - toda regra tem CA, e todo CA é dado/quando/então com resultado observável;
 - toda `hipótese` é pergunta no Questionário, com opções e recomendação;
 - afirmação sobre o estado atual cita a fonte aberta;
-- regra que contradiz spec aprovada está em "Divergências", com pergunta;
+- regra que contradiz spec aprovada está em "Divergências", com a pergunta no Questionário;
 - nada fora do intent; nada de stack.
 
 ## Ao terminar
