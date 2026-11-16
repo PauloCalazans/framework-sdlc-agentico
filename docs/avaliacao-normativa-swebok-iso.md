@@ -46,6 +46,30 @@ A revisão de 2026-11-04 parte da base higienizada (seção 2) e acrescenta:
 
 ---
 
+### 2.4 Citações do SWEBOK v4.0a no texto integral (`medido`, 2026-11-16)
+
+Conferidas no PDF oficial do *Guide to the Software Engineering Body of Knowledge* v4.0a (IEEE Computer Society, agosto de 2026), em https://ieeecs-media.computer.org/media/education/swebok/swebok-v4.pdf. São as frases que a página de divulgação cita.
+
+| Área e seção do SWEBOK | Texto | No kit |
+|---|---|---|
+| Software Construction, 4.16 *Test-First Programming* (p. 4-14) | "Test-first programming (also known as TDD - Test-Driven Development) is a popular development style in which test cases are written before any code. These test cases, when applied to the current code base, will fail. Code is then written that will allow the test cases to pass." | RED provado antes do código (`verifica-red.sh`), depois GREEN |
+| Software Construction, 4.16 (p. 4-14) | "writing test cases first forces programmers to think about requirements and design before coding, thus exposing requirements and design problems sooner." | spec e design aprovados no Gate 1 antes do RED |
+| Software Design, 4.6 *Design Rationale* (p. 3-11) | "Design rationale captures why a design decision was made. This includes prior assumptions made, alternatives considered, and trade-offs and criteria analyzed to select one approach and reject others." | decisões `D<n>` com justificativa e alternativa descartada |
+| Software Design, 6.1 *Design Reviews and Audits* (p. 3-13) | "Design reviews can be conducted by the design team, by an independent third party or other stakeholder." | `revisor` dos modos `spec`, `design` e `mudanca`, em contexto limpo |
+
+### 2.5 Pesquisa sobre agentes de IA (fora da base normativa, `medido`, 2026-11-16)
+
+Fontes do notebook *Architecting the AI-Native SDLC* (NotebookLM), conferidas no texto completo de cada fonte. Não são normas: são estudos e guias que mostram por que os controles do kit importam quando o executor é um agente. O OWASP GenAI Security Project lista o mesmo risco que o `deny` e os gates tratam: *LLM06:2025 Excessive Agency*.
+
+| Fonte | Texto | No kit |
+|---|---|---|
+| METR (2025), *Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity* | "developers forecast that allowing AI will reduce completion time by 24% […] allowing AI actually increases completion time by 19%" | sucesso só com a saída do `verify.sh`; cada afirmação marcada `medido` ou `inferido` |
+| DORA, *Accelerate State of DevOps Report 2024* | "it also negatively impacts software delivery stability and throughput […] fundamentals like small batch sizes and robust testing remain crucial" | task pequena com `## Arquivos`, RED antes do código |
+| Anthropic, *Building effective AI agents* | "Code solutions are verifiable through automated tests" | `verify.sh` como ponto único de verificação |
+| Anthropic, *Building effective AI agents* | "We recommend extensive testing in sandboxed environments, along with the appropriate guardrails." | worktree por task; githooks e `deny` como guardrails |
+| Anthropic, *Best practices for Claude Code* | "write a failing test that reproduces it, then fix it" | commit `test(red):` provado antes do `feat(green):` |
+| arXiv 2406.10279, *We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs* | "the average percentage of hallucinated packages is at least 5.2% for commercial models and 21.7% for open-source models" | dependência nova é gatilho N3: só com aprovação humana |
+
 ## 3. Matriz de correspondência (v1)
 
 **Grau:** **forte** = mesma finalidade, verificável dos dois lados; **parcial** = cobre parte da norma; **analogia** = finalidade parecida, escopo diferente.

@@ -12,6 +12,15 @@ tem() { [ -f "$raiz/$1" ] && tr -d '\r' < "$raiz/$1" | grep -qF -- "$2"; }
 linha() { [ -f "$raiz/$1" ] && tr -d '\r' < "$raiz/$1" | grep -qE -- "$2"; }
 # nenhum <ERE> <caminhos...>: nenhum arquivo dos caminhos casa a ERE (sem distinção de maiúsculas); imprime as ocorrências.
 nenhum() { tl_p=$1; shift; ! ( cd "$raiz" && grep -rniE -- "$tl_p" "$@" ); }
+# sem_nomes_proibidos <caminhos...>: nenhum caminho cita um nome da lista local .nomes-proibidos (uma ERE por linha,
+# fora do git: a lista não pode publicar os nomes que proíbe). Sem a lista, avisa e passa.
+sem_nomes_proibidos() {
+  [ -f "$raiz/.nomes-proibidos" ] || { echo "aviso: .nomes-proibidos ausente — nomes não conferidos"; return 0; }
+  tr -d '' < "$raiz/.nomes-proibidos" | while IFS= read -r tl_n; do
+    [ -n "$tl_n" ] || continue
+    nenhum "$tl_n" "$@" || return 1
+  done
+}
 # ordem <arquivo> <texto A> <texto B>: a primeira linha com A vem antes da primeira linha com B.
 ordem() {
   [ -f "$raiz/$1" ] || return 1
@@ -297,5 +306,83 @@ tl_espera 0 "empilhamento só com plataforma de PR (task)" tem core/templates/ta
 tl_espera 0 "ampliação de escopo nunca é do papel (verifica-escopo)" tem mecanismos/scripts/verifica-escopo.sh 'decisão do orquestrador'
 tl_espera 0 "Ruling depois do último commit de papel vai ao Gate 2" tem core/processo/ciclo.md 'quem a confere é o humano, no Gate 2'
 tl_espera 0 "dominio não entrevista o humano" nenhum 'a partir da entrevista|conduz.{0,4} a entrevista' core adapters
+
+# --- Site de divulgação (docs/specs/2026-11-16-site-divulgacao-design.md)
+tl_espera 0 "LICENSE: MIT" tem LICENSE 'MIT License'
+tl_espera 0 "LICENSE: titular" tem LICENSE 'Copyright (c) 2026 Paulo Ricardo Calazans'
+tl_espera 0 "README: seção Licença" linha README.md '^## Licença$'
+tl_espera 0 "sem nome de projeto de origem" sem_nomes_proibidos README.md LICENSE docs core adapters bootstrap mecanismos scripts
+
+e=docs/evidencias.md
+for a in e1 e2 e3 e4 e5 e6 e7 e8 e9 e10; do
+  tl_espera 0 "evidências: âncora $a" tem $e "<a id=\"$a\"></a>"
+done
+tl_espera 0 "evidências: seção Limites" linha $e '^## Limites$'
+tl_espera 0 "evidências: data de corte" tem $e '2026-11-15'
+tl_espera 0 "evidências sem nome de projeto de origem" sem_nomes_proibidos $e
+tl_espera 0 "README cita as evidências" tem README.md 'docs/evidencias.md'
+
+s=site/index.html
+tl_espera 0 "site: página existe" tem $s '<html lang="pt-BR"'
+tl_espera 0 "site: og:image" tem $s 'property="og:image"'
+tl_espera 0 "site: data de corte" tem $s '2026-11-15'
+tl_espera 0 "site: licença no rodapé" tem $s 'MIT'
+tl_espera 0 "site sem nome de projeto de origem" sem_nomes_proibidos site
+sem_package() { ! [ -e "$raiz/package.json" ]; }
+tl_espera 0 "site: sem build (sem package.json)" sem_package
+# cada número marcado tem par, como palavra inteira, dentro da seção da sua âncora em docs/evidencias.md
+secao_evid() { tr -d '\r' < "$raiz/docs/evidencias.md" | awk -v a="<a id=\"$1\"></a>" 'index($0,a){d=1;next} d&&(/^<a id="/||/^## Limites/){exit} d'; }
+site_nums_ok() {
+  [ -f "$raiz/$s" ] || return 1
+  tl_n=$(tr -d '\r' < "$raiz/$s" | grep -o 'data-e="e[0-9]*">[^<]*<' | sed 's/data-e="\(e[0-9]*\)">\([^<]*\)</\1 \2/')
+  [ -n "$tl_n" ] || { echo "nenhum número marcado"; return 1; }
+  echo "$tl_n" | while read -r tl_a tl_v; do
+    tem docs/evidencias.md "<a id=\"$tl_a\"></a>" || { echo "sem âncora $tl_a"; return 1; }
+    secao_evid "$tl_a" | grep -qFw -- "$tl_v" || { echo "valor sem par na seção: $tl_a $tl_v"; return 1; }
+  done
+}
+tl_espera 0 "site: todo número tem par em evidencias.md" site_nums_ok
+# cada frase de mecanismo existe no README
+site_mec_ok() {
+  [ -f "$raiz/$s" ] || return 1
+  tl_f=$(tr -d '\r' < "$raiz/$s" | grep -o '<p class="mecanismo">[^<]*</p>' | sed 's/<[^>]*>//g')
+  [ -n "$tl_f" ] || { echo "nenhuma frase de mecanismo"; return 1; }
+  echo "$tl_f" | while IFS= read -r tl_l; do tem README.md "$tl_l" || { echo "frase fora do README: $tl_l"; return 1; }; done
+}
+tl_espera 0 "site: frases de mecanismo iguais ao README" site_mec_ok
+
+w=.github/workflows/pages.yml
+tl_espera 0 "pages: publica só site/" linha $w 'path: *site$'
+tl_espera 0 "pages: deploy oficial" tem $w 'actions/deploy-pages@v4'
+tl_espera 0 "README: link do site" tem README.md 'paulocalazans.github.io/framework-sdlc-agentico'
+
+# base teórica: cada citação da página existe literalmente no parecer normativo
+site_cit_ok() {
+  [ -f "$raiz/$s" ] || return 1
+  tl_c=$(tr -d '\r' < "$raiz/$s" | grep -o '<blockquote class="citacao"><p>[^<]*</p>' | sed 's/<[^>]*>//g')
+  [ -n "$tl_c" ] || { echo "nenhuma citação"; return 1; }
+  echo "$tl_c" | while IFS= read -r tl_l; do tem docs/avaliacao-normativa-swebok-iso.md "$tl_l" || { echo "citação sem fonte: $tl_l"; return 1; }; done
+}
+tl_espera 0 "site: citações da base teórica existem no parecer normativo" site_cit_ok
+tl_espera 0 "site: seção base teórica" tem $s 'id="base"'
+tl_espera 0 "site: link para o parecer normativo" tem $s 'docs/avaliacao-normativa-swebok-iso.md'
+
+# revisão final da branch (correções)
+tl_espera 0 "evidências: soma por papel explicada" tem docs/evidencias.md 'A soma por papel dá 704'
+tl_espera 0 "site: 36 execuções marcado" tem $s 'data-e="e1">36<'
+tl_espera 0 "site: menos de 5% marcado" tem $s 'data-e="e4">5%<'
+tl_espera 0 "site: 5 execuções de B marcado" tem $s 'data-e="e1">5<'
+tl_espera 0 "site: verify garantido por regra + script, como no README" tem $s '<code>regra + verify.sh</code>'
+tl_espera 0 "site: hook PreToolUse só no Claude Code" tem $s 'hook PreToolUse (só Claude Code)'
+tl_espera 0 "site: ressalva do merge fast-forward" tem $s 'merge fast-forward local não dispara hook'
+tl_espera 0 "site: pre-merge-commit e deny de gh pr merge" tem $s 'pre-merge-commit · deny de gh pr merge'
+tl_espera 1 "site: sem 'cada regra nasceu de medição' (contradiz a base teórica)" tem $s 'Cada regra do kit nasceu de uma medição'
+tl_espera 1 "site: meta sem 'cada regra sustentada por medições'" tem $s 'Cada regra sustentada por medições'
+
+# base teórica: pesquisa sobre agentes (notebook AI-native SDLC), registrada no parecer §2.5
+tl_espera 0 "parecer: seção 2.5 de pesquisa sobre agentes" linha docs/avaliacao-normativa-swebok-iso.md '^### 2\.5 '
+tl_espera 0 "site: bloco de pesquisa sobre agentes" tem $s 'id="pesquisa"'
+site_cit_n() { [ "$(tr -d '\r' < "$raiz/$s" | grep -o '<blockquote class="citacao">' | wc -l)" -ge 10 ]; }
+tl_espera 0 "site: ao menos 10 citações (normas + pesquisa)" site_cit_n
 
 tl_fim

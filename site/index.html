@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kit de SDLC Agêntico</title>
+<meta name="description" content="Kit que faz agentes de IA (Claude Code, GitHub Copilot) desenvolverem com 5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Conceitos consolidados de engenharia de software, ajustados por medições de execuções reais.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kit de SDLC Agêntico — agentes de IA com processo de engenharia">
+<meta property="og:description" content="5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente. Engenharia de software consolidada, ajustada por medições em execuções reais.">
+<meta property="og:url" content="https://paulocalazans.github.io/framework-sdlc-agentico/">
+<meta property="og:image" content="https://paulocalazans.github.io/framework-sdlc-agentico/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="nav envelope">
+  <a class="marca" href="#">› sdlc-agêntico</a>
+  <nav aria-label="Seções">
+    <a href="#problema">O problema</a>
+    <a href="#como">Como funciona</a>
+    <a href="#base">Base teórica</a>
+    <a href="#porque">Por que assim</a>
+    <a href="#aprendemos">Evidências</a>
+    <button class="tema" type="button" aria-label="Alternar tema claro e escuro">◐</button>
+    <a class="botao-contorno" href="https://github.com/PauloCalazans/framework-sdlc-agentico">GitHub</a>
+  </nav>
+</header>
+
+<main id="conteudo">
+<section class="hero envelope">
+  <div class="hero-texto">
+    <p class="eyebrow">Kit open source · SWEBOK v4 · ISO/IEC/IEEE · NIST SSDF</p>
+    <h1>Agentes de IA que seguem um processo de engenharia — e um kit que diz <em>não</em> quando eles saem dele.</h1>
+    <p class="lead">Conceitos consolidados de engenharia de software, do SWEBOK às normas ISO/IEC/IEEE, levados à prática para Claude Code e GitHub Copilot: 5 papéis com contrato fixo, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Qualquer stack, projeto novo ou existente.</p>
+    <div class="ctas">
+      <a class="botao" href="https://github.com/PauloCalazans/framework-sdlc-agentico">Ver no GitHub →</a>
+      <a class="botao-contorno" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md">Ler as evidências</a>
+    </div>
+  </div>
+  <figure class="terminal" aria-label="Exemplo: o kit barrando o agente">
+    <div class="terminal-barra"><span></span><span></span><span></span><b>agente · branch feat/desconto</b></div>
+<pre><code><span class="m">$ git commit -m "feat(green): faixa de desconto"</span>
+<span class="x">✗ verifica-red: asserção removida em
+  test/desconto.test.js depois do RED</span>
+<span class="m">  remoção sem trailer nem decisão registrada</span>
+
+<span class="m">$ git push origin main</span>
+<span class="x">✗ pre-push: push na branch protegida</span>
+
+<span class="m">$ sh scripts/verify.sh</span>
+<span class="ok">✓ VERIFY: OK</span></code></pre>
+  </figure>
+</section>
+
+<section class="envelope" aria-label="Números">
+  <dl class="faixa">
+    <div><dt><strong class="num" data-e="e1">705</strong></dt><dd>despachos de agentes em <strong class="num" data-e="e1">36</strong> execuções reais <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e1">evidências §1</a></dd></div>
+    <div><dt><strong class="num" data-e="e1">4</strong></dt><dd>projetos com o kit instalado, em Java e Python <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e1">evidências §1</a></dd></div>
+    <div><dt><strong class="num" data-e="e4">227</strong></dt><dd>achados bloqueantes classificados por causa <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e4">evidências §4</a></dd></div>
+    <div><dt>~<strong class="num" data-e="e8">80%</strong></dt><dd>menos documentação na trilha enxuta <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e8">evidências §8</a></dd></div>
+  </dl>
+</section>
+
+<section id="problema" class="faixa-escura">
+  <div class="envelope bloco">
+    <header class="cabeca">
+      <p class="eyebrow">01 · O problema</p>
+      <h2>Sem trilho, o agente toma atalhos. Com o kit, cada atalho tem quem o barre.</h2>
+      <p>Regra que nenhum mecanismo garante aparece como "por revisão", nunca como garantida.</p>
+    </header>
+    <div class="tabela" role="table" aria-label="Sem o kit e com o kit">
+      <div class="linha cab" role="row"><span role="columnheader">Sem o kit, o agente…</span><span role="columnheader">Com o kit</span><span role="columnheader">Quem garante</span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">diz "está funcionando" sem rodar nada</span><span role="cell"><p class="com">o verify.sh é o ponto único de verificação; sucesso só com a saída do nível do passo (VERIFY: OK)</p></span><span role="cell"><code>regra + verify.sh</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">altera o teste até ele passar</span><span role="cell"><p class="com">o commit test(red): prova que os testes falhavam; asserção removida depois reprova, salvo remoção declarada e decidida antes</p></span><span role="cell"><code>verifica-red.sh</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">desliga o teste que incomoda</span><span role="cell"><p class="mecanismo">teste desabilitado na branch ou skip novo no relatório JUnit reprova</p></span><span role="cell"><code>verifica-skip.sh</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">"aproveita" e mexe em arquivos fora do pedido</span><span role="cell"><p class="com">cada task declara ## Arquivos; arquivo fora da lista reprova</p></span><span role="cell"><code>verifica-escopo.sh</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">commita na main ou faz o merge do próprio PR</span><span role="cell"><p class="mecanismo">commit e push na branch protegida são bloqueados, e o merge com commit também; merge fast-forward local não dispara hook</p><p class="com">o remoto continua protegido pelo pre-push</p></span><span role="cell"><code>pre-commit · pre-push · pre-merge-commit · deny de gh pr merge</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">pula os githooks (--no-verify)</span><span role="cell"><p class="com">comando git com --no-verify, commit -n ou -c core.hooksPath é barrado em qualquer posição</p></span><span role="cell"><code>hook PreToolUse (só Claude Code)</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">commita uma senha ou token</span><span role="cell"><p class="mecanismo">conteúdo staged é varrido antes do commit</p></span><span role="cell"><code>pre-commit (gitleaks)</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">revisa o próprio trabalho</span><span role="cell"><p class="com">o revisor roda em contexto limpo, escreve só o parecer e nunca corrige</p></span><span role="cell"><code>contrato do papel</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">decide sozinho regra de negócio, segurança ou dependência nova</span><span role="cell"><p class="mecanismo">gatilhos N3 param a execução e chamam o humano</p></span><span role="cell"><code>revisão</code></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="como" class="envelope bloco">
+  <header class="cabeca">
+    <p class="eyebrow">02 · Como funciona</p>
+    <h2>Especificar, provar o vermelho, fazer passar, revisar. Um humano aprova a entrada e a saída.</h2>
+  </header>
+  <ol class="fluxo">
+    <li><b>Intent</b><span>dominio</span></li>
+    <li><b>Spec</b><span>dominio → revisor</span></li>
+    <li><b>Design + tasks</b><span>arquiteto → revisor</span></li>
+    <li class="gate"><b>Gate 1</b><span>humano aprova</span></li>
+    <li><b>RED</b><span>testes</span></li>
+    <li><b>GREEN</b><span>dev</span></li>
+    <li><b>Revisão</b><span>revisor</span></li>
+    <li class="gate"><b>Gate 2</b><span>humano faz o merge</span></li>
+  </ol>
+  <div class="papeis">
+    <div><h3>dominio</h3><p>transforma o pedido em spec, cada regra com fonte</p><p class="nunca">nunca: sugere stack ou arquitetura</p></div>
+    <div><h3>arquiteto</h3><p>desenha, valida o contrato executável e quebra em tasks</p><p class="nunca">nunca: muda regra de negócio</p></div>
+    <div><h3>testes</h3><p>escreve testes que falham pelo motivo certo</p><p class="nunca">nunca: toca código de produção</p></div>
+    <div><h3>dev</h3><p>faz os testes passarem e refatora</p><p class="nunca">nunca: altera ou desabilita teste do RED</p></div>
+    <div><h3>revisor</h3><p>revisa em contexto limpo e dá parecer Crítico / Importante / Menor</p><p class="nunca">nunca: escreve além do parecer ou revisa o que produziu</p></div>
+  </div>
+  <div class="trilhas">
+    <article><h3>Trilha padrão <code>/intent</code></h3><p class="quando">funcionalidade nova ou mudança de comportamento</p><p class="mecanismo">intent → spec → revisão da spec → design → revisão do design → Gate 1 → RED → GREEN → revisão → Gate 2</p></article>
+    <article><h3>Trilha enxuta <code>/mudanca</code></h3><p class="quando">mudança pequena, numa task só, sem gatilho N3</p><p class="mecanismo">um documento no worktree → revisão do documento → Gate 1 → RED → GREEN → revisão → Gate 2</p></article>
+    <article><h3>Trilha rápida</h3><p class="quando">chore, docs, ferramental, correção sem mudança de comportamento</p><p class="caminho">branch → verify → PR → Gate 2</p></article>
+  </div>
+</section>
+
+<section id="base" class="faixa-escura">
+  <div class="envelope bloco">
+    <header class="cabeca">
+      <p class="eyebrow">03 · Base teórica</p>
+      <h2>Nada aqui foi inventado: é engenharia de software consolidada, aplicada a um executor novo.</h2>
+      <p>Os papéis, os gates e os controles do kit vêm do SWEBOK v4 (IEEE Computer Society), das normas ISO/IEC/IEEE de ciclo de vida, requisitos e teste e do NIST SSDF, e dialogam com a pesquisa recente sobre agentes (Anthropic, DORA, METR). O kit transforma esses conceitos em prática que o agente não consegue pular. Registramos correspondências, não conformidade: nenhuma norma regula ainda agente de IA como ferramenta de desenvolvimento.</p>
+    </header>
+    <div class="citacoes">
+      <figure class="destaque"><blockquote class="citacao"><p>Test-first programming (also known as TDD - Test-Driven Development) is a popular development style in which test cases are written before any code. These test cases, when applied to the current code base, will fail. Code is then written that will allow the test cases to pass.</p></blockquote><figcaption><cite>SWEBOK v4.0a · Software Construction, 4.16</cite><span>→ no kit: o commit <code>test(red):</code> prova a falha antes do código, e o <code>verifica-red.sh</code> barra quem mexe no teste depois.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>Design rationale captures why a design decision was made. This includes prior assumptions made, alternatives considered, and trade-offs and criteria analyzed to select one approach and reject others.</p></blockquote><figcaption><cite>SWEBOK v4.0a · Software Design, 4.6</cite><span>→ no kit: decisões <code>D&lt;n&gt;</code> registradas com justificativa e alternativa descartada.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>Design reviews can be conducted by the design team, by an independent third party or other stakeholder.</p></blockquote><figcaption><cite>SWEBOK v4.0a · Software Design, 6.1</cite><span>→ no kit: o <code>revisor</code>, em contexto limpo, revisa spec e design antes do Gate 1.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>the focus is on the outcomes of the practices rather than on the tools</p></blockquote><figcaption><cite>NIST SP 800-218 (SSDF) v1.1</cite><span>→ no kit: cada controle vale pelo resultado, seja o executor uma pessoa ou um agente.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>Have the code owner review and approve all changes</p></blockquote><figcaption><cite>NIST SP 800-218 (SSDF) · PS.1.1</cite><span>→ no kit: Gate 2, o merge é sempre humano.</span></figcaption></figure>
+    </div>
+    <div id="pesquisa" class="sub">
+      <h3>O que a pesquisa sobre agentes mostra</h3>
+      <p>Estudos e guias recentes explicam por que esses controles importam quando quem executa é um agente. O OWASP GenAI Top 10 nomeia o risco que os gates e o <code>deny</code> tratam: LLM06:2025 Excessive Agency.</p>
+    </div>
+    <div class="citacoes">
+      <figure class="destaque"><blockquote class="citacao"><p>developers forecast that allowing AI will reduce completion time by 24% […] allowing AI actually increases completion time by 19%</p></blockquote><figcaption><cite>METR (2025), Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity</cite><span>→ no kit: sucesso só com a saída do verify.sh; cada afirmação marcada medido ou inferido.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>it also negatively impacts software delivery stability and throughput […] fundamentals like small batch sizes and robust testing remain crucial</p></blockquote><figcaption><cite>DORA, Accelerate State of DevOps Report 2024</cite><span>→ no kit: task pequena com ## Arquivos, RED antes do código.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>Code solutions are verifiable through automated tests</p></blockquote><figcaption><cite>Anthropic, Building effective AI agents</cite><span>→ no kit: verify.sh como ponto único de verificação.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>We recommend extensive testing in sandboxed environments, along with the appropriate guardrails.</p></blockquote><figcaption><cite>Anthropic, Building effective AI agents</cite><span>→ no kit: worktree por task; githooks e deny como guardrails.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>write a failing test that reproduces it, then fix it</p></blockquote><figcaption><cite>Anthropic, Best practices for Claude Code</cite><span>→ no kit: commit test(red) provado antes do feat(green).</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>the average percentage of hallucinated packages is at least 5.2% for commercial models and 21.7% for open-source models</p></blockquote><figcaption><cite>arXiv 2406.10279, We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs</cite><span>→ no kit: dependência nova é gatilho N3: só com aprovação humana.</span></figcaption></figure>
+    </div>
+    <p class="normas">Correspondência completa com SWEBOK v4.0a, ISO/IEC/IEEE 12207:2026, 29148:2018, 29119-1, 42010:2022 e NIST SP 800-218, e as fontes de pesquisa sobre agentes: <a href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/avaliacao-normativa-swebok-iso.md">parecer normativo</a>.</p>
+  </div>
+</section>
+
+<section id="porque">
+  <div class="envelope bloco">
+    <header class="cabeca">
+      <p class="eyebrow">04 · Por que o repositório é assim</p>
+      <h2>Cada ajuste do kit nasceu de uma medição.</h2>
+      <p>A base vem da engenharia de software; o ajuste fino vem do uso. Medimos <strong class="num" data-e="e1">36</strong> execuções reais e, quando o dado mostrava um problema, o kit mudou. Cada cartão liga a decisão à evidência.</p>
+    </header>
+    <div class="cartoes">
+      <article><p class="valor"><strong class="num" data-e="e6">58%</strong></p><p>dos achados de design vinham de impacto não levantado; <strong class="num" data-e="e6">61%</strong> nasceram da correção anterior.</p><p class="decisao"><span>→ no kit</span>## Impacto no design e no brief; parecer sem prescrição</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e6">evidências §6</a></article>
+      <article><p class="valor"><strong class="num" data-e="e7">−80%</strong></p><p>de cache lido quando o brief diz "leia só isto" e declara um teto (<strong class="num" data-e="e7">25,8M</strong> → <strong class="num" data-e="e7">5,3M</strong>).</p><p class="decisao"><span>→ no kit</span>brief estruturado, com teto e regras coladas</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e7">evidências §7</a></article>
+      <article><p class="valor"><strong class="num" data-e="e5">528</strong> × <strong class="num" data-e="e5">260</strong></p><p>achados Menores contra Críticos e Importantes.</p><p class="decisao"><span>→ no kit</span>"Menor não abre rodada"</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e5">evidências §5</a></article>
+      <article><p class="valor"><strong class="num" data-e="e10">10,5 min</strong> → <strong class="num" data-e="e10">6 s</strong></p><p>para provar o RED, com cache por SHA.</p><p class="decisao"><span>→ no kit</span>prova do RED em cache; verify --rapido no laço do dev</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e10">evidências §10</a></article>
+      <article><p class="valor"><strong class="num" data-e="e8">309</strong> → <strong class="num" data-e="e8">58</strong></p><p>linhas de documento para uma mudança pequena.</p><p class="decisao"><span>→ no kit</span>trilha enxuta (/mudanca)</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e8">evidências §8</a></article>
+      <article><p class="valor"><strong class="num" data-e="e9">32 de 40</strong></p><p>commits RED também editavam o documento da task.</p><p class="decisao"><span>→ no kit</span>verifica-red isenta docs/ e compara as asserções por arquivo</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e9">evidências §9</a></article>
+    </div>
+  </div>
+</section>
+
+<section id="aprendemos" class="faixa-escura">
+  <div class="envelope bloco">
+  <header class="cabeca">
+    <p class="eyebrow">05 · O que aprendemos medindo</p>
+    <h2><strong class="num" data-e="e3">55%</strong> das revisões foram devolvidas. Fomos atrás do porquê.</h2>
+    <p>Não é burocracia: a revisão quase nunca devolve por forma. O problema está no autor que entrega sem conferir e na correção que gera outra rodada.</p>
+  </header>
+  <div class="aprendizado">
+    <figure class="grafico">
+      <figcaption>Causas dos <strong class="num" data-e="e4">227</strong> achados bloqueantes · <a href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e4">evidências §4</a></figcaption>
+      <div class="barra" style="--v:33"><span>contrato ignorado</span><strong class="num" data-e="e4">33%</strong><i></i></div>
+      <div class="barra" style="--v:32"><span>defeito real</span><strong class="num" data-e="e4">32%</strong><i></i></div>
+      <div class="barra" style="--v:30"><span>afirmação sem conferir</span><strong class="num" data-e="e4">30%</strong><i></i></div>
+      <div class="barra baixa" style="--v:3.5"><span>exigência sem base</span><strong class="num" data-e="e4">3,5%</strong><i></i></div>
+      <div class="barra baixa" style="--v:1"><span>só forma</span><strong class="num" data-e="e4">1%</strong><i></i></div>
+    </figure>
+    <ul class="licoes">
+      <li><b><strong class="num" data-e="e2">57%</strong></b><div>das revisões acontecem antes do código: o design é o artefato mais revisado. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e2">evidências §2</a></div></li>
+      <li><b>&lt; <strong class="num" data-e="e4">5%</strong></b><div>dos achados são de forma ou sem base no texto: autor e revisor estão alinhados. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e4">evidências §4</a></div></li>
+      <li><b>1 gargalo</b><div>não serve para todos: em B é o revisor; em A, o papel testes. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e3">evidências §3</a></div></li>
+      <li class="limite"><b>Limites</b><div>amostra pequena: B tem <strong class="num" data-e="e1">5</strong> execuções e a revisão que converge ainda não foi medida. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#limites">evidências · Limites</a></div></li>
+    </ul>
+  </div>
+  </div>
+</section>
+
+<section id="comece">
+  <div class="envelope bloco comece">
+    <header class="cabeca">
+      <p class="eyebrow">06 · Comece</p>
+      <h2>Instale no seu repositório e deixe a entrevista configurar a stack.</h2>
+      <p>Java, Python, Node, .NET, front-end. A stack entra pela entrevista do <code>/bootstrap</code>, sem editar o núcleo do kit.</p>
+    </header>
+    <ol class="passos">
+      <li><span>copie o kit e rode o instalador</span><code>$ sh bootstrap/instalar.sh &lt;caminho-do-projeto&gt;</code></li>
+      <li><span>abra o agente no seu repositório</span><code>$ /bootstrap</code></li>
+      <li><span>peça a primeira mudança</span><code>$ /intent  ou  /mudanca</code></li>
+    </ol>
+  </div>
+</section>
+</main>
+
+<footer class="rodape envelope">
+  <span>› sdlc-agêntico · Licença MIT · Paulo Ricardo Calazans</span>
+  <span>Dados até 2026-11-15 · <a href="https://github.com/PauloCalazans/framework-sdlc-agentico">github.com/PauloCalazans/framework-sdlc-agentico</a></span>
+</footer>
+
+<script>
+document.querySelector(".tema").addEventListener("click",function(){
+  var r=document.documentElement,n=r.dataset.theme==="light"?"dark":"light";
+  r.dataset.theme=n;try{localStorage.setItem("tema",n);}catch(e){}
+});
+</script>
+</body>
+</html>

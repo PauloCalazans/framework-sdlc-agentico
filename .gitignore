@@ -1,1 +1,4 @@
 .superpowers/
+
+# lista local de nomes que não podem entrar no repositório (coerencia-kit.Tests.sh)
+.nomes-proibidos
