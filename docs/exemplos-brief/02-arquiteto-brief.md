@@ -20,10 +20,16 @@ Task: /home/dev/loja/agentic/projeto/specs/pedidos/spec.md — fase 2 (design)
 - Contrato executável só com esqueleto: corpo com comportamento é o stub da stack; corpo que não é stub vai na declaração de corpos, com o porquê.
 - Regra de negócio divergente: PARE e transforme em pergunta; nunca altere a spec.
 - Nunca escreva aprovação de gate, resposta do humano nem Ruling.
+- `## Impacto`: só das buscas do `## Impacto` e dos comandos do brief, cada linha conferida no trecho; busca que falta além dos comandos do brief: PARE e peça.
 
 ## Leia só isto
 - agentic/projeto/specs/pedidos/spec.md:1-90 — regras e critérios de aceite.
 - agentic/projeto/decisoes.md:1-40 — decisões vigentes.
+- agentic/projeto/specs/cupons/spec.md:10-20 — R3, do `## Impacto`.
+
+## Impacto
+- `grep -rn "Pedido\|pedido" src tests | head -20` → sem resultado: nenhum chamador nem teste existente (o módulo é novo).
+- `grep -n "desconto\|cupom" agentic/projeto/specs/*/spec.md | head -20` → `agentic/projeto/specs/cupons/spec.md:14: | R3 | Cupom vale só para cliente cadastrado | …`
 
 ## Comandos
 - Validação do contrato: o comando de build do AGENTS.md, com `2>&1 | tail -15`. Rode uma vez no fim.

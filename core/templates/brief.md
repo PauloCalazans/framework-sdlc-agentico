@@ -3,7 +3,7 @@ Por quê: cada requisição do papel reenvia o contexto inteiro. Arquivo lido in
 sem rumo são contexto inútil; "leia só isto", saída curta e teto declarado cortam esse custo. E a regra que está só no
 contrato linkado não chega ao papel: o brief é o texto que ele lê com atenção.
 
-- Meta: até ~40 linhas. Brief maior vira um segundo contrato e traz o custo de volta.
+- Meta: até ~40 linhas, sem contar o `## Impacto` colado nem os trechos que ele acrescenta a "Leia só isto". Brief maior vira um segundo contrato e traz o custo de volta.
 - Toda seção obrigatória aparece; quando não há nada a dizer, escreva `nenhum`.
 - Caminhos absolutos sempre, inclusive em rodada de correção. `Papel:` é o nome exato de um contrato de agentic/processo/papeis/.
 - Rodada de correção: copie para um arquivo novo o brief anterior do mesmo papel, inteiro; reescreva "O que fazer",
@@ -24,7 +24,7 @@ Task: <caminho da task ou do documento enxuto> — fase <n>
 Worktree: <caminho absoluto> (branch <branch>; antes do Gate 1 da trilha padrão: a árvore principal, sem branch). Escreva só em: <caminhos>. Precisa de outro arquivo: PARE e pergunte pelo canal de dúvida.
 
 ## O que fazer
-<até 5 linhas; cada uma, uma entrega verificável — a entrega, nunca a solução: valor, nome, caminho de implementação só se vier de "Já decidido">
+<até 5 linhas; cada uma, uma entrega verificável — a entrega, nunca a solução: valor, nome, caminho de implementação só se vier de "Já decidido". No `revisor`, antes das entregas, uma linha a mais: `Rodada <k> do <artefato>; parecer anterior: <caminho absoluto | não há>`>
 
 ## Já decidido
 <só o que tem origem citável, um por linha com a origem: resposta do humano (data), R-n, D<n>, item N3 aprovado; ou: nenhum. Ruling nova: o orquestrador a escreve em `## Rulings` da task no worktree e o brief do próximo papel manda incluir essa mudança no próximo commit dele (RED, GREEN ou correção); o revisor `diff` só é despachado com a Ruling já commitada>
@@ -35,6 +35,9 @@ projeto" do perfil que se aplicam. Em forma de ação: "PARE e diga", nunca um l
 
 ## Leia só isto
 - <arquivo>:<a>-<b> — <para quê> (até ~80 linhas por trecho; nada de "leia o arquivo" nem "veja o commit")
+
+## Impacto
+<o que a entrega muda e quem já depende disso, `medido`, para o papel não descobrir tarde. Antes do Gate 1 (`dominio`, `arquiteto`): a saída das buscas que você rodou na árvore, colada com o comando de cada uma — para cada termo, símbolo, rota, schema ou regra que muda segundo o pedido ou o intent (para o `dominio`), a spec ou, na trilha enxuta, a descrição do humano (para o `arquiteto`): as specs aprovadas que citam a regra e, para o `arquiteto`, também quem usa (`arquivo:linha`) e os testes que o exercitam; todo resultado tem trecho em "Leia só isto". Depois do Gate 1 (`testes`, `dev`): as linhas de `## Impacto` do design (ou do documento enxuto) que tocam esta task, coladas, com o teste existente afetado; teste afetado que contradiz a spec leva a referência de remoção em "Já decidido" (`agentic/processo/ciclo.md`, "Remoção de comportamento"). O `revisor` recebe o mesmo `## Impacto` do brief do autor. Ou: nenhum (só arquivos novos), com a busca que mostrou isso>
 
 ## Comandos
 - <comando exato, com saída limitada e em primeiro plano>
@@ -69,6 +72,8 @@ e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferênci
 - [ ] cabeçalho de quatro linhas, caminhos absolutos, `Papel:` igual ao nome do contrato;
 - [ ] em correção: copiado do brief anterior, com "Desde a rodada anterior";
 - [ ] toda leitura com intervalo; todo comando com saída limitada;
+- [ ] `## Impacto` com as buscas coladas (antes do Gate 1) ou as linhas do Impacto aprovado da task (depois), cada resultado com trecho em "Leia só isto";
+- [ ] revisor: linha da rodada em "O que fazer", com a rodada `<k>` e o último parecer do mesmo artefato, contados em todos os pareceres dele (`agentic/processo/templates/parecer.md`), e o mesmo `## Impacto` do brief do autor;
 - [ ] teto declarado;
 - [ ] "Nunca faz" colado, não linkado;
 - [ ] nenhuma linha decide algo sem origem citável;
