@@ -264,3 +264,7 @@ Instâncias antigas continuam funcionando: as variáveis novas de `agentic/confi
 `sh scripts/verify.sh` — roda todas as suítes `*.Tests.sh` de `mecanismos/`, `adapters/`, `bootstrap/` e `scripts/`, inclusive a de coerência do kit.
 
 Design completo: `docs/specs/2026-10-05-framework-sdlc-agentico-design.md`. Validação: `docs/validacao-v1.md`.
+
+## Licença
+
+MIT — ver [LICENSE](LICENSE).

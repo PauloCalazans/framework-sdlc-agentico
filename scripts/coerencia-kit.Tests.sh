@@ -12,6 +12,15 @@ tem() { [ -f "$raiz/$1" ] && tr -d '\r' < "$raiz/$1" | grep -qF -- "$2"; }
 linha() { [ -f "$raiz/$1" ] && tr -d '\r' < "$raiz/$1" | grep -qE -- "$2"; }
 # nenhum <ERE> <caminhos...>: nenhum arquivo dos caminhos casa a ERE (sem distinção de maiúsculas); imprime as ocorrências.
 nenhum() { tl_p=$1; shift; ! ( cd "$raiz" && grep -rniE -- "$tl_p" "$@" ); }
+# sem_nomes_proibidos <caminhos...>: nenhum caminho cita um nome da lista local .nomes-proibidos (uma ERE por linha,
+# fora do git: a lista não pode publicar os nomes que proíbe). Sem a lista, avisa e passa.
+sem_nomes_proibidos() {
+  [ -f "$raiz/.nomes-proibidos" ] || { echo "aviso: .nomes-proibidos ausente — nomes não conferidos"; return 0; }
+  tr -d '' < "$raiz/.nomes-proibidos" | while IFS= read -r tl_n; do
+    [ -n "$tl_n" ] || continue
+    nenhum "$tl_n" "$@" || return 1
+  done
+}
 # ordem <arquivo> <texto A> <texto B>: a primeira linha com A vem antes da primeira linha com B.
 ordem() {
   [ -f "$raiz/$1" ] || return 1
@@ -297,5 +306,11 @@ tl_espera 0 "empilhamento só com plataforma de PR (task)" tem core/templates/ta
 tl_espera 0 "ampliação de escopo nunca é do papel (verifica-escopo)" tem mecanismos/scripts/verifica-escopo.sh 'decisão do orquestrador'
 tl_espera 0 "Ruling depois do último commit de papel vai ao Gate 2" tem core/processo/ciclo.md 'quem a confere é o humano, no Gate 2'
 tl_espera 0 "dominio não entrevista o humano" nenhum 'a partir da entrevista|conduz.{0,4} a entrevista' core adapters
+
+# --- Site de divulgação (docs/specs/2026-11-16-site-divulgacao-design.md)
+tl_espera 0 "LICENSE: MIT" tem LICENSE 'MIT License'
+tl_espera 0 "LICENSE: titular" tem LICENSE 'Copyright (c) 2026 Paulo Ricardo Calazans'
+tl_espera 0 "README: seção Licença" linha README.md '^## Licença$'
+tl_espera 0 "sem nome de projeto de origem" sem_nomes_proibidos README.md LICENSE docs core adapters bootstrap mecanismos scripts
 
 tl_fim
