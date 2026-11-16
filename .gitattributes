@@ -2,3 +2,4 @@
 *.tmpl text eol=lf
 *.padrao text eol=lf
 mecanismos/githooks/* text eol=lf
+*.pen binary
