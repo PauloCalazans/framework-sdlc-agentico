@@ -19,10 +19,15 @@ agentic/projeto/specs/pedidos/spec.md. Precisa de outro arquivo: PARE e pergunte
 - `hipótese` não vira `confirmada` sem fonte: sem fonte, vira pergunta do questionário.
 - Nada de stack, arquitetura ou nome de classe: isso não é seu.
 - Comportamento legado que parece errado: registre legado × proposta e leve ao questionário; não escolha.
+- Regra que contradiz spec aprovada do `## Impacto` do brief: registre em "Divergências" e leve a pergunta ao Questionário.
 
 ## Leia só isto
 - agentic/projeto/intent/003-pedidos.md:1-40 — o pedido do humano.
 - legado/pedidos/regras.txt:10-60 — oráculo das regras de desconto em vigor.
+- agentic/projeto/specs/cupons/spec.md:10-20 — R3, do `## Impacto`.
+
+## Impacto
+- `grep -n "desconto\|cupom" agentic/projeto/specs/*/spec.md | head -20` → `agentic/projeto/specs/cupons/spec.md:14: | R3 | Cupom vale só para cliente cadastrado | …`
 
 ## Comandos
 - Busca só com pasta e saída limitada: `grep -n "<termo>" legado/pedidos/*.txt | head -20`.

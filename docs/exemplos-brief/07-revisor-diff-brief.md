@@ -8,6 +8,7 @@ Worktree: /home/dev/loja/agentic/.estado/worktrees/pedidos-001-criar (branch ped
 escreve o parecer, fora do worktree. Não corrige e não comita.
 
 ## O que fazer
+- Rodada 2 do diff da task 001; parecer anterior: /home/dev/loja/agentic/.estado/execucao/2026-11-06-pedidos/05-revisor-diff-parecer.md.
 - Para cada achado do parecer 05 (I1, M1): corrigido, não corrigido ou parcial, com `arquivo:linha` do HEAD.
 - Revise o intervalo novo d4e5f6a..b7c8d9e: nada além do que I1 e M1 pediam, e o RED a1b2c3d intacto.
 
@@ -22,6 +23,9 @@ escreve o parecer, fora do worktree. Não corrige e não comita.
 ## Leia só isto
 - /home/dev/loja/agentic/.estado/execucao/2026-11-06-pedidos/05-revisor-diff-parecer.md — seção "Achados".
 - `git diff d4e5f6a b7c8d9e -- src/pedidos/`
+
+## Impacto
+- Nenhum (só arquivos novos): `## Impacto` do design aprovado, sem linha para a task 001.
 
 ## Comandos
 - `sh agentic/mecanismos/scripts/verify.sh 2>&1 | tail -20`, em primeiro plano: a verificação é sua.
@@ -38,5 +42,5 @@ escreve o parecer, fora do worktree. Não corrige e não comita.
 
 ## Desde a rodada anterior
 - Brief anterior: /home/dev/loja/agentic/.estado/execucao/2026-11-06-pedidos/05-revisor-diff-brief.md.
-- Parecer anterior: 05-revisor-diff-parecer.md (DEVOLVIDO: I1, M1). Correção: 06-dev, commits b1a2c3d e b7c8d9e.
+- Parecer anterior: /home/dev/loja/agentic/.estado/execucao/2026-11-06-pedidos/05-revisor-diff-parecer.md (DEVOLVIDO: I1, M1). Correção: 06-dev, commits b1a2c3d e b7c8d9e.
 - Mudou: "O que fazer", "Leia só isto", o intervalo e o teto.
