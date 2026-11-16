@@ -26,6 +26,9 @@ tests/pedidos/criar_pedido_test.* e no documento da task. Nunca toque em src/. O
 - src/pedidos/criar_pedido.*:1-30 — o contrato executável (esqueleto).
 - tests/clientes/cadastrar_cliente_test.*:1-40 — modelo de setup e de um teste.
 
+## Impacto
+- Nenhum (só arquivos novos): `## Impacto` do design aprovado, sem linha para a task 001.
+
 ## Comandos
 - O comando de teste por arquivo do AGENTS.md: `<CMD_TESTE_ARQUIVO> tests/pedidos/criar_pedido_test.* 2>&1 | tail -15`.
 - Quem roda o verifica-red.sh: o orquestrador. Não o rode.

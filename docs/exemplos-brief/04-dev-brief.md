@@ -24,6 +24,9 @@ src/pedidos/criar_pedido.*, src/pedidos/desconto.*. Nunca toque em tests/. Outro
 - tests/pedidos/criar_pedido_test.*:1-70 — o RED.
 - agentic/projeto/specs/pedidos/design.md:20-45 — D1 a D3.
 
+## Impacto
+- Nenhum (só arquivos novos): `## Impacto` do design aprovado, sem linha para a task 001.
+
 ## Comandos
 - `<CMD_TESTE_ARQUIVO> tests/pedidos/criar_pedido_test.* 2>&1 | tail -15` a cada passo.
 - No fim, em primeiro plano: `sh agentic/mecanismos/scripts/verify.sh 2>&1 | tail -20` (VERIFY: OK).

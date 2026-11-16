@@ -25,6 +25,9 @@ src/pedidos/criar_pedido.*, src/pedidos/desconto.*, src/pedidos/erros.*. Nunca t
 - src/pedidos/criar_pedido.*:30-55 — onde está o cálculo.
 - agentic/projeto/specs/pedidos/design.md:28-36 — D2.
 
+## Impacto
+- Nenhum (só arquivos novos): `## Impacto` do design aprovado, sem linha para a task 001.
+
 ## Comandos
 - `<CMD_TESTE_ARQUIVO> tests/pedidos/criar_pedido_test.* 2>&1 | tail -15` a cada passo.
 - No fim, em primeiro plano: `sh agentic/mecanismos/scripts/verify.sh 2>&1 | tail -20` (VERIFY: OK).

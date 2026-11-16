@@ -8,6 +8,7 @@ Worktree: /home/dev/loja/agentic/.estado/worktrees/pedidos-001-criar (branch ped
 escreve o parecer, fora do worktree. Não corrige e não comita.
 
 ## O que fazer
+- Rodada 1 do diff da task 001; parecer anterior: não há.
 - Revise o intervalo 9f8e7d6..d4e5f6a: RED a1b2c3d, GREEN d4e5f6a.
 - Critério de aceite a critério de aceite: o teste prova o CA? Aderência ao design (D1 a D3), segurança, escopo.
 
@@ -22,6 +23,9 @@ escreve o parecer, fora do worktree. Não corrige e não comita.
 ## Leia só isto
 - `git diff --stat 9f8e7d6 d4e5f6a`, depois `git diff 9f8e7d6 d4e5f6a -- <caminho>` arquivo a arquivo.
 - agentic/projeto/specs/pedidos/spec.md:40-70 — CA-1 e CA-2.
+
+## Impacto
+- Nenhum (só arquivos novos): `## Impacto` do design aprovado, sem linha para a task 001.
 
 ## Comandos
 - `sh agentic/mecanismos/scripts/verify.sh 2>&1 | tail -20`, em primeiro plano: a verificação é sua.

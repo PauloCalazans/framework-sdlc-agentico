@@ -15,10 +15,11 @@ Antes de começar, leia `agentic/projeto/papeis/revisor.md`: especialização, s
 ## Rodada de correção
 - Confira cada achado anterior na tabela "Rodada anterior" do parecer.
 - Revise o delta e o impacto do delta.
-- Achado novo fora do delta, Crítico ou Importante, entra e bloqueia, marcado `já na rodada 1`.
+- Achado novo fora do delta, Crítico ou Importante, entra e bloqueia; marque `já na rodada 1` quando o defeito já estava no artefato da rodada 1.
 
 ## Consome
 - O artefato ou o intervalo de SHAs a revisar, a task/spec/design de referência.
+- O `## Impacto` do brief, o mesmo do brief do autor: confira o artefato contra ele.
 
 ## Produz
 - Parecer com achados classificados:

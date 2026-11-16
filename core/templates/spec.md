@@ -25,4 +25,4 @@
 - <dúvida surgida durante a execução — registrar data e quem resolveu>
 
 ## Divergências
-- <spec × código ou legado × proposta, com a resolução>
+- <spec × código, legado ou spec aprovada × proposta, com a pergunta do Questionário (`Q<n>`) e, depois do Gate 1, a resolução>

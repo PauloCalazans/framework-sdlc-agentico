@@ -24,7 +24,7 @@
 - `<diretorio/*>`
 
 ## Impacto
-<!-- Toda linha `medido` (busca no repositório, com arquivo:linha). Sem impacto fora dos arquivos novos: escreva `- Nenhum (só arquivos novos).` -->
+<!-- Toda linha `medido` (das buscas do `## Impacto` do brief, conferida no trecho, com arquivo:linha). Sem impacto fora dos arquivos novos: escreva `- Nenhum (só arquivos novos).` -->
 | Alterado (símbolo, rota, schema, regra) | Quem usa hoje (arquivo:linha, medido) | Em ## Arquivos de | Teste existente afetado | Regra de outra spec → emenda |
 |---|---|---|---|---|
 | <símbolo alterado> | <arquivo:linha> | <task NNN> | <teste ou "nenhum"> | <spec e regra, ou "nenhuma"> |
