@@ -126,12 +126,27 @@ h2 { font-size: clamp(26px, 3vw, 36px); line-height: 1.15; letter-spacing: -.02e
 
 /* cartões de evidência */
 .cartoes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.cartoes article { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 28px; display: grid; gap: 14px; align-content: start; }
+.cartoes article { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 28px; display: grid; gap: 14px; align-content: start; }
 .cartoes .valor { font-size: 34px; font-weight: 700; letter-spacing: -.02em; color: var(--accent); line-height: 1.1; }
 .cartoes p { font-size: 15px; }
 .cartoes .decisao { border-top: 1px solid var(--line); padding-top: 14px; font-size: 13px; line-height: 1.5; }
 .cartoes .decisao span { display: block; color: var(--muted); font-size: 11.5px; margin-bottom: 6px; }
 .cartoes .fonte { color: var(--muted); margin: 0; }
+
+/* base teórica */
+.citacoes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.citacoes figure { margin: 0; background: var(--bg); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; padding: 28px; display: grid; gap: 18px; align-content: space-between; }
+.citacoes .destaque { grid-column: 1 / -1; }
+.citacoes blockquote { margin: 0; }
+.citacoes blockquote p { font-size: 17px; line-height: 1.55; font-style: italic; }
+.citacoes blockquote p::before { content: "“"; } .citacoes blockquote p::after { content: "”"; }
+.citacoes .destaque blockquote p { font-size: clamp(18px, 1.8vw, 22px); }
+.citacoes figcaption { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 14px; }
+.citacoes cite { font: 400 12px "JetBrains Mono", monospace; font-style: normal; color: var(--accent); }
+.citacoes figcaption span { font-size: 14px; color: var(--muted); }
+.citacoes code { font-size: 13px; color: var(--text); }
+.normas { color: var(--muted); font-size: 15px; }
+.normas a { color: var(--accent); }
 
 /* aprendizado */
 .aprendizado { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
@@ -153,7 +168,7 @@ h2 { font-size: clamp(26px, 3vw, 36px); line-height: 1.15; letter-spacing: -.02e
 
 /* comece */
 .comece { grid-template-columns: 1fr 560px; align-items: center; gap: 64px; }
-.passos { list-style: none; margin: 0; padding: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; counter-reset: p; }
+.passos { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; counter-reset: p; }
 .passos li { counter-increment: p; display: grid; grid-template-columns: 24px 1fr; gap: 6px 16px; padding: 20px 24px; }
 .passos li + li { border-top: 1px solid var(--line); }
 .passos li::before { content: counter(p); grid-row: span 2; color: var(--accent); font: 400 14px "JetBrains Mono", monospace; }
@@ -180,7 +195,7 @@ h2 { font-size: clamp(26px, 3vw, 36px); line-height: 1.15; letter-spacing: -.02e
   .faixa dt { font-size: 30px; }
   .fluxo { grid-template-columns: 1fr 1fr; gap: 12px; }
   .fluxo li::before { display: none; }
-  .papeis, .trilhas, .cartoes { grid-template-columns: 1fr; }
+  .papeis, .trilhas, .cartoes, .citacoes { grid-template-columns: 1fr; }
   .tabela .cab { display: none; }
   .tabela .linha { grid-template-columns: 1fr; gap: 6px; }
   .tabela .linha > :last-child { grid-column: auto; }

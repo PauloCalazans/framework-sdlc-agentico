@@ -46,6 +46,17 @@ A revisão de 2026-11-04 parte da base higienizada (seção 2) e acrescenta:
 
 ---
 
+### 2.4 Citações do SWEBOK v4.0a no texto integral (`medido`, 2026-11-16)
+
+Conferidas no PDF oficial do *Guide to the Software Engineering Body of Knowledge* v4.0a (IEEE Computer Society, agosto de 2026), em https://ieeecs-media.computer.org/media/education/swebok/swebok-v4.pdf. São as frases que a página de divulgação cita.
+
+| Área e seção do SWEBOK | Texto | No kit |
+|---|---|---|
+| Software Construction, 4.16 *Test-First Programming* (p. 4-14) | "Test-first programming (also known as TDD - Test-Driven Development) is a popular development style in which test cases are written before any code. These test cases, when applied to the current code base, will fail. Code is then written that will allow the test cases to pass." | RED provado antes do código (`verifica-red.sh`), depois GREEN |
+| Software Construction, 4.16 (p. 4-14) | "writing test cases first forces programmers to think about requirements and design before coding, thus exposing requirements and design problems sooner." | spec e design aprovados no Gate 1 antes do RED |
+| Software Design, 4.6 *Design Rationale* (p. 3-11) | "Design rationale captures why a design decision was made. This includes prior assumptions made, alternatives considered, and trade-offs and criteria analyzed to select one approach and reject others." | decisões `D<n>` com justificativa e alternativa descartada |
+| Software Design, 6.1 *Design Reviews and Audits* (p. 3-13) | "Design reviews can be conducted by the design team, by an independent third party or other stakeholder." | `revisor` dos modos `spec`, `design` e `mudanca`, em contexto limpo |
+
 ## 3. Matriz de correspondência (v1)
 
 **Grau:** **forte** = mesma finalidade, verificável dos dois lados; **parcial** = cobre parte da norma; **analogia** = finalidade parecida, escopo diferente.

@@ -151,7 +151,7 @@
                   "id": "y5qQX",
                   "name": "Eyebrow",
                   "fill": "$accent",
-                  "content": "KIT OPEN SOURCE · CLAUDE CODE · GITHUB COPILOT",
+                  "content": "KIT OPEN SOURCE · SWEBOK v4 · ISO/IEC/IEEE · NIST SSDF",
                   "fontFamily": "JetBrains Mono",
                   "fontSize": 12,
                   "fontWeight": "normal",
@@ -178,7 +178,7 @@
                   "fill": "$muted",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "5 papéis com contrato fixo, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Qualquer stack, projeto novo ou existente.",
+                  "content": "Conceitos consolidados de engenharia de software, do SWEBOK às normas ISO/IEC/IEEE, levados à prática para Claude Code e GitHub Copilot: 5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente.",
                   "lineHeight": 1.5,
                   "fontFamily": "Inter",
                   "fontSize": 19,
@@ -2169,8 +2169,8 @@
         },
         {
           "type": "frame",
-          "id": "y0sEH",
-          "name": "Por que assim",
+          "id": "p9KhD",
+          "name": "Base teórica",
           "width": "fill_container",
           "fill": "$surface",
           "stroke": "$line",
@@ -2178,6 +2178,480 @@
             "top": 1,
             "bottom": 1
           },
+          "layout": "vertical",
+          "gap": 48,
+          "padding": [
+            96,
+            120
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "s3ccm1",
+              "name": "Cabeçalho",
+              "width": 760,
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "BuQ8w",
+                  "name": "Eyebrow",
+                  "fill": "$accent",
+                  "content": "03 · BASE TEÓRICA",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 12,
+                  "fontWeight": "normal",
+                  "letterSpacing": 1.5
+                },
+                {
+                  "type": "text",
+                  "id": "KmBaj",
+                  "name": "Título",
+                  "fill": "$text",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Nada aqui foi inventado: é engenharia de software consolidada, aplicada a um executor novo.",
+                  "lineHeight": 1.15,
+                  "fontFamily": "Inter",
+                  "fontSize": 36,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.8
+                },
+                {
+                  "type": "text",
+                  "id": "o8BpmF",
+                  "name": "Texto",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Os conceitos vêm do SWEBOK v4, das normas ISO/IEC/IEEE e do NIST SSDF. O kit os transforma em prática que o agente não consegue pular. Registramos correspondências, não conformidade.",
+                  "lineHeight": 1.55,
+                  "fontFamily": "Inter",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "JbDtk",
+              "name": "Citações",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xpn7t",
+                  "name": "Citação SWEBOK v4.0a · Software Construction, 4.16",
+                  "width": "fill_container",
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "stroke": "$accent",
+                  "strokeWidth": {
+                    "left": 3
+                  },
+                  "layout": "vertical",
+                  "gap": 18,
+                  "padding": 28,
+                  "justifyContent": "space_between",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "RIWAo",
+                      "name": "Texto",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "“Test-first programming (also known as TDD - Test-Driven Development) is a popular development style in which test cases are written before any code. These test cases, when applied to the current code base, will fail. Code is then written that will allow the test cases to pass.”",
+                      "lineHeight": 1.55,
+                      "fontFamily": "Inter",
+                      "fontSize": 21,
+                      "fontWeight": "normal",
+                      "fontStyle": "italic"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "X0U62",
+                      "name": "Legenda",
+                      "width": "fill_container",
+                      "stroke": "$line",
+                      "strokeWidth": {
+                        "top": 1
+                      },
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        14,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "BZOD7",
+                          "name": "Fonte",
+                          "fill": "$accent",
+                          "content": "SWEBOK v4.0a · Software Construction, 4.16",
+                          "fontFamily": "JetBrains Mono",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "WbGaI",
+                          "name": "No kit",
+                          "fill": "$muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "→ no kit: test(red): prova a falha; verifica-red.sh barra quem mexe no teste",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ydy2e",
+                  "name": "Linha",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "bemQL",
+                      "name": "Citação SWEBOK v4.0a · Software Design, 4.6",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "a6zASG",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“Design rationale captures why a design decision was made. This includes prior assumptions made, alternatives considered, and trade-offs and criteria analyzed to select one approach and reject others.”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "nNHYz",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "l4Q6M",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "SWEBOK v4.0a · Software Design, 4.6",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "YOjAV",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: decisões D<n> com justificativa",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eTrEM",
+                      "name": "Citação SWEBOK v4.0a · Software Design, 6.1",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ZFvqo",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“Design reviews can be conducted by the design team, by an independent third party or other stakeholder.”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yvV9E",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "xg91m",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "SWEBOK v4.0a · Software Design, 6.1",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "GX6qj",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: revisor em contexto limpo antes do Gate 1",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "OTuSM",
+                  "name": "Linha",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "sCIYU",
+                      "name": "Citação NIST SP 800-218 (SSDF) v1.1",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "kuqEJ",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“the focus is on the outcomes of the practices rather than on the tools”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GmK4Z",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Gi9R1",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "NIST SP 800-218 (SSDF) v1.1",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "EAaNL",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: controle vale pelo resultado, pessoa ou agente",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bqd8s",
+                      "name": "Citação NIST SP 800-218 (SSDF) · PS.1.1",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "k3v8mo",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“Have the code owner review and approve all changes”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "j1oGUg",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ixHam",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "NIST SP 800-218 (SSDF) · PS.1.1",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "H8ZQjH",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: Gate 2, merge sempre humano",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "HdICy",
+              "name": "Normas",
+              "fill": "$muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Correspondência completa com SWEBOK v4.0a, ISO/IEC/IEEE 12207:2026, 29148:2018, 29119-1, 42010:2022 e NIST SP 800-218: parecer normativo.",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "y0sEH",
+          "name": "Por que assim",
+          "width": "fill_container",
+          "fill": "$bg",
+          "stroke": "$line",
           "layout": "vertical",
           "gap": 48,
           "padding": [
@@ -2253,7 +2727,7 @@
                       "id": "s9NIw",
                       "name": "Cartão e6",
                       "width": "fill_container",
-                      "fill": "$bg",
+                      "fill": "$surface",
                       "cornerRadius": 10,
                       "stroke": "$line",
                       "strokeWidth": 1,
@@ -2345,7 +2819,7 @@
                       "id": "OtWhV",
                       "name": "Cartão e7",
                       "width": "fill_container",
-                      "fill": "$bg",
+                      "fill": "$surface",
                       "cornerRadius": 10,
                       "stroke": "$line",
                       "strokeWidth": 1,
@@ -2437,7 +2911,7 @@
                       "id": "aM9Yh",
                       "name": "Cartão e5",
                       "width": "fill_container",
-                      "fill": "$bg",
+                      "fill": "$surface",
                       "cornerRadius": 10,
                       "stroke": "$line",
                       "strokeWidth": 1,
@@ -2538,7 +3012,7 @@
                       "id": "k4vses",
                       "name": "Cartão e10",
                       "width": "fill_container",
-                      "fill": "$bg",
+                      "fill": "$surface",
                       "cornerRadius": 10,
                       "stroke": "$line",
                       "strokeWidth": 1,
@@ -2630,7 +3104,7 @@
                       "id": "Rq3Wu",
                       "name": "Cartão e8",
                       "width": "fill_container",
-                      "fill": "$bg",
+                      "fill": "$surface",
                       "cornerRadius": 10,
                       "stroke": "$line",
                       "strokeWidth": 1,
@@ -2722,7 +3196,7 @@
                       "id": "hmTby",
                       "name": "Cartão e9",
                       "width": "fill_container",
-                      "fill": "$bg",
+                      "fill": "$surface",
                       "cornerRadius": 10,
                       "stroke": "$line",
                       "strokeWidth": 1,

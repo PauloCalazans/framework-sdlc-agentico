@@ -28,6 +28,7 @@
   <nav aria-label="Seções">
     <a href="#problema">O problema</a>
     <a href="#como">Como funciona</a>
+    <a href="#base">Base teórica</a>
     <a href="#porque">Por que assim</a>
     <a href="#aprendemos">Evidências</a>
     <button class="tema" type="button" aria-label="Alternar tema claro e escuro">◐</button>
@@ -38,9 +39,9 @@
 <main id="conteudo">
 <section class="hero envelope">
   <div class="hero-texto">
-    <p class="eyebrow">Kit open source · Claude Code · GitHub Copilot</p>
+    <p class="eyebrow">Kit open source · SWEBOK v4 · ISO/IEC/IEEE · NIST SSDF</p>
     <h1>Agentes de IA que seguem um processo de engenharia — e um kit que diz <em>não</em> quando eles saem dele.</h1>
-    <p class="lead">5 papéis com contrato fixo, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Qualquer stack, projeto novo ou existente.</p>
+    <p class="lead">Conceitos consolidados de engenharia de software, do SWEBOK às normas ISO/IEC/IEEE, levados à prática para Claude Code e GitHub Copilot: 5 papéis com contrato fixo, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Qualquer stack, projeto novo ou existente.</p>
     <div class="ctas">
       <a class="botao" href="https://github.com/PauloCalazans/framework-sdlc-agentico">Ver no GitHub →</a>
       <a class="botao-contorno" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md">Ler as evidências</a>
@@ -121,10 +122,28 @@
   </div>
 </section>
 
-<section id="porque" class="faixa-escura">
+<section id="base" class="faixa-escura">
   <div class="envelope bloco">
     <header class="cabeca">
-      <p class="eyebrow">03 · Por que o repositório é assim</p>
+      <p class="eyebrow">03 · Base teórica</p>
+      <h2>Nada aqui foi inventado: é engenharia de software consolidada, aplicada a um executor novo.</h2>
+      <p>Os papéis, os gates e os controles do kit vêm do SWEBOK v4 (IEEE Computer Society), das normas ISO/IEC/IEEE de ciclo de vida, requisitos e teste e do NIST SSDF. O kit transforma esses conceitos em prática que o agente não consegue pular. Registramos correspondências, não conformidade: nenhuma norma regula ainda agente de IA como ferramenta de desenvolvimento.</p>
+    </header>
+    <div class="citacoes">
+      <figure class="destaque"><blockquote class="citacao"><p>Test-first programming (also known as TDD - Test-Driven Development) is a popular development style in which test cases are written before any code. These test cases, when applied to the current code base, will fail. Code is then written that will allow the test cases to pass.</p></blockquote><figcaption><cite>SWEBOK v4.0a · Software Construction, 4.16</cite><span>→ no kit: o commit <code>test(red):</code> prova a falha antes do código, e o <code>verifica-red.sh</code> barra quem mexe no teste depois.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>Design rationale captures why a design decision was made. This includes prior assumptions made, alternatives considered, and trade-offs and criteria analyzed to select one approach and reject others.</p></blockquote><figcaption><cite>SWEBOK v4.0a · Software Design, 4.6</cite><span>→ no kit: decisões <code>D&lt;n&gt;</code> registradas com justificativa e alternativa descartada.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>Design reviews can be conducted by the design team, by an independent third party or other stakeholder.</p></blockquote><figcaption><cite>SWEBOK v4.0a · Software Design, 6.1</cite><span>→ no kit: o <code>revisor</code>, em contexto limpo, revisa spec e design antes do Gate 1.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>the focus is on the outcomes of the practices rather than on the tools</p></blockquote><figcaption><cite>NIST SP 800-218 (SSDF) v1.1</cite><span>→ no kit: cada controle vale pelo resultado, seja o executor uma pessoa ou um agente.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>Have the code owner review and approve all changes</p></blockquote><figcaption><cite>NIST SP 800-218 (SSDF) · PS.1.1</cite><span>→ no kit: Gate 2, o merge é sempre humano.</span></figcaption></figure>
+    </div>
+    <p class="normas">Correspondência completa com SWEBOK v4.0a, ISO/IEC/IEEE 12207:2026, 29148:2018, 29119-1, 42010:2022 e NIST SP 800-218: <a href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/avaliacao-normativa-swebok-iso.md">parecer normativo</a>.</p>
+  </div>
+</section>
+
+<section id="porque">
+  <div class="envelope bloco">
+    <header class="cabeca">
+      <p class="eyebrow">04 · Por que o repositório é assim</p>
       <h2>Cada regra do kit nasceu de uma medição.</h2>
       <p>Medimos 36 execuções reais. Quando o dado mostrava um problema, o kit mudou. Cada cartão liga a decisão à evidência.</p>
     </header>
@@ -139,9 +158,10 @@
   </div>
 </section>
 
-<section id="aprendemos" class="envelope bloco">
+<section id="aprendemos" class="faixa-escura">
+  <div class="envelope bloco">
   <header class="cabeca">
-    <p class="eyebrow">04 · O que aprendemos medindo</p>
+    <p class="eyebrow">05 · O que aprendemos medindo</p>
     <h2><strong class="num" data-e="e3">55%</strong> das revisões foram devolvidas. Fomos atrás do porquê.</h2>
     <p>Não é burocracia: a revisão quase nunca devolve por forma. O problema está no autor que entrega sem conferir e na correção que gera outra rodada.</p>
   </header>
@@ -161,12 +181,13 @@
       <li class="limite"><b>Limites</b><div>amostra pequena: B tem 5 execuções e a revisão que converge ainda não foi medida. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#limites">evidências · Limites</a></div></li>
     </ul>
   </div>
+  </div>
 </section>
 
-<section id="comece" class="faixa-escura">
+<section id="comece">
   <div class="envelope bloco comece">
     <header class="cabeca">
-      <p class="eyebrow">05 · Comece</p>
+      <p class="eyebrow">06 · Comece</p>
       <h2>Instale no seu repositório e deixe a entrevista configurar a stack.</h2>
       <p>Java, Python, Node, .NET, front-end. A stack entra pela entrevista do <code>/bootstrap</code>, sem editar o núcleo do kit.</p>
     </header>

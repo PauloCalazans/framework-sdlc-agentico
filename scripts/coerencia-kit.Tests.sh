@@ -355,4 +355,15 @@ tl_espera 0 "pages: publica só site/" linha $w 'path: *site$'
 tl_espera 0 "pages: deploy oficial" tem $w 'actions/deploy-pages@v4'
 tl_espera 0 "README: link do site" tem README.md 'paulocalazans.github.io/framework-sdlc-agentico'
 
+# base teórica: cada citação da página existe literalmente no parecer normativo
+site_cit_ok() {
+  [ -f "$raiz/$s" ] || return 1
+  tl_c=$(tr -d '\r' < "$raiz/$s" | grep -o '<blockquote class="citacao"><p>[^<]*</p>' | sed 's/<[^>]*>//g')
+  [ -n "$tl_c" ] || { echo "nenhuma citação"; return 1; }
+  echo "$tl_c" | while IFS= read -r tl_l; do tem docs/avaliacao-normativa-swebok-iso.md "$tl_l" || { echo "citação sem fonte: $tl_l"; return 1; }; done
+}
+tl_espera 0 "site: citações da base teórica existem no parecer normativo" site_cit_ok
+tl_espera 0 "site: seção base teórica" tem $s 'id="base"'
+tl_espera 0 "site: link para o parecer normativo" tem $s 'docs/avaliacao-normativa-swebok-iso.md'
+
 tl_fim
