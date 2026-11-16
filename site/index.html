@@ -127,7 +127,7 @@
     <header class="cabeca">
       <p class="eyebrow">03 · Base teórica</p>
       <h2>Nada aqui foi inventado: é engenharia de software consolidada, aplicada a um executor novo.</h2>
-      <p>Os papéis, os gates e os controles do kit vêm do SWEBOK v4 (IEEE Computer Society), das normas ISO/IEC/IEEE de ciclo de vida, requisitos e teste e do NIST SSDF. O kit transforma esses conceitos em prática que o agente não consegue pular. Registramos correspondências, não conformidade: nenhuma norma regula ainda agente de IA como ferramenta de desenvolvimento.</p>
+      <p>Os papéis, os gates e os controles do kit vêm do SWEBOK v4 (IEEE Computer Society), das normas ISO/IEC/IEEE de ciclo de vida, requisitos e teste e do NIST SSDF, e dialogam com a pesquisa recente sobre agentes (Anthropic, DORA, METR). O kit transforma esses conceitos em prática que o agente não consegue pular. Registramos correspondências, não conformidade: nenhuma norma regula ainda agente de IA como ferramenta de desenvolvimento.</p>
     </header>
     <div class="citacoes">
       <figure class="destaque"><blockquote class="citacao"><p>Test-first programming (also known as TDD - Test-Driven Development) is a popular development style in which test cases are written before any code. These test cases, when applied to the current code base, will fail. Code is then written that will allow the test cases to pass.</p></blockquote><figcaption><cite>SWEBOK v4.0a · Software Construction, 4.16</cite><span>→ no kit: o commit <code>test(red):</code> prova a falha antes do código, e o <code>verifica-red.sh</code> barra quem mexe no teste depois.</span></figcaption></figure>
@@ -136,7 +136,19 @@
       <figure><blockquote class="citacao"><p>the focus is on the outcomes of the practices rather than on the tools</p></blockquote><figcaption><cite>NIST SP 800-218 (SSDF) v1.1</cite><span>→ no kit: cada controle vale pelo resultado, seja o executor uma pessoa ou um agente.</span></figcaption></figure>
       <figure><blockquote class="citacao"><p>Have the code owner review and approve all changes</p></blockquote><figcaption><cite>NIST SP 800-218 (SSDF) · PS.1.1</cite><span>→ no kit: Gate 2, o merge é sempre humano.</span></figcaption></figure>
     </div>
-    <p class="normas">Correspondência completa com SWEBOK v4.0a, ISO/IEC/IEEE 12207:2026, 29148:2018, 29119-1, 42010:2022 e NIST SP 800-218: <a href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/avaliacao-normativa-swebok-iso.md">parecer normativo</a>.</p>
+    <div id="pesquisa" class="sub">
+      <h3>O que a pesquisa sobre agentes mostra</h3>
+      <p>Estudos e guias recentes explicam por que esses controles importam quando quem executa é um agente. O OWASP GenAI Top 10 nomeia o risco que os gates e o <code>deny</code> tratam: LLM06:2025 Excessive Agency.</p>
+    </div>
+    <div class="citacoes">
+      <figure class="destaque"><blockquote class="citacao"><p>developers forecast that allowing AI will reduce completion time by 24% […] allowing AI actually increases completion time by 19%</p></blockquote><figcaption><cite>METR (2025), Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity</cite><span>→ no kit: sucesso só com a saída do verify.sh; cada afirmação marcada medido ou inferido.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>it also negatively impacts software delivery stability and throughput […] fundamentals like small batch sizes and robust testing remain crucial</p></blockquote><figcaption><cite>DORA, Accelerate State of DevOps Report 2024</cite><span>→ no kit: task pequena com ## Arquivos, RED antes do código.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>Code solutions are verifiable through automated tests</p></blockquote><figcaption><cite>Anthropic, Building effective AI agents</cite><span>→ no kit: verify.sh como ponto único de verificação.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>We recommend extensive testing in sandboxed environments, along with the appropriate guardrails.</p></blockquote><figcaption><cite>Anthropic, Building effective AI agents</cite><span>→ no kit: worktree por task; githooks e deny como guardrails.</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>write a failing test that reproduces it, then fix it</p></blockquote><figcaption><cite>Anthropic, Best practices for Claude Code</cite><span>→ no kit: commit test(red) provado antes do feat(green).</span></figcaption></figure>
+      <figure><blockquote class="citacao"><p>the average percentage of hallucinated packages is at least 5.2% for commercial models and 21.7% for open-source models</p></blockquote><figcaption><cite>arXiv 2406.10279, We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs</cite><span>→ no kit: dependência nova é gatilho N3: só com aprovação humana.</span></figcaption></figure>
+    </div>
+    <p class="normas">Correspondência completa com SWEBOK v4.0a, ISO/IEC/IEEE 12207:2026, 29148:2018, 29119-1, 42010:2022 e NIST SP 800-218, e as fontes de pesquisa sobre agentes: <a href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/avaliacao-normativa-swebok-iso.md">parecer normativo</a>.</p>
   </div>
 </section>
 

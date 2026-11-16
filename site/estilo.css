@@ -146,6 +146,9 @@ h2 { font-size: clamp(26px, 3vw, 36px); line-height: 1.15; letter-spacing: -.02e
 .citacoes figcaption span { font-size: 14px; color: var(--muted); }
 .citacoes code { font-size: 13px; color: var(--text); }
 .normas { color: var(--muted); font-size: 15px; }
+.sub { display: grid; gap: 10px; max-width: 760px; margin-top: 16px; }
+.sub h3 { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.sub p { color: var(--muted); font-size: 16px; }
 .normas a { color: var(--accent); }
 
 /* aprendizado */

@@ -2632,6 +2632,521 @@
               ]
             },
             {
+              "type": "frame",
+              "id": "ABEya",
+              "name": "Pesquisa",
+              "width": 760,
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "iFIaf",
+                  "name": "Título",
+                  "fill": "$text",
+                  "content": "O que a pesquisa sobre agentes mostra",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "wDusa",
+                  "name": "Texto",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Estudos e guias recentes explicam por que esses controles importam quando quem executa é um agente. O OWASP GenAI Top 10 nomeia o risco: LLM06:2025 Excessive Agency.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Xw3dD",
+              "name": "Citações pesquisa",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "qGhyQ",
+                  "name": "Citação METR (2025) · Early-2025 AI and developer productivity",
+                  "width": "fill_container",
+                  "fill": "$bg",
+                  "cornerRadius": 10,
+                  "stroke": "$accent",
+                  "strokeWidth": {
+                    "left": 3
+                  },
+                  "layout": "vertical",
+                  "gap": 18,
+                  "padding": 28,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "u1tNE",
+                      "name": "Texto",
+                      "fill": "$text",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "“developers forecast that allowing AI will reduce completion time by 24% […] allowing AI actually increases completion time by 19%”",
+                      "lineHeight": 1.55,
+                      "fontFamily": "Inter",
+                      "fontSize": 21,
+                      "fontWeight": "normal",
+                      "fontStyle": "italic"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dozzw",
+                      "name": "Legenda",
+                      "width": "fill_container",
+                      "stroke": "$line",
+                      "strokeWidth": {
+                        "top": 1
+                      },
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        14,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "BUutF",
+                          "name": "Fonte",
+                          "fill": "$accent",
+                          "content": "METR (2025) · Early-2025 AI and developer productivity",
+                          "fontFamily": "JetBrains Mono",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "O7ZRVt",
+                          "name": "No kit",
+                          "fill": "$muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "→ no kit: sucesso só com a saída do verify.sh; medido × inferido",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "j1tiK",
+                  "name": "Linha",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "WCuH5",
+                      "name": "Citação DORA · State of DevOps 2024",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "a5cR24",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“it also negatively impacts software delivery stability and throughput […] fundamentals like small batch sizes and robust testing remain crucial”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "G2dbzx",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "jDs17",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "DORA · State of DevOps 2024",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "IW1RC",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: task pequena com ## Arquivos, RED antes do código",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "xQBZ4",
+                      "name": "Citação Anthropic · Building effective AI agents",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "q5IXCQ",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“Code solutions are verifiable through automated tests”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "lchqK",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "LTJKe",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "Anthropic · Building effective AI agents",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "b8x0UN",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: verify.sh como ponto único",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "P0yQoJ",
+                  "name": "Linha",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "okNvF",
+                      "name": "Citação Anthropic · Building effective AI agents",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "IZHOm",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“We recommend extensive testing in sandboxed environments, along with the appropriate guardrails.”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kdT5W",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "TFHOC",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "Anthropic · Building effective AI agents",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "H9996",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: worktree por task; githooks e deny",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "sxd1O",
+                      "name": "Citação Anthropic · Best practices for Claude Code",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "eKKn3",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“write a failing test that reproduces it, then fix it”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "WawWm",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "z4ujb8",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "Anthropic · Best practices for Claude Code",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "GvWsq",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: test(red) antes do feat(green)",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hdab9",
+                  "name": "Linha",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "M20giW",
+                      "name": "Citação arXiv 2406.10279 · Package Hallucinations",
+                      "width": "fill_container",
+                      "fill": "$bg",
+                      "cornerRadius": 10,
+                      "stroke": "$accent",
+                      "strokeWidth": {
+                        "left": 3
+                      },
+                      "layout": "vertical",
+                      "gap": 18,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "lXFBS",
+                          "name": "Texto",
+                          "fill": "$text",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "“the average percentage of hallucinated packages is at least 5.2% for commercial models and 21.7% for open-source models”",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "normal",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "D7x9Em",
+                          "name": "Legenda",
+                          "width": "fill_container",
+                          "stroke": "$line",
+                          "strokeWidth": {
+                            "top": 1
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "L67En",
+                              "name": "Fonte",
+                              "fill": "$accent",
+                              "content": "arXiv 2406.10279 · Package Hallucinations",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "doKPX",
+                              "name": "No kit",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "→ no kit: dependência nova é gatilho N3",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "B1uqa",
+                      "name": "Vazio",
+                      "width": "fill_container",
+                      "height": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
               "type": "text",
               "id": "HdICy",
               "name": "Normas",

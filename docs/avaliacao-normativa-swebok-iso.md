@@ -57,6 +57,19 @@ Conferidas no PDF oficial do *Guide to the Software Engineering Body of Knowledg
 | Software Design, 4.6 *Design Rationale* (p. 3-11) | "Design rationale captures why a design decision was made. This includes prior assumptions made, alternatives considered, and trade-offs and criteria analyzed to select one approach and reject others." | decisões `D<n>` com justificativa e alternativa descartada |
 | Software Design, 6.1 *Design Reviews and Audits* (p. 3-13) | "Design reviews can be conducted by the design team, by an independent third party or other stakeholder." | `revisor` dos modos `spec`, `design` e `mudanca`, em contexto limpo |
 
+### 2.5 Pesquisa sobre agentes de IA (fora da base normativa, `medido`, 2026-11-16)
+
+Fontes do notebook *Architecting the AI-Native SDLC* (NotebookLM), conferidas no texto completo de cada fonte. Não são normas: são estudos e guias que mostram por que os controles do kit importam quando o executor é um agente. O OWASP GenAI Security Project lista o mesmo risco que o `deny` e os gates tratam: *LLM06:2025 Excessive Agency*.
+
+| Fonte | Texto | No kit |
+|---|---|---|
+| METR (2025), *Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity* | "developers forecast that allowing AI will reduce completion time by 24% […] allowing AI actually increases completion time by 19%" | sucesso só com a saída do `verify.sh`; cada afirmação marcada `medido` ou `inferido` |
+| DORA, *Accelerate State of DevOps Report 2024* | "it also negatively impacts software delivery stability and throughput […] fundamentals like small batch sizes and robust testing remain crucial" | task pequena com `## Arquivos`, RED antes do código |
+| Anthropic, *Building effective AI agents* | "Code solutions are verifiable through automated tests" | `verify.sh` como ponto único de verificação |
+| Anthropic, *Building effective AI agents* | "We recommend extensive testing in sandboxed environments, along with the appropriate guardrails." | worktree por task; githooks e `deny` como guardrails |
+| Anthropic, *Best practices for Claude Code* | "write a failing test that reproduces it, then fix it" | commit `test(red):` provado antes do `feat(green):` |
+| arXiv 2406.10279, *We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs* | "the average percentage of hallucinated packages is at least 5.2% for commercial models and 21.7% for open-source models" | dependência nova é gatilho N3: só com aprovação humana |
+
 ## 3. Matriz de correspondência (v1)
 
 **Grau:** **forte** = mesma finalidade, verificável dos dois lados; **parcial** = cobre parte da norma; **analogia** = finalidade parecida, escopo diferente.

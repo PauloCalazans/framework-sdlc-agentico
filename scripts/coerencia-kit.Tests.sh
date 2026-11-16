@@ -379,4 +379,10 @@ tl_espera 0 "site: pre-merge-commit e deny de gh pr merge" tem $s 'pre-merge-com
 tl_espera 1 "site: sem 'cada regra nasceu de medição' (contradiz a base teórica)" tem $s 'Cada regra do kit nasceu de uma medição'
 tl_espera 1 "site: meta sem 'cada regra sustentada por medições'" tem $s 'Cada regra sustentada por medições'
 
+# base teórica: pesquisa sobre agentes (notebook AI-native SDLC), registrada no parecer §2.5
+tl_espera 0 "parecer: seção 2.5 de pesquisa sobre agentes" linha docs/avaliacao-normativa-swebok-iso.md '^### 2\.5 '
+tl_espera 0 "site: bloco de pesquisa sobre agentes" tem $s 'id="pesquisa"'
+site_cit_n() { [ "$(tr -d '\r' < "$raiz/$s" | grep -o '<blockquote class="citacao">' | wc -l)" -ge 10 ]; }
+tl_espera 0 "site: ao menos 10 citações (normas + pesquisa)" site_cit_n
+
 tl_fim
