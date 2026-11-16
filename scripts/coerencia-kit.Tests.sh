@@ -330,14 +330,15 @@ tl_espera 0 "site: licença no rodapé" tem $s 'MIT'
 tl_espera 0 "site sem nome de projeto de origem" sem_nomes_proibidos site
 sem_package() { ! [ -e "$raiz/package.json" ]; }
 tl_espera 0 "site: sem build (sem package.json)" sem_package
-# cada número marcado tem âncora e par em docs/evidencias.md
+# cada número marcado tem par, como palavra inteira, dentro da seção da sua âncora em docs/evidencias.md
+secao_evid() { tr -d '\r' < "$raiz/docs/evidencias.md" | awk -v a="<a id=\"$1\"></a>" 'index($0,a){d=1;next} d&&(/^<a id="/||/^## Limites/){exit} d'; }
 site_nums_ok() {
   [ -f "$raiz/$s" ] || return 1
   tl_n=$(tr -d '\r' < "$raiz/$s" | grep -o 'data-e="e[0-9]*">[^<]*<' | sed 's/data-e="\(e[0-9]*\)">\([^<]*\)</\1 \2/')
   [ -n "$tl_n" ] || { echo "nenhum número marcado"; return 1; }
   echo "$tl_n" | while read -r tl_a tl_v; do
     tem docs/evidencias.md "<a id=\"$tl_a\"></a>" || { echo "sem âncora $tl_a"; return 1; }
-    tem docs/evidencias.md "$tl_v" || { echo "valor sem par: $tl_a $tl_v"; return 1; }
+    secao_evid "$tl_a" | grep -qFw -- "$tl_v" || { echo "valor sem par na seção: $tl_a $tl_v"; return 1; }
   done
 }
 tl_espera 0 "site: todo número tem par em evidencias.md" site_nums_ok
@@ -365,5 +366,17 @@ site_cit_ok() {
 tl_espera 0 "site: citações da base teórica existem no parecer normativo" site_cit_ok
 tl_espera 0 "site: seção base teórica" tem $s 'id="base"'
 tl_espera 0 "site: link para o parecer normativo" tem $s 'docs/avaliacao-normativa-swebok-iso.md'
+
+# revisão final da branch (correções)
+tl_espera 0 "evidências: soma por papel explicada" tem docs/evidencias.md 'A soma por papel dá 704'
+tl_espera 0 "site: 36 execuções marcado" tem $s 'data-e="e1">36<'
+tl_espera 0 "site: menos de 5% marcado" tem $s 'data-e="e4">5%<'
+tl_espera 0 "site: 5 execuções de B marcado" tem $s 'data-e="e1">5<'
+tl_espera 0 "site: verify garantido por regra + script, como no README" tem $s '<code>regra + verify.sh</code>'
+tl_espera 0 "site: hook PreToolUse só no Claude Code" tem $s 'hook PreToolUse (só Claude Code)'
+tl_espera 0 "site: ressalva do merge fast-forward" tem $s 'merge fast-forward local não dispara hook'
+tl_espera 0 "site: pre-merge-commit e deny de gh pr merge" tem $s 'pre-merge-commit · deny de gh pr merge'
+tl_espera 1 "site: sem 'cada regra nasceu de medição' (contradiz a base teórica)" tem $s 'Cada regra do kit nasceu de uma medição'
+tl_espera 1 "site: meta sem 'cada regra sustentada por medições'" tem $s 'Cada regra sustentada por medições'
 
 tl_fim

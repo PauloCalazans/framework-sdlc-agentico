@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kit de SDLC Agêntico</title>
-<meta name="description" content="Kit que faz agentes de IA (Claude Code, GitHub Copilot) desenvolverem com 5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Cada regra sustentada por medições de execuções reais.">
+<meta name="description" content="Kit que faz agentes de IA (Claude Code, GitHub Copilot) desenvolverem com 5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Conceitos consolidados de engenharia de software, ajustados por medições de execuções reais.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Kit de SDLC Agêntico — agentes de IA com processo de engenharia">
-<meta property="og:description" content="5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente. Cada regra nasceu de uma medição em execuções reais.">
+<meta property="og:description" content="5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente. Engenharia de software consolidada, ajustada por medições em execuções reais.">
 <meta property="og:url" content="https://paulocalazans.github.io/framework-sdlc-agentico/">
 <meta property="og:image" content="https://paulocalazans.github.io/framework-sdlc-agentico/og.png">
 <meta property="og:image:width" content="1200">
@@ -64,7 +64,7 @@
 
 <section class="envelope" aria-label="Números">
   <dl class="faixa">
-    <div><dt><strong class="num" data-e="e1">705</strong></dt><dd>despachos de agentes em 36 execuções reais <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e1">evidências §1</a></dd></div>
+    <div><dt><strong class="num" data-e="e1">705</strong></dt><dd>despachos de agentes em <strong class="num" data-e="e1">36</strong> execuções reais <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e1">evidências §1</a></dd></div>
     <div><dt><strong class="num" data-e="e1">4</strong></dt><dd>projetos com o kit instalado, em Java e Python <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e1">evidências §1</a></dd></div>
     <div><dt><strong class="num" data-e="e4">227</strong></dt><dd>achados bloqueantes classificados por causa <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e4">evidências §4</a></dd></div>
     <div><dt>~<strong class="num" data-e="e8">80%</strong></dt><dd>menos documentação na trilha enxuta <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e8">evidências §8</a></dd></div>
@@ -80,12 +80,12 @@
     </header>
     <div class="tabela" role="table" aria-label="Sem o kit e com o kit">
       <div class="linha cab" role="row"><span role="columnheader">Sem o kit, o agente…</span><span role="columnheader">Com o kit</span><span role="columnheader">Quem garante</span></div>
-      <div class="linha" role="row"><span role="cell" class="sem">diz "está funcionando" sem rodar nada</span><span role="cell"><p class="com">o verify.sh é o ponto único de verificação; sucesso só com a saída do nível do passo (VERIFY: OK)</p></span><span role="cell"><code>verify.sh</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">diz "está funcionando" sem rodar nada</span><span role="cell"><p class="com">o verify.sh é o ponto único de verificação; sucesso só com a saída do nível do passo (VERIFY: OK)</p></span><span role="cell"><code>regra + verify.sh</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">altera o teste até ele passar</span><span role="cell"><p class="com">o commit test(red): prova que os testes falhavam; asserção removida depois reprova, salvo remoção declarada e decidida antes</p></span><span role="cell"><code>verifica-red.sh</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">desliga o teste que incomoda</span><span role="cell"><p class="mecanismo">teste desabilitado na branch ou skip novo no relatório JUnit reprova</p></span><span role="cell"><code>verifica-skip.sh</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">"aproveita" e mexe em arquivos fora do pedido</span><span role="cell"><p class="com">cada task declara ## Arquivos; arquivo fora da lista reprova</p></span><span role="cell"><code>verifica-escopo.sh</code></span></div>
-      <div class="linha" role="row"><span role="cell" class="sem">commita na main ou faz o merge do próprio PR</span><span role="cell"><p class="mecanismo">commit e push na branch protegida são bloqueados, e o merge com commit também</p></span><span role="cell"><code>pre-commit · pre-push</code></span></div>
-      <div class="linha" role="row"><span role="cell" class="sem">pula os githooks (--no-verify)</span><span role="cell"><p class="com">comando git com --no-verify, commit -n ou -c core.hooksPath é barrado em qualquer posição</p></span><span role="cell"><code>hook PreToolUse</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">commita na main ou faz o merge do próprio PR</span><span role="cell"><p class="mecanismo">commit e push na branch protegida são bloqueados, e o merge com commit também; merge fast-forward local não dispara hook</p><p class="com">o remoto continua protegido pelo pre-push</p></span><span role="cell"><code>pre-commit · pre-push · pre-merge-commit · deny de gh pr merge</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">pula os githooks (--no-verify)</span><span role="cell"><p class="com">comando git com --no-verify, commit -n ou -c core.hooksPath é barrado em qualquer posição</p></span><span role="cell"><code>hook PreToolUse (só Claude Code)</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">commita uma senha ou token</span><span role="cell"><p class="mecanismo">conteúdo staged é varrido antes do commit</p></span><span role="cell"><code>pre-commit (gitleaks)</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">revisa o próprio trabalho</span><span role="cell"><p class="com">o revisor roda em contexto limpo, escreve só o parecer e nunca corrige</p></span><span role="cell"><code>contrato do papel</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">decide sozinho regra de negócio, segurança ou dependência nova</span><span role="cell"><p class="mecanismo">gatilhos N3 param a execução e chamam o humano</p></span><span role="cell"><code>revisão</code></span></div>
@@ -144,8 +144,8 @@
   <div class="envelope bloco">
     <header class="cabeca">
       <p class="eyebrow">04 · Por que o repositório é assim</p>
-      <h2>Cada regra do kit nasceu de uma medição.</h2>
-      <p>Medimos 36 execuções reais. Quando o dado mostrava um problema, o kit mudou. Cada cartão liga a decisão à evidência.</p>
+      <h2>Cada ajuste do kit nasceu de uma medição.</h2>
+      <p>A base vem da engenharia de software; o ajuste fino vem do uso. Medimos <strong class="num" data-e="e1">36</strong> execuções reais e, quando o dado mostrava um problema, o kit mudou. Cada cartão liga a decisão à evidência.</p>
     </header>
     <div class="cartoes">
       <article><p class="valor"><strong class="num" data-e="e6">58%</strong></p><p>dos achados de design vinham de impacto não levantado; <strong class="num" data-e="e6">61%</strong> nasceram da correção anterior.</p><p class="decisao"><span>→ no kit</span>## Impacto no design e no brief; parecer sem prescrição</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e6">evidências §6</a></article>
@@ -176,9 +176,9 @@
     </figure>
     <ul class="licoes">
       <li><b><strong class="num" data-e="e2">57%</strong></b><div>das revisões acontecem antes do código: o design é o artefato mais revisado. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e2">evidências §2</a></div></li>
-      <li><b>&lt; 5%</b><div>dos achados são de forma ou sem base no texto: autor e revisor estão alinhados. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e4">evidências §4</a></div></li>
+      <li><b>&lt; <strong class="num" data-e="e4">5%</strong></b><div>dos achados são de forma ou sem base no texto: autor e revisor estão alinhados. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e4">evidências §4</a></div></li>
       <li><b>1 gargalo</b><div>não serve para todos: em B é o revisor; em A, o papel testes. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e3">evidências §3</a></div></li>
-      <li class="limite"><b>Limites</b><div>amostra pequena: B tem 5 execuções e a revisão que converge ainda não foi medida. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#limites">evidências · Limites</a></div></li>
+      <li class="limite"><b>Limites</b><div>amostra pequena: B tem <strong class="num" data-e="e1">5</strong> execuções e a revisão que converge ainda não foi medida. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#limites">evidências · Limites</a></div></li>
     </ul>
   </div>
   </div>

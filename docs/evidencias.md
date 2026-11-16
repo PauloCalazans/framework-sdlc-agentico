@@ -24,6 +24,8 @@ A e B somam **36 execuções** e **705 despachos** de papéis (cada despacho é 
 |---|---|---|---|---|---|
 | Despachos | 208 | 156 | 215 | 89 | 36 |
 
+A soma por papel dá 704: um despacho do total de 705 não foi atribuído a nenhum dos cinco papéis na extração.
+
 <a id="e2"></a>
 ## 2. Onde a revisão acontece
 
