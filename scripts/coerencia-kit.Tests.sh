@@ -322,4 +322,32 @@ tl_espera 0 "evidências: data de corte" tem $e '2026-11-15'
 tl_espera 0 "evidências sem nome de projeto de origem" sem_nomes_proibidos $e
 tl_espera 0 "README cita as evidências" tem README.md 'docs/evidencias.md'
 
+s=site/index.html
+tl_espera 0 "site: página existe" tem $s '<html lang="pt-BR"'
+tl_espera 0 "site: og:image" tem $s 'property="og:image"'
+tl_espera 0 "site: data de corte" tem $s '2026-11-15'
+tl_espera 0 "site: licença no rodapé" tem $s 'MIT'
+tl_espera 0 "site sem nome de projeto de origem" sem_nomes_proibidos site
+sem_package() { ! [ -e "$raiz/package.json" ]; }
+tl_espera 0 "site: sem build (sem package.json)" sem_package
+# cada número marcado tem âncora e par em docs/evidencias.md
+site_nums_ok() {
+  [ -f "$raiz/$s" ] || return 1
+  tl_n=$(tr -d '\r' < "$raiz/$s" | grep -o 'data-e="e[0-9]*">[^<]*<' | sed 's/data-e="\(e[0-9]*\)">\([^<]*\)</\1 \2/')
+  [ -n "$tl_n" ] || { echo "nenhum número marcado"; return 1; }
+  echo "$tl_n" | while read -r tl_a tl_v; do
+    tem docs/evidencias.md "<a id=\"$tl_a\"></a>" || { echo "sem âncora $tl_a"; return 1; }
+    tem docs/evidencias.md "$tl_v" || { echo "valor sem par: $tl_a $tl_v"; return 1; }
+  done
+}
+tl_espera 0 "site: todo número tem par em evidencias.md" site_nums_ok
+# cada frase de mecanismo existe no README
+site_mec_ok() {
+  [ -f "$raiz/$s" ] || return 1
+  tl_f=$(tr -d '\r' < "$raiz/$s" | grep -o '<p class="mecanismo">[^<]*</p>' | sed 's/<[^>]*>//g')
+  [ -n "$tl_f" ] || { echo "nenhuma frase de mecanismo"; return 1; }
+  echo "$tl_f" | while IFS= read -r tl_l; do tem README.md "$tl_l" || { echo "frase fora do README: $tl_l"; return 1; }; done
+}
+tl_espera 0 "site: frases de mecanismo iguais ao README" site_mec_ok
+
 tl_fim
