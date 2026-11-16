@@ -119,6 +119,14 @@ done
 tl_espera 0 "ciclo: teste existente afetado sai depois do RED, por Emenda ou Ruling" tem core/processo/ciclo.md 'a asserção antiga sai depois dele'
 tl_espera 0 "ciclo: verifica-red só confere arquivos tocados pelo RED" tem core/processo/ciclo.md 'só nos arquivos de teste tocados pelo RED'
 
+# --- README acompanha o kit (conferência de 2026-11-15)
+tl_espera 0 "README: padrão de stack repetido vira checagem, como no template de perfil" tem README.md 'sai do perfil e vira checagem no `CMD_VERIFY_STACK`'
+tl_espera 1 "README: sem atualizar o perfil por devolução repetida" tem README.md 'Atualize o perfil quando o revisor devolver duas vezes'
+tl_espera 0 "README: trilha padrão com revisão de spec e de design" tem README.md 'spec → revisão da spec → design → revisão do design → Gate 1'
+tl_espera 0 "README: limite do verifica-red (arquivos tocados pelo RED)" tem README.md 'num arquivo de teste que o RED tocou'
+tl_espera 0 "README: Impacto do dominio só com specs" tem README.md 'para o `arquiteto`, também quem usa o que muda'
+tl_espera 1 "README: a Ruling (feminino)" tem README.md 'o Ruling'
+
 # --- Revisão final da branch (correções)
 # Revisor: ao receber, HEAD igual ao SHA do brief no modo diff; estado igual ao anotado nos modos sem commit.
 tl_espera 0 "brief: ao receber confere HEAD do revisor" tem core/templates/brief.md 'git rev-parse HEAD'
