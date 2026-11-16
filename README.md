@@ -18,10 +18,10 @@ Serve para **qualquer stack** (Java, Python, Node, .NET, front-end…) e para pr
 | Sem o kit, o agente… | Com o kit | Quem garante |
 |---|---|---|
 | diz "está funcionando" sem rodar nada | `verify.sh` é o ponto único de verificação; sucesso só com a saída do nível do passo (`VERIFY: OK` no completo, `VERIFY RÁPIDO: OK` no laço do `dev`) | regra + `verify.sh` |
-| altera o teste até ele passar | o commit `test(red):` prova que os testes falhavam; asserção removida depois reprova, salvo remoção declarada em trailer com decisão registrada antes | `verifica-red.sh` |
+| altera o teste até ele passar | o commit `test(red):` prova que os testes falhavam; asserção removida depois, num arquivo de teste que o RED tocou, reprova, salvo remoção declarada em trailer com decisão registrada antes | `verifica-red.sh` |
 | desliga o teste que incomoda (`.skip`, `@Disabled`) | teste desabilitado na branch ou skip novo no relatório JUnit reprova | `verifica-skip.sh` |
 | "aproveita" e mexe em arquivos fora do pedido | cada task declara `## Arquivos`; arquivo fora da lista reprova | `verifica-escopo.sh` |
-| commita na `main` ou faz o merge do próprio PR | commit e push na branch protegida são bloqueados, e o merge com commit também; merge fast-forward local não dispara hook (o remoto continua protegido pelo `pre-push`) | `pre-commit`, `pre-push`, `pre-merge-commit`, `deny` de `gh pr merge` (e de `git merge` sem plataforma de PR) |
+| commita na `main` ou faz o merge do próprio PR | commit e push na branch protegida são bloqueados, e o merge com commit também; merge fast-forward local não dispara hook (o remoto continua protegido pelo `pre-push`) | `pre-commit`, `pre-push`, `pre-merge-commit`, `deny` de `gh pr merge` (e de `git merge` sem plataforma de PR, acrescentado no `/bootstrap`) |
 | pula os githooks (`--no-verify`) | comando git com `--no-verify`, `commit -n` ou `-c core.hooksPath` é barrado em qualquer posição | hook `PreToolUse` do Claude Code |
 | commita uma senha ou token | conteúdo staged é varrido antes do commit | `pre-commit` (gitleaks + palavras-chave) |
 | afrouxa as próprias permissões | edição de `agentic/config`, hooks e `.claude/settings.json` é negada | `deny` do Claude Code |
@@ -36,7 +36,7 @@ Regra que nenhum mecanismo garante aparece como "por revisão", nunca como garan
 flowchart TB
     subgraph E1 ["1. Especificar"]
         direction LR
-        P([Pedido]) --> I["Intent<br/><i>dominio</i>"] --> S["Spec<br/><i>dominio</i>"] --> D["Design + tasks<br/><i>arquiteto</i>"] --> G1{{"GATE 1<br/>humano aprova<br/>(ou orquestrador, se delegado)"}}
+        P([Pedido]) --> I["Intent<br/><i>dominio</i>"] --> S["Spec<br/><i>dominio → revisor</i>"] --> D["Design + tasks<br/><i>arquiteto → revisor</i>"] --> G1{{"GATE 1<br/>humano aprova<br/>(ou orquestrador, se delegado)"}}
     end
     subgraph E2 ["2. Executar cada task"]
         direction LR
@@ -62,7 +62,7 @@ Três trilhas, pelo tamanho da mudança:
 
 | Trilha | Quando | Caminho |
 |---|---|---|
-| **Padrão** (`/intent`) | funcionalidade nova ou mudança de comportamento | intent → spec → design → Gate 1 → RED → GREEN → revisão → Gate 2 |
+| **Padrão** (`/intent`) | funcionalidade nova ou mudança de comportamento | intent → spec → revisão da spec → design → revisão do design → Gate 1 → RED → GREEN → revisão → Gate 2 |
 | **Enxuta** (`/mudanca`) | mudança pequena, numa task só, sem gatilho N3 (salvo acréscimo a contrato público aprovado no Gate 1) | um documento no worktree → revisão do documento → Gate 1 → RED → GREEN → revisão → Gate 2 |
 | **Rápida** | `chore`, `docs`, ferramental, correção sem mudança de comportamento | branch → `verify` → PR → Gate 2 |
 
@@ -119,14 +119,13 @@ O `arquiteto` recusa a trilha enxuta: "mudança em regra de desconto" é gatilho
    ```
 
 2. **Gate 1:** o humano responde o questionário e aprova o documento (e, se houver, cada acréscimo a contrato público e cada decisão nova). Só então o orquestrador commita o documento: é o registro da aprovação.
-3. Commits na branch, nesta ordem:
+3. Commits na branch, nesta ordem (a sequência do kit atual; na validação houve também `docs(task) em-andamento`, hoje derivado do git, e um `docs(mudanca)` avulso, que a sequência de `core/processo/ciclo.md` não prevê):
 
    ```
    docs(mudanca): ... aprovada (Gate 1)   ← registro da aprovação
    test(red): ...                         ← testes falhando, sem código de produção
    feat(green): ...                       ← testes passando
    fix: ...                               ← achado do revisor: espaço sem quebra (NBSP) no "R$ 10,00"
-   docs(mudanca): ...
    docs(task): ... publicada
    ```
 
@@ -213,7 +212,7 @@ de cálculo de preços usado pelo time comercial.
 - `agentic/projeto/decisoes.md`: D1 (comandos de verificação), D3 (legado protegido).
 ```
 
-Atualize o perfil quando o revisor devolver duas vezes pelo mesmo motivo de stack ou quando uma decisão nova mudar o trabalho do papel.
+Atualize o perfil quando uma decisão nova mudar o trabalho do papel. Padrão de stack que o revisor devolveu duas vezes pelo mesmo motivo sai do perfil e vira checagem no `CMD_VERIFY_STACK` de `agentic/config` (princípio 2).
 
 ## O que é instalado no projeto
 
@@ -242,9 +241,9 @@ Instâncias antigas continuam funcionando: as variáveis novas de `agentic/confi
 - Design e mudança ganham `## Impacto` (arquiteto); os contratos dos autores ganham `## Pronto para revisão` (autoverificação registrada no relatório).
 - O parecer ganha a coluna "Causa" (defeito, contrato, não conferido, sem contrato, forma) e o PR, a linha "Rodadas", registro durável da revisão.
 - No laço roda `verify.sh --rapido`; o `verify.sh` completo roda uma vez antes do PR e no revisor `diff`. A prova do RED fica em cache por SHA (`AGENTIC_RED_SEM_CACHE=1` força nova prova).
-- `em-andamento` é derivado do git; o Ruling vai no próximo commit da task, sem commit próprio.
+- `em-andamento` é derivado do git; a Ruling vai no próximo commit da task, sem commit próprio.
 - O commit RED anota `CA<n> … → test: <arquivo>::<nome>`, conferido por `verifica-red.sh`; task sem anotação passa com `aviso:`.
-- O brief ganha `## Impacto`: antes do Gate 1, o orquestrador roda as buscas (quem usa o que muda, testes que o exercitam, specs aprovadas que citam a regra) e cola a saída, com os trechos em "Leia só isto"; depois do Gate 1, cola as linhas do Impacto aprovado que tocam a task, e o `testes` roda cada teste existente afetado antes do RED. A meta de ~40 linhas não conta essa seção.
+- O brief ganha `## Impacto`: antes do Gate 1, o orquestrador roda as buscas (specs aprovadas que citam a regra; para o `arquiteto`, também quem usa o que muda e os testes que o exercitam) e cola a saída, com os trechos em "Leia só isto"; depois do Gate 1, cola as linhas do Impacto aprovado que tocam a task, e o `testes` roda cada teste existente afetado antes do RED. A meta de ~40 linhas não conta essa seção nem os trechos que ela acrescenta a "Leia só isto".
 - A rodada do parecer conta todos os pareceres do mesmo artefato, também os de ajuste reaberto por Ruling; a 3ª devolução do `ciclo.md` é o 3º `DEVOLVIDO` entre esses mesmos pareceres, e a contagem nunca recomeça.
 - Para medir: `grep` da coluna Causa nos pareceres de `agentic/.estado/execucao/` e das linhas "Rodadas" nos PRs.
 
@@ -262,6 +261,6 @@ Instâncias antigas continuam funcionando: as variáveis novas de `agentic/confi
 
 ## Verificação do framework
 
-`sh scripts/verify.sh` — roda todas as suítes de teste dos mecanismos.
+`sh scripts/verify.sh` — roda todas as suítes `*.Tests.sh` de `mecanismos/`, `adapters/`, `bootstrap/` e `scripts/`, inclusive a de coerência do kit.
 
 Design completo: `docs/specs/2026-10-05-framework-sdlc-agentico-design.md`. Validação: `docs/validacao-v1.md`.
