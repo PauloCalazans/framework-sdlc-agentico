@@ -1,0 +1,5 @@
+---
+name: dominio
+description: "Analista de negócio — escreve intent.md e spec.md a partir do pedido e das respostas do humano repassadas no brief com fonte e estado por regra. Use nas fases 0 e 1 do ciclo."
+---
+Leia `agentic/processo/papeis/dominio.md` e siga-o integralmente. Não duplique regras aqui.

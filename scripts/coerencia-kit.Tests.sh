@@ -428,4 +428,15 @@ tl_espera 0 "codex: revisor declara o limite por revisão" tem adapters/codex/ag
 tl_espera 0 "codex: hooks.json usa o lançador no PreToolUse" tem adapters/codex/hooks.json 'git -c alias.agentic-sh=!sh agentic-sh .codex/hooks/guarda.sh'
 tl_espera 1 "codex: hooks.json sem \$( (não roda no PowerShell)" tem adapters/codex/hooks.json '$('
 
+# Antigravity: agentes dos 5 papéis sem tools: (nome de ferramenta errado trava o subagente), hooks pelo lançador
+for pa in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "antigravity: agente $pa com name" linha adapters/antigravity/agents/$pa.md "^name: $pa$"
+  tl_espera 0 "antigravity: agente $pa aponta o contrato" tem adapters/antigravity/agents/$pa.md "agentic/processo/papeis/$pa.md"
+done
+tl_espera 0 "antigravity: nenhum agente com tools:" nenhum '^tools:' adapters/antigravity
+tl_espera 0 "antigravity: revisor declara o limite por revisão" tem adapters/antigravity/agents/revisor.md 'por revisão'
+tl_espera 0 "antigravity: hooks.json usa o lançador no guarda" tem adapters/antigravity/hooks.json 'git -c alias.agentic-sh=!sh agentic-sh .agents/hooks/guarda.sh'
+tl_espera 0 "antigravity: hooks.json usa o lançador no início" tem adapters/antigravity/hooks.json 'git -c alias.agentic-sh=!sh agentic-sh .agents/hooks/inicio.sh'
+tl_espera 1 "antigravity: hooks.json sem \$(" tem adapters/antigravity/hooks.json '$('
+
 tl_fim
