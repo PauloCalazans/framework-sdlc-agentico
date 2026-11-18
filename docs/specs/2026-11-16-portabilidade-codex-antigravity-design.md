@@ -52,7 +52,7 @@ Sucesso: num projeto instalado com `--codex` ou `--antigravity`, uma sessão nov
   - O `SessionStart` injeta contexto por `injectSteps`/`systemMessage`.
 - Lista de permitidos e negados para terminal e arquivos: existe só nas configurações do usuário. **Não há** arquivo de repositório para isso.
 
-Os nomes de campo do hook do Antigravity e o comportamento dos hooks no Windows nas duas ferramentas são **a confirmar no teste real** (seção 7).
+Os nomes de campo do hook do Antigravity e o comportamento dos hooks no Windows nas duas ferramentas são **a confirmar no teste real** (seção 7). Um projeto real já mostrou que, no Windows, os comandos do Antigravity não passam pelo Git Bash (5.4, "Windows").
 
 ## 4. Abordagens consideradas
 
@@ -108,7 +108,12 @@ O `bootstrap` entra como skill porque o `/bootstrap` hoje só existe no Claude C
   - O script continua sendo a única ação humana e não sobrescreve um arquivo de proteção que já exista, como faz hoje com o `settings.json`.
   - O passo 6 da entrevista passa a ajustar as três listas pendentes.
 - **Confiança no Codex.** O `ativar-protecoes.sh` e o `docs/portabilidade.md` dizem que é preciso marcar o projeto como confiável e aprovar os hooks em `/hooks`. Sem isso, nenhum bloqueio do Codex vale, só os githooks e a CI.
-- **Windows.** Os hooks chamam `sh`. Se a ferramenta não rodar comandos pelo Git Bash, usa-se `commandWindows` (no Codex) ou o equivalente que o teste real mostrar.
+- **Windows.** Codex e Antigravity rodam comandos pelo PowerShell. Num projeto real, o Antigravity tentou `bash agentic/mecanismos/scripts/status-projeto.sh` e falhou. No Windows, `bash` é o do WSL (`C:\Windows\system32\bash.exe`) e `sh` não está no PATH. A sintaxe `$(…)` também não existe no PowerShell nem no cmd.
+  - Lançador: `git -c alias.agentic-sh=!sh agentic-sh <script> [args]`. O git roda o alias de shell com o `sh` dele e a partir da raiz do repositório (ou do worktree), repassa o stdin e devolve o código de saída. Funciona igual no PowerShell, no cmd e no sh, e só depende do git, que o kit já exige. Foi conferido em 2026-11-17 no Windows 11 com git 2.47.
+  - Os hooks dos dois adaptadores usam o lançador, sem `$(git rev-parse …)` e sem `commandWindows`.
+  - O `AGENTS.md` ganha uma linha: no Windows, fora do Git Bash, os scripts do kit rodam pelo lançador.
+  - O `guarda_negado` reduz o lançador a `sh` antes de comparar prefixos. Assim, `… agentic-sh agentic/mecanismos/scripts/ativar-protecoes.sh` é negado como a forma com `sh`. As regras do Codex ganham o `allow` das formas com o lançador de `verify.sh` e `status-projeto.sh`.
+  - Se o hook não chegar a rodar (git fora do PATH), a falha é da ferramenta e pode deixar o comando passar. Por isso o teste real começa pela tentativa de um comando bloqueado.
 
 ### 5.4.1 Decisões do design, depois da leitura do construtor
 
@@ -131,7 +136,7 @@ Estas decisões são minhas e o dono pode corrigi-las.
   - a tabela "Estrutura do framework" ganha os adaptadores;
   - na tabela "O problema que ele resolve", a coluna "Quem garante" deixa de ser só Claude onde houver equivalente.
   - O site segue o README nas frases de mecanismo que o `coerencia-kit` confere.
-- O `AGENTS.md` não muda, porque já é neutro.
+- O `AGENTS.md` já é neutro. Ganha só a linha do lançador no Windows (5.4).
 
 ### 5.6 Modelos
 
@@ -159,7 +164,7 @@ Os agentes do Codex e do Antigravity não fixam modelo e herdam o da sessão. O 
 ## 7. Validação real (dono)
 
 Em `exemplos/node-servico-existente`, montado com `--codex --antigravity`, para cada ferramenta:
-1. `ativar-protecoes.sh`. No Codex, também confiar no projeto e aprovar os hooks.
+1. `ativar-protecoes.sh`. No Codex, também confiar no projeto e aprovar os hooks. Logo depois, pedir ao agente que rode `status-projeto.sh` e um `git commit --no-verify -m x`. O primeiro precisa funcionar pelo lançador. O segundo precisa ser barrado, o que prova que o hook roda no Windows.
 2. As 5 perguntas do teste de portabilidade.
 3. `$bootstrap` ou `/bootstrap` roda a entrevista.
 4. O orquestrador despacha um papel como subagente.

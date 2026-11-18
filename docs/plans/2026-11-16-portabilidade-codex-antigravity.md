@@ -42,6 +42,7 @@ Os arquivos de proteção (hooks, regras e listas) são instalados como pendente
 3. Na reinstalação sem opção, num projeto que já tinha `.codex/agents/`, o adaptador continua e o instalador avisa. Teste na Task 4.
 4. Rodar o `ativar-protecoes.sh` com o `settings.json` já existente ainda instala as proteções pendentes do Codex e do Antigravity e sai com 1, orientando o merge. Teste na Task 4.
 5. Um comando negado depois de `&&` (`git add . && gh pr merge 1`) precisa ser barrado no Antigravity. Teste na Task 3.
+6. Windows sem Git Bash: os hooks e os scripts rodam pelo lançador `git -c alias.agentic-sh=!sh agentic-sh`. Testes na Task 2 e na Task 3: rodar o comando do `hooks.json` exatamente como está escrito, com a entrada de um commit `--no-verify`, e esperar o bloqueio.
 
 ---
 
@@ -63,6 +64,7 @@ Os arquivos de proteção (hooks, regras e listas) são instalados como pendente
       - o padrão `X/**` casa `X/…` e `…/X/…`;
       - o padrão `X` casa `X` e `…/X`.
     - `guarda_negado <comando> <arquivo-lista>` retorna 0 se algum trecho do comando, separado por `;`, `&` ou `|` e sem espaços nas pontas, começa com um prefixo da lista seguido de espaço ou fim.
+    - Antes de comparar, `guarda_negado` reduz o lançador do Windows a `sh`: o trecho `git -c alias.agentic-sh=!sh agentic-sh ` no começo de um segmento vira `sh `.
     - Lista ausente: a função imprime `agentic: lista de proteção ausente: <arquivo>` no stderr e retorna 0. Assim, a ausência bloqueia.
 
 - [ ] **Step 1: escrever `lib-guarda.Tests.sh`** com uma lista temporária contendo `agentic/config`, `agentic/mecanismos/**` e `.claude/hooks/**`, e a linha de comando `gh pr merge`. Asserções (`tl_espera 0`, protegido ou negado; `tl_espera 1`, livre):
@@ -74,6 +76,7 @@ Os arquivos de proteção (hooks, regras e listas) são instalados como pendente
     - `.claude/hooks/pre-tool-use.sh`.
   - livres (→ 1): `agentic/configuracao.md`, `src/agentic/config.js`, `agentic/projeto/decisoes.md`.
   - negados: `gh pr merge 3`, `git add . && gh pr merge 3`, `  gh pr merge`.
+  - negado (com `sh agentic/mecanismos/scripts/ativar-protecoes.sh` na lista): `git -c alias.agentic-sh=!sh agentic-sh agentic/mecanismos/scripts/ativar-protecoes.sh`.
   - não negados: `gh pr view 3`, `echo gh pr merge`.
   - lista ausente: `guarda_protegido x /nao/existe` → 0 e a mensagem `lista de proteção ausente`.
 - [ ] **Step 2:** `sh adapters/comum/lib-guarda.Tests.sh`. Expected: FAIL (lib inexistente).
@@ -116,6 +119,7 @@ Os arquivos de proteção (hooks, regras e listas) são instalados como pendente
     - `git status`;
     - patch que toca só `src/a.js`.
   - O stderr do bloqueio contém `agentic:`.
+  - O comando do `PreToolUse` do `hooks.json`, extraído do arquivo e rodado com `sh -c` na pasta temporária (que é um repositório git), com a entrada do `--no-verify`, sai com 2.
 - [ ] **Step 2:** rodar o teste. Expected: FAIL.
 - [ ] **Step 3: implementar `guarda.sh`.**
   - Lê o stdin e pega `tool_name` com o mesmo `sed` do `pre-tool-use.sh`.
@@ -123,11 +127,12 @@ Os arquivos de proteção (hooks, regras e listas) são instalados como pendente
   - `apply_patch`: tira de `command` as linhas `*** (Update|Add|Delete) File: ` e `*** Move to: ` (o `\n` vem escapado na string JSON) e aplica `guarda_protegido` a cada caminho.
   - Sem campo `command`: `exit 2`.
 - [ ] **Step 4: `hooks.json`.**
-  - `PreToolUse`: matcher `^(Bash|apply_patch)$`, command `sh "$(git rev-parse --show-toplevel)/.codex/hooks/guarda.sh"`, `statusMessage` `agentic: conferindo proteções`.
-  - `SessionStart`: matcher `startup|resume|clear|compact`, command `sh "$(git rev-parse --show-toplevel)/agentic/mecanismos/scripts/status-projeto.sh"`.
+  - `PreToolUse`: matcher `^(Bash|apply_patch)$`, command `git -c alias.agentic-sh=!sh agentic-sh .codex/hooks/guarda.sh`, `statusMessage` `agentic: conferindo proteções`.
+  - `SessionStart`: matcher `startup|resume|clear|compact`, command `git -c alias.agentic-sh=!sh agentic-sh agentic/mecanismos/scripts/status-projeto.sh`.
+  - O lançador (design 5.4, "Windows") roda o `sh` do git a partir da raiz, no PowerShell, no cmd e no sh. Não use `$(…)` nem `commandWindows`.
 - [ ] **Step 5: `rules/agentic.rules`.**
   - Um `prefix_rule(pattern=[…], decision="forbidden", justification="agentic: <motivo>; peça ao humano")` por linha de `comandos-negados.txt`, com um `match` igual ao próprio prefixo.
-  - Um `decision="allow"` por item `Bash(p:*)` do `allow` do settings.
+  - Um `decision="allow"` por item `Bash(p:*)` do `allow` do settings. Os dois itens `sh agentic/mecanismos/scripts/…` ganham também o `allow` da forma com o lançador (`["git", "-c", "alias.agentic-sh=!sh", "agentic-sh", "agentic/mecanismos/scripts/verify.sh"]`).
   - Comentário no topo: "gerado a partir de adapters/comum/comandos-negados.txt e do allow do settings; o coerencia-kit confere".
 - [ ] **Step 6: agentes `.toml`.**
   - `name` é o papel. `description` é a mesma do `.claude/agents/<papel>.md`.
@@ -168,6 +173,7 @@ Os arquivos de proteção (hooks, regras e listas) são instalados como pendente
     - `run_command` sem `CommandLine`, com o `reason` contendo `entrada ilegível`.
   - `"decision":"allow"` para `npm test` e para `write_to_file` em `src/a.js`.
   - Sempre sai com 0. O stdout é um único objeto JSON e o `reason` não tem aspas soltas.
+  - O comando do `PreToolUse` do `hooks.json`, extraído do arquivo e rodado com `sh -c` na pasta temporária, com a entrada do `--no-verify`, devolve `"decision":"deny"`.
 - [ ] **Step 2:** rodar o teste. Expected: FAIL.
 - [ ] **Step 3: implementar `guarda.sh`.**
   - Lê `toolCall.name` com o `sed` do campo `"name"` dentro de `toolCall`.
@@ -180,9 +186,9 @@ Os arquivos de proteção (hooks, regras e listas) são instalados como pendente
 ```json
 {
   "agentic": {
-    "SessionStart": [{ "type": "command", "command": "sh \"$(git rev-parse --show-toplevel)/.agents/hooks/inicio.sh\"" }],
+    "SessionStart": [{ "type": "command", "command": "git -c alias.agentic-sh=!sh agentic-sh .agents/hooks/inicio.sh" }],
     "PreToolUse": [{ "matcher": "run_command|write_to_file|replace_file_content|multi_replace_file_content",
-                     "hooks": [{ "type": "command", "command": "sh \"$(git rev-parse --show-toplevel)/.agents/hooks/guarda.sh\"" }] }]
+                     "hooks": [{ "type": "command", "command": "git -c alias.agentic-sh=!sh agentic-sh .agents/hooks/guarda.sh" }] }]
   }
 }
 ```
@@ -268,22 +274,25 @@ Os arquivos pendentes ficam em `agentic/.estado/protecoes-pendentes/`:
   - `docs/portabilidade.md`
   - `README.md`
   - `site/index.html`, se uma frase de mecanismo copiada do README mudar
+  - `core/templates/AGENTS.md` (a linha do lançador no Windows)
   - `scripts/coerencia-kit.Tests.sh`
 
 - [ ] **Step 1: testes de coerência primeiro.** Devem falhar.
   - `docs/portabilidade.md` cita `--codex`, `--antigravity`, `.codex/agents/`, `.agents/agents/`, `.agents/skills/`, `/hooks` (confiança) e "por revisão" nas seções das duas ferramentas.
   - O README cita `--codex` e `--antigravity` em "Início rápido" e `adapters/codex/` e `adapters/antigravity/` em "Estrutura do framework".
   - A entrevista cita `agente-oraculo-codex.toml`, `agente-oraculo-antigravity.md` e `protecoes-pendentes`.
+  - `core/templates/AGENTS.md` e os dois `hooks.json` citam o mesmo lançador, `git -c alias.agentic-sh=!sh agentic-sh`.
 - [ ] **Step 2: entrevista.**
   - Linha 27: "Algum é o GitHub Copilot, o Codex ou o Antigravity?".
   - Passo 4: copiar os templates de oráculo de cada adaptador instalado para `.codex/agents/oraculo-<nome>.toml` e `.agents/agents/oraculo-<nome>.md`. No Codex, a gravação pede aprovação, porque `.codex/` é somente leitura no sandbox.
   - Passo 6: os acréscimos ao `deny` (como `git merge`) entram também nas pendentes, em `comandos-negados.txt` e em `agentic.rules`, como `prefix_rule` `forbidden`.
   - Passo 8: no Codex e no Antigravity, o nível de modelo do papel vem de `modelos.md` e é aplicado pelo humano. Se a ferramenta faz parte do time e não está instalada, peça `instalar.sh . --codex` ou `--antigravity`.
+- [ ] **Step 2b: `AGENTS.md`.** Na seção de comandos, uma linha: "No Windows, fora do Git Bash (PowerShell, cmd), `sh` não está no PATH e `bash` pode ser o do WSL. Rode os scripts do kit com `git -c alias.agentic-sh=!sh agentic-sh agentic/mecanismos/scripts/<script>.sh`, que usa o `sh` do git e roda da raiz do repositório."
 - [ ] **Step 3: `docs/portabilidade.md`.**
   - Linhas novas na tabela "Como cada ferramenta encontra as instruções".
   - A coluna "Adaptador" da tabela de personas ganha os dois caminhos.
   - Uma seção por ferramenta, no molde da do Copilot, dizendo o que garante e o que fica por revisão: revisor; modelos; Codex sem confiança no projeto ou em `danger-full-access`; Antigravity sem lista de bloqueio no repositório, coberta pelo hook.
-  - "A confirmar no teste real": hooks no Windows.
+  - Windows: o lançador e o motivo (o `bash` do WSL). "A confirmar no teste real": o hook roda e bloqueia nas duas ferramentas.
 - [ ] **Step 4: README.**
   - A frase de abertura passa a citar "(Claude Code, GitHub Copilot, Codex, Antigravity)".
   - Pré-requisitos e Início rápido ganham o item 1 com as opções.
