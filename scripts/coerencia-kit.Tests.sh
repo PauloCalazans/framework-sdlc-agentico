@@ -385,4 +385,20 @@ tl_espera 0 "site: bloco de pesquisa sobre agentes" tem $s 'id="pesquisa"'
 site_cit_n() { [ "$(tr -d '\r' < "$raiz/$s" | grep -o '<blockquote class="citacao">' | wc -l)" -ge 10 ]; }
 tl_espera 0 "site: ao menos 10 citações (normas + pesquisa)" site_cit_n
 
+# --- Portabilidade Codex/Antigravity (docs/specs/2026-11-16-portabilidade-codex-antigravity-design.md)
+st=adapters/claude-code/settings.json.tmpl
+# util_lista <arquivo>: linhas úteis de uma lista de adapters/comum (sem #, sem vazias, sem \r).
+util_lista() { tr -d '\r' < "$raiz/$1" | grep -v -e '^#' -e '^[[:space:]]*$'; }
+deny_bash() { tr -d '\r' < "$raiz/$st" | grep -o '"Bash([^"]*:\*)"' | sed -n '/gh pr merge/,$p' | sed -E 's/^"Bash\((.*):\*\)"$/\1/'; }
+deny_edit() { tr -d '\r' < "$raiz/$st" | grep -o '"Edit([^"]*)"' | sed -E 's/^"Edit\((.*)\)"$/\1/' | grep -v '^\*\*/'; }
+# mesmas <A> <B>: as duas saídas (comandos) têm as mesmas linhas, em qualquer ordem; imprime a diferença.
+mesmas() { tl_a=$(mktemp); tl_b=$(mktemp); $1 | sort > "$tl_a"; $2 | sort > "$tl_b"; diff "$tl_a" "$tl_b"; tl_r=$?; rm -f "$tl_a" "$tl_b"; return $tl_r; }
+negados_txt() { util_lista adapters/comum/comandos-negados.txt; }
+caminhos_txt() { util_lista adapters/comum/caminhos-protegidos.txt; }
+tl_espera 0 "comandos-negados.txt = Bash(...) do deny do settings" mesmas deny_bash negados_txt
+tl_espera 0 "caminhos-protegidos.txt = Edit(...) do deny do settings (sem **/)" mesmas deny_edit caminhos_txt
+for x in '.codex/hooks.json' '.codex/hooks/**' '.codex/rules/**' '.codex/config.toml' '.agents/hooks.json' '.agents/hooks/**'; do
+  tl_espera 0 "settings: deny de Edit(**/$x)" tem $st "\"Edit(**/$x)\""
+done
+
 tl_fim

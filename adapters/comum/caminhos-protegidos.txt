@@ -1,0 +1,18 @@
+# caminhos-protegidos.txt — um padrão por linha, relativo à raiz; espelha os Edit(<padrão>) do deny de
+# .claude/settings.json (sem as formas **/, que o hook cobre casando também …/<padrão>).
+# X casa X e …/X; X/** casa X/… e …/X/…. Usado pelos hooks do Codex e do Antigravity; o coerencia-kit confere.
+.claude/settings.json
+.claude/settings.local.json
+.claude/hooks/**
+agentic/config
+agentic/auto-mode
+agentic/mecanismos/**
+agentic/baseline-skips
+.git/agentic/**
+.gitleaksignore
+.codex/hooks.json
+.codex/hooks/**
+.codex/rules/**
+.codex/config.toml
+.agents/hooks.json
+.agents/hooks/**

@@ -1,0 +1,12 @@
+# comandos-negados.txt — um prefixo por linha; espelha os Bash(<prefixo>:*) do deny de .claude/settings.json.
+# Usado pelos hooks do Codex e do Antigravity e pelas regras do Codex; o coerencia-kit do kit confere.
+gh pr merge
+git push --force
+git push -f
+git push --force-with-lease
+git push --no-verify
+git commit --no-verify
+git commit -n
+git reset --hard
+git config core.hooksPath
+sh agentic/mecanismos/scripts/ativar-protecoes.sh
