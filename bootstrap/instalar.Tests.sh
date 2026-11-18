@@ -144,5 +144,59 @@ for f in .github/agents/*.agent.md .github/prompts/*.prompt.md; do
 done
 EOS
 tl_espera 0 "--copilot: ponteiros dos agentes e prompts levam a arquivos instalados" sh -c "cd '$r' && sh .ponteiros.sh"
+# Adaptadores do Codex e do Antigravity: só com --codex / --antigravity; as proteções ficam pendentes.
+pend=agentic/.estado/protecoes-pendentes
+r=$(tl_repo)
+tl_espera 0 "instala com --codex" sh "$dir/instalar.sh" "$r" --codex
+for p in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "--codex: agente do papel $p" test -f "$r/.codex/agents/$p.toml"
+done
+tl_espera 0 "--codex: skills compartilhadas" test -f "$r/.agents/skills/intent/SKILL.md"
+tl_espera 0 "--codex: template do oráculo" test -f "$r/agentic/processo/templates/agente-oraculo-codex.toml"
+tl_espera 1 "--codex: hooks.json não vai direto (ação humana)" test -e "$r/.codex/hooks.json"
+tl_espera 1 "--codex: regras não vão direto (ação humana)" test -e "$r/.codex/rules"
+for f in .codex/hooks.json .codex/rules/agentic.rules .codex/hooks/guarda.sh .codex/hooks/lib-guarda.sh \
+         .codex/hooks/caminhos-protegidos.txt .codex/hooks/comandos-negados.txt; do
+  tl_espera 0 "--codex: pendente $f" test -f "$r/$pend/$f"
+done
+tl_espera 1 "--codex: sem agentes do Antigravity" test -e "$r/.agents/agents"
+tl_espera 1 "--codex: pendentes fora do manifesto" grep -q "protecoes-pendentes" "$r/agentic/processo/.kit-manifesto"
+tl_espera 0 "reinstala sem opção" sh "$dir/instalar.sh" "$r"
+tl_contem "mantendo o adaptador codex" "reinstalação avisa que mantém o Codex"
+tl_espera 0 "reinstalação mantém o Codex no manifesto" grep -q "  .codex/agents/dev.toml$" "$r/agentic/processo/.kit-manifesto"
+
+r=$(tl_repo)
+tl_espera 0 "instala com --antigravity" sh "$dir/instalar.sh" "$r" --antigravity
+for p in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "--antigravity: agente do papel $p" test -f "$r/.agents/agents/$p.md"
+done
+tl_espera 1 "--antigravity: agente sem tools:" grep -q '^tools:' "$r/.agents/agents/revisor.md"
+tl_espera 0 "--antigravity: template do oráculo" test -f "$r/agentic/processo/templates/agente-oraculo-antigravity.md"
+for f in .agents/hooks.json .agents/hooks/guarda.sh .agents/hooks/inicio.sh .agents/hooks/lib-guarda.sh \
+         .agents/hooks/caminhos-protegidos.txt .agents/hooks/comandos-negados.txt; do
+  tl_espera 0 "--antigravity: pendente $f" test -f "$r/$pend/$f"
+done
+tl_espera 1 "--antigravity: hooks.json não vai direto" test -e "$r/.agents/hooks.json"
+tl_espera 1 "--antigravity: sem .codex" test -e "$r/.codex"
+
+r=$(tl_repo)
+tl_espera 0 "instala com --antigravity --codex --copilot" sh "$dir/instalar.sh" "$r" --antigravity --codex --copilot
+for f in .agents/agents/dev.md .codex/agents/dev.toml .github/agents/dev.agent.md .agents/skills/bootstrap/SKILL.md; do
+  tl_espera 0 "três opções: $f" test -f "$r/$f"
+done
+tl_espera 2 "recusa opção desconhecida depois de uma válida" sh "$dir/instalar.sh" "$r" --codex --outro
+tl_espera 0 "reinstala sem opção (três adaptadores)" sh "$dir/instalar.sh" "$r"
+tl_contem "mantendo o adaptador copilot" "reinstalação avisa que mantém o Copilot"
+tl_contem "mantendo o adaptador antigravity" "reinstalação avisa que mantém o Antigravity"
+tl_espera 0 "reinstalação mantém o Copilot" grep -q "  .github/agents/dev.agent.md$" "$r/agentic/processo/.kit-manifesto"
+cat > "$r/.ponteiros2.sh" <<'EOS'
+# toda skill e todo agente do Codex/Antigravity aponta (primeiro caminho .md entre crases) para um arquivo instalado
+for f in .agents/skills/*/SKILL.md .agents/agents/*.md .codex/agents/*.toml; do
+  alvo=$(grep -o '`[^`]*[.]md`' "$f" | head -n 1 | tr -d '`')
+  [ -f "$alvo" ] || { echo "$f aponta para $alvo, que não existe"; exit 1; }
+done
+EOS
+tl_espera 0 "ponteiros das skills e dos agentes novos levam a arquivos instalados" sh -c "cd '$r' && sh .ponteiros2.sh"
+
 
 tl_fim

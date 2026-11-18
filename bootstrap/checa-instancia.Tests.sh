@@ -81,6 +81,20 @@ tl_contem "agentic/mecanismos/githooks/pre-push" "aponta o hook sem bit executá
 git -C "$r" update-index --chmod=+x agentic/mecanismos/githooks/pre-push
 tl_espera 0 "hooks 100755 no índice passam" sh "$dir/checa-instancia.sh" "$r"
 
+# Adaptadores Codex/Antigravity: proteção pendente não ativada e proteção não versionada são problema.
+mkdir -p "$r/.codex/agents" && printf 'name = "dev"\n' > "$r/.codex/agents/dev.toml" && git -C "$r" add .codex
+tl_espera 1 "Codex instalado sem .codex/hooks.json" sh "$dir/checa-instancia.sh" "$r"
+tl_contem "ativar-protecoes.sh" "orienta a ativação das proteções do Codex"
+printf '{}\n' > "$r/.codex/hooks.json"
+tl_espera 1 "proteção do Codex não rastreada" sh "$dir/checa-instancia.sh" "$r"
+tl_contem ".codex/hooks.json não rastreado" "aponta o hooks.json não rastreado"
+git -C "$r" add .codex/hooks.json
+tl_espera 0 "Codex com proteção ativada e versionada passa" sh "$dir/checa-instancia.sh" "$r"
+mkdir -p "$r/.agents/agents" && printf -- '---\nname: dev\n---\n' > "$r/.agents/agents/dev.md" && git -C "$r" add .agents
+tl_espera 1 "Antigravity instalado sem .agents/hooks.json" sh "$dir/checa-instancia.sh" "$r"
+tl_contem ".agents/hooks.json" "aponta a proteção do Antigravity"
+git -C "$r" rm -rq --cached .codex .agents && rm -rf "$r/.codex" "$r/.agents"
+
 sed -i 's/^CMD_VERIFY_STACK="true"$/CMD_VERIFY_STACK="false"/' "$r/agentic/config"
 tl_espera 1 "verify vermelho na instância é problema" sh "$dir/checa-instancia.sh" "$r"
 tl_contem "VERIFY: FALHOU" "mostra a saída do verify (arquivo temporário via mktemp)"

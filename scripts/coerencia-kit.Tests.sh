@@ -439,4 +439,14 @@ tl_espera 0 "antigravity: hooks.json usa o lançador no guarda" tem adapters/ant
 tl_espera 0 "antigravity: hooks.json usa o lançador no início" tem adapters/antigravity/hooks.json 'git -c alias.agentic-sh=!sh agentic-sh .agents/hooks/inicio.sh'
 tl_espera 1 "antigravity: hooks.json sem \$(" tem adapters/antigravity/hooks.json '$('
 
+# Skills compartilhadas (.agents/skills): uma por comando do Claude, apontando para ele; instalador com as três opções
+for c in "$raiz"/adapters/claude-code/commands/*.md; do
+  c=$(basename "$c" .md)
+  tl_espera 0 "skill $c com name" linha adapters/agents-skills/$c/SKILL.md "^name: $c$"
+  tl_espera 0 "skill $c aponta para .claude/commands/$c.md" tem adapters/agents-skills/$c/SKILL.md ".claude/commands/$c.md"
+done
+n_skills() { [ "$(ls -d "$raiz"/adapters/agents-skills/*/ | wc -l)" -eq "$(ls "$raiz"/adapters/claude-code/commands/*.md | wc -l)" ]; }
+tl_espera 0 "skills: nenhuma sem comando do Claude" n_skills
+tl_espera 0 "instalar.sh: uso cita as três opções" tem bootstrap/instalar.sh 'uso: instalar.sh <projeto-alvo> [--copilot] [--codex] [--antigravity]'
+
 tl_fim
