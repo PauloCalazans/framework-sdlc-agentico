@@ -1,0 +1,7 @@
+# Papel dominio no Codex. O contrato é agentic/processo/papeis/dominio.md; aqui não se duplicam regras.
+# Sem model: herda o da sessão (nível do papel em agentic/processo/modelos.md, aplicado pelo humano).
+name = "dominio"
+description = "Analista de negócio — escreve intent.md e spec.md a partir do pedido e das respostas do humano repassadas no brief com fonte e estado por regra. Use nas fases 0 e 1 do ciclo."
+developer_instructions = """
+Leia `agentic/processo/papeis/dominio.md` e siga-o integralmente. Não duplique regras aqui.
+"""

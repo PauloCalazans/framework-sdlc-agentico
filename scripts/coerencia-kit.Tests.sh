@@ -401,4 +401,31 @@ for x in '.codex/hooks.json' '.codex/hooks/**' '.codex/rules/**' '.codex/config.
   tl_espera 0 "settings: deny de Edit(**/$x)" tem $st "\"Edit(**/$x)\""
 done
 
+# Codex: regras geradas das listas, agentes dos 5 papéis, hooks pelo lançador do Windows
+ru=adapters/codex/rules/agentic.rules
+# padrao_starlark <prefixo>: o pattern que a regra do Codex usa para o prefixo ("a b" vira ["a", "b"]).
+padrao_starlark() { printf '%s\n' "$1" | awk '{ s = "pattern = ["; for (i = 1; i <= NF; i++) s = s (i > 1 ? ", " : "") "\"" $i "\""; print s "]," }'; }
+# regra <prefixo> <decisão>: a regra existe, com a decisão na linha seguinte ao pattern.
+regra() { tr -d '\r' < "$raiz/$ru" | grep -A1 -F -- "$(padrao_starlark "$1")" | grep -qF "decision = \"$2\""; }
+allow_bash() { tr -d '\r' < "$raiz/$st" | sed -n '/"allow"/,/\]/p' | grep -o '"Bash([^"]*:\*)"' | sed -E 's/^"Bash\((.*):\*\)"$/\1/'; }
+negados_txt > "$TL_SAIDA.neg"
+while IFS= read -r n; do
+  tl_espera 0 "codex: regra forbidden para $n" regra "$n" forbidden
+done < "$TL_SAIDA.neg"
+allow_bash > "$TL_SAIDA.alw"
+while IFS= read -r a; do
+  tl_espera 0 "codex: regra allow para $a" regra "$a" allow
+done < "$TL_SAIDA.alw"
+rm -f "$TL_SAIDA.neg" "$TL_SAIDA.alw"
+tl_espera 0 "codex: allow do verify pelo lançador" regra 'git -c alias.agentic-sh=!sh agentic-sh agentic/mecanismos/scripts/verify.sh' allow
+n_forb() { [ "$(tr -d '\r' < "$raiz/$ru" | grep -c 'decision = "forbidden"')" -eq "$(negados_txt | wc -l)" ]; }
+tl_espera 0 "codex: nenhuma regra forbidden além da lista" n_forb
+for pa in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "codex: agente $pa com name" linha adapters/codex/agents/$pa.toml "^name = \"$pa\"$"
+  tl_espera 0 "codex: agente $pa aponta o contrato" tem adapters/codex/agents/$pa.toml "agentic/processo/papeis/$pa.md"
+done
+tl_espera 0 "codex: revisor declara o limite por revisão" tem adapters/codex/agents/revisor.toml 'por revisão'
+tl_espera 0 "codex: hooks.json usa o lançador no PreToolUse" tem adapters/codex/hooks.json 'git -c alias.agentic-sh=!sh agentic-sh .codex/hooks/guarda.sh'
+tl_espera 1 "codex: hooks.json sem \$( (não roda no PowerShell)" tem adapters/codex/hooks.json '$('
+
 tl_fim

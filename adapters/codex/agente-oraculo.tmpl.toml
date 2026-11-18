@@ -1,0 +1,7 @@
+# Oráculo somente leitura no Codex (template do /bootstrap, passo 4). Grave como .codex/agents/oraculo-{{NOME_ORACULO}}.toml.
+# "Somente leitura" não é imposto pela ferramenta: é verificado por revisão.
+name = "oraculo-{{NOME_ORACULO}}"
+description = "Oráculo somente leitura sobre {{FONTE_ORACULO}} — responde com citações e juízo preservar/corrigir."
+developer_instructions = """
+Leia `agentic/processo/papeis/oraculo-{{NOME_ORACULO}}.md` e siga-o integralmente. Não duplique regras aqui.
+"""

@@ -1,0 +1,7 @@
+# Papel dev no Codex. O contrato é agentic/processo/papeis/dev.md; aqui não se duplicam regras.
+# Sem model: herda o da sessão (nível do papel em agentic/processo/modelos.md, aplicado pelo humano).
+name = "dev"
+description = "Desenvolvedor — faz GREEN e REFACTOR dentro do escopo da task. Use na fase 4 do ciclo."
+developer_instructions = """
+Leia `agentic/processo/papeis/dev.md` e siga-o integralmente. Não duplique regras aqui.
+"""
