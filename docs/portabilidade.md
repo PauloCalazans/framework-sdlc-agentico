@@ -44,6 +44,8 @@ O adaptador do Copilot traz:
 - `.github/prompts/*.prompt.md`: os comandos do ciclo, apontando para `.claude/commands/`.
 - `.github/workflows/copilot-setup-steps.yml`: prepara o agente de nuvem com histórico completo, `gitleaks` e githooks ligados. O passo da stack é completado no `/bootstrap`.
 
+Sessão longa: O Copilot não documenta limite de compactação configurável (conferido em 2026-11-19). Na CLI, o humano roda `/compact <o que guardar>` ao fim de cada task; a regra do `AGENTS.md` ("Orquestrador em sessão longa") manda reler o `progress.md` e o status, que no Copilot nenhum hook reinjeta.
+
 **A confirmar na documentação do GitHub:** nomes de arquivo e campos `name`, `description` e `tools` (`read`, `search`, `edit`, `execute`).
 
 ## Codex
@@ -52,7 +54,8 @@ O adaptador traz:
 - `.codex/agents/<papel>.toml`: `name`, `description` e `developer_instructions` apontando para o contrato. Sem `model`: o nível do papel vem de `modelos.md` e é aplicado pelo humano.
 - Proteções, instaladas pelo `ativar-protecoes.sh` a partir de `agentic/.estado/protecoes-pendentes/`:
   - `.codex/rules/agentic.rules`: um `prefix_rule` `forbidden` por comando do `deny` do Claude, e `allow` para os do `allow`;
-  - `.codex/hooks.json` e `.codex/hooks/guarda.sh`: no `PreToolUse`, o comando passa pela lista de negados e pelo `.claude/hooks/pre-tool-use.sh` (desvio dos githooks, varredura de disco), e o `apply_patch` é negado se tocar um arquivo de proteção. No `SessionStart`, o `status-projeto.sh` vira contexto.
+  - `.codex/hooks.json` e `.codex/hooks/guarda.sh`: no `PreToolUse`, o comando passa pela lista de negados e pelo `.claude/hooks/pre-tool-use.sh` (desvio dos githooks, varredura de disco), e o `apply_patch` é negado se tocar um arquivo de proteção. No `SessionStart`, o `status-projeto.sh` vira contexto;
+  - `.codex/config.toml`: `model_auto_compact_token_limit = 200000`. A sessão do orquestrador é compactada ao chegar a 200 mil tokens, e o `SessionStart` (origem `compact`) reinjeta o status depois. Não trocamos o prompt de compactação (`compact_prompt` substitui o do Codex inteiro): quem manda reler o `progress.md` é o `AGENTS.md`.
 
 Garantido pela ferramenta, depois da ativação: os bloqueios acima. **Condição:** o Codex só carrega `.codex/` de projeto confiável, e cada hook precisa ser aprovado em `/hooks`. Sem isso, e em `danger-full-access`, valem só os githooks e a CI.
 
@@ -65,6 +68,8 @@ O adaptador traz:
 - Proteções, instaladas pelo `ativar-protecoes.sh`: `.agents/hooks.json` e `.agents/hooks/`. O `guarda.sh` responde `deny` a `run_command` com comando negado ou que pula os githooks, e às ferramentas de escrita num arquivo de proteção. O `inicio.sh` injeta o status no início da sessão.
 
 Garantido pela ferramenta: os bloqueios do hook. O Antigravity não tem lista de permitidos e negados no repositório (só nas configurações do usuário); o hook cobre esse papel.
+
+Sessão longa: O Antigravity não documenta limite de compactação configurável nem hook depois da compactação (conferido em 2026-11-19). O humano roda `/compact` ao fim de cada task; a regra do `AGENTS.md` ("Orquestrador em sessão longa") manda reler o `progress.md` e o status.
 
 Por revisão: "o revisor escreve só o parecer", "o oráculo só lê" e o modelo de cada papel. Se o subagente não tiver worktree próprio (a confirmar no teste real), vale a regra do `AGENTS.md` para ferramenta sem isolamento: o orquestrador grava o brief e pede ao humano uma sessão nova.
 

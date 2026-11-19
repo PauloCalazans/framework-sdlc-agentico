@@ -526,4 +526,24 @@ tl_espera 0 "README: a atualização aponta o que reler" tem README.md 'a seçã
 tl_espera 0 "README: verify interrompido não segue" tem README.md '`VERIFY: INTERROMPIDO`'
 tl_espera 0 "verify: interrupção declarada" tem mecanismos/scripts/verify.sh 'INTERROMPIDO'
 
+# --- Contexto do orquestrador: a sessão compacta cedo e retoma pelo progress.md (medido: contexto médio de 378 mil
+# tokens por requisição numa instância, com a compactação só perto do limite da janela de 1 milhão).
+tl_espera 0 "settings do claude: compacta ao chegar a 200 mil tokens" linha adapters/claude-code/settings.json.tmpl '^  "autoCompactWindow": 200000,$'
+tl_espera 0 "CLAUDE.md: instruções de compactação" linha adapters/claude-code/CLAUDE.md '^# Compact instructions$'
+tl_espera 0 "CLAUDE.md: o resumo manda reler o progress.md" tem adapters/claude-code/CLAUDE.md 'reler o `progress.md`'
+tl_espera 0 "ciclo: a sessão retoma pelo progress.md" tem core/processo/ciclo.md 'é por ele que a sessão retoma depois de compactada ou trocada'
+tl_espera 0 "README: limite de compactação" tem README.md '"autoCompactWindow": 200000'
+tl_espera 0 "README: caminho sem mexer em arquivo" tem README.md '`/autocompact 200k`'
+tl_espera 0 "AGENTS: sessão longa retoma pelo progress.md em qualquer ferramenta" tem core/templates/AGENTS.md 'Quando a ferramenta compactar ou resumir a conversa'
+tl_espera 0 "AGENTS: o estado não vive na conversa" tem core/templates/AGENTS.md 'o estado da execução vive no `progress.md`, não na conversa'
+
+# Nas outras ferramentas: só o Codex documenta limite configurável; Antigravity e Copilot ficam com o /compact do humano.
+tl_espera 0 "codex: limite de compactação no config de projeto" linha adapters/codex/config.toml '^model_auto_compact_token_limit = 200000$'
+tl_espera 0 "instalador: config do Codex fica pendente (ação humana)" tem bootstrap/instalar.sh 'pendente "$fw/adapters/codex/config.toml" .codex/config.toml'
+tl_espera 0 "portabilidade: Codex compacta aos 200 mil" tem docs/portabilidade.md '`model_auto_compact_token_limit = 200000`'
+tl_espera 0 "portabilidade: Antigravity sem limite configurável" tem docs/portabilidade.md 'O Antigravity não documenta limite de compactação configurável'
+tl_espera 0 "portabilidade: Copilot sem limite configurável" tem docs/portabilidade.md 'O Copilot não documenta limite de compactação configurável'
+tl_espera 0 "README: Codex e as ferramentas sem limite" tem README.md '`model_auto_compact_token_limit = 200000`'
+tl_espera 0 "README não diz mais que nada foi conferido" nenhum 'nenhum equivalente foi conferido' README.md
+
 tl_fim

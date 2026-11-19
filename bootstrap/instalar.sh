@@ -1,8 +1,8 @@
 #!/bin/sh
 # instalar.sh <projeto-alvo> [--copilot] [--codex] [--antigravity] — copia o kit do framework para o projeto.
 # --copilot acrescenta o adaptador do GitHub Copilot em .github/ (instruções, agentes, prompts, setup do agente de nuvem).
-# --codex e --antigravity acrescentam os agentes (.codex/agents, .agents/agents) e as skills (.agents/skills); hooks e
-# regras ficam pendentes em agentic/.estado/protecoes-pendentes até o ativar-protecoes.sh (ação humana).
+# --codex e --antigravity acrescentam os agentes (.codex/agents, .agents/agents) e as skills (.agents/skills); hooks,
+# regras e o .codex/config.toml ficam pendentes em agentic/.estado/protecoes-pendentes até o ativar-protecoes.sh (ação humana).
 # Reinstalar sem opção mantém os adaptadores que o manifesto anterior registra.
 # Não pergunta nada e não sobrescreve edição da instância: conflitos vão para agentic/.estado/conflitos-instalacao.txt
 # e são resolvidos no /bootstrap. Arquivo do kit intacto desde a instalação anterior (hash igual ao do
@@ -130,6 +130,7 @@ if [ -n "$codex" ]; then
   copia_dir "$fw/adapters/codex/agents" .codex/agents
   copia "$fw/adapters/codex/agente-oraculo.tmpl.toml" agentic/processo/templates/agente-oraculo-codex.toml
   pendente "$fw/adapters/codex/hooks.json" .codex/hooks.json
+  pendente "$fw/adapters/codex/config.toml" .codex/config.toml
   pendente "$fw/adapters/codex/rules/agentic.rules" .codex/rules/agentic.rules
   pendente "$fw/adapters/codex/hooks/guarda.sh" .codex/hooks/guarda.sh
   for f in lib-guarda.sh caminhos-protegidos.txt comandos-negados.txt; do

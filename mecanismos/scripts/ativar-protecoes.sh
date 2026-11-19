@@ -17,7 +17,7 @@ if [ -f agentic/.estado/settings.pendente.json ]; then
   if [ -f .claude/settings.json ]; then
     if ! cmp -s agentic/.estado/settings.pendente.json .claude/settings.json; then
       echo "Já existe .claude/settings.json — não sobrescrito."
-      echo "Faça o merge manual de agentic/.estado/settings.pendente.json (permissions.deny, hooks, enabledPlugins) em .claude/settings.json, commite o resultado e apague o pendente; não é preciso rodar este script de novo."
+      echo "Faça o merge manual de agentic/.estado/settings.pendente.json (permissions.deny, hooks, enabledPlugins, autoCompactWindow) em .claude/settings.json, commite o resultado e apague o pendente; não é preciso rodar este script de novo."
       falhou=1
     fi
   else
