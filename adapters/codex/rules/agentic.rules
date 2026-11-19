@@ -1,0 +1,149 @@
+# agentic.rules — regras de comando do Codex (Starlark, experimentais).
+# Gerado a partir de adapters/comum/comandos-negados.txt e do allow de adapters/claude-code/settings.json.tmpl;
+# o coerencia-kit do kit confere. "forbidden" vence "allow" quando os dois casam.
+# O lançador do Windows (git -c alias.agentic-sh=!sh agentic-sh) tem o mesmo allow que a forma com sh.
+
+prefix_rule(
+    pattern = ["gh", "pr", "merge"],
+    decision = "forbidden",
+    justification = "agentic: gh pr merge é negado pelo kit; peça ao humano",
+    match = ["gh pr merge"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "--force"],
+    decision = "forbidden",
+    justification = "agentic: git push --force é negado pelo kit; peça ao humano",
+    match = ["git push --force"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "-f"],
+    decision = "forbidden",
+    justification = "agentic: git push -f é negado pelo kit; peça ao humano",
+    match = ["git push -f"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "--force-with-lease"],
+    decision = "forbidden",
+    justification = "agentic: git push --force-with-lease é negado pelo kit; peça ao humano",
+    match = ["git push --force-with-lease"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "--no-verify"],
+    decision = "forbidden",
+    justification = "agentic: git push --no-verify é negado pelo kit; peça ao humano",
+    match = ["git push --no-verify"],
+)
+
+prefix_rule(
+    pattern = ["git", "commit", "--no-verify"],
+    decision = "forbidden",
+    justification = "agentic: git commit --no-verify é negado pelo kit; peça ao humano",
+    match = ["git commit --no-verify"],
+)
+
+prefix_rule(
+    pattern = ["git", "commit", "-n"],
+    decision = "forbidden",
+    justification = "agentic: git commit -n é negado pelo kit; peça ao humano",
+    match = ["git commit -n"],
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "agentic: git reset --hard é negado pelo kit; peça ao humano",
+    match = ["git reset --hard"],
+)
+
+prefix_rule(
+    pattern = ["git", "config", "core.hooksPath"],
+    decision = "forbidden",
+    justification = "agentic: git config core.hooksPath é negado pelo kit; peça ao humano",
+    match = ["git config core.hooksPath"],
+)
+
+prefix_rule(
+    pattern = ["sh", "agentic/mecanismos/scripts/ativar-protecoes.sh"],
+    decision = "forbidden",
+    justification = "agentic: sh agentic/mecanismos/scripts/ativar-protecoes.sh é negado pelo kit; peça ao humano",
+    match = ["sh agentic/mecanismos/scripts/ativar-protecoes.sh"],
+)
+
+prefix_rule(
+    pattern = ["sh", "agentic/mecanismos/scripts/verify.sh"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "-c", "alias.agentic-sh=!sh", "agentic-sh", "agentic/mecanismos/scripts/verify.sh"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["sh", "agentic/mecanismos/scripts/status-projeto.sh"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "-c", "alias.agentic-sh=!sh", "agentic-sh", "agentic/mecanismos/scripts/status-projeto.sh"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "status"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "diff"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "log"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "add"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "commit"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "checkout"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "rebase"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "worktree"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["gh", "pr", "create"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["gh", "pr", "view"],
+    decision = "allow",
+)

@@ -65,6 +65,18 @@ if [ -f .claude/settings.json ]; then
     problema ".claude/settings.json não rastreado pelo git; commite (ação humana): git add .claude/settings.json && git commit -m 'chore: ativa proteções do agente'"
 fi
 
+# Codex e Antigravity: com o adaptador instalado, as proteções precisam estar ativadas (ativar-protecoes.sh) e
+# versionadas; senão somem em clones e worktrees, e a ferramenta roda sem bloqueio nenhum.
+if [ -d .codex/agents ] && [ ! -f .codex/hooks.json ]; then
+  problema "Codex instalado sem .codex/hooks.json: rode sh agentic/mecanismos/scripts/ativar-protecoes.sh (ação humana)"
+fi
+if [ -d .agents/agents ] && [ ! -f .agents/hooks.json ]; then
+  problema "Antigravity instalado sem .agents/hooks.json: rode sh agentic/mecanismos/scripts/ativar-protecoes.sh (ação humana)"
+fi
+for f in $(git ls-files --others -- .codex/hooks.json .codex/hooks .codex/rules .codex/config.toml .agents/hooks.json .agents/hooks 2>/dev/null); do
+  problema "$f não rastreado pelo git; commite (ação humana): git add $f"
+done
+
 # Hooks precisam estar no índice como executáveis (100755); senão, num clone Unix, o git os ignora em silêncio.
 for h in agentic/mecanismos/githooks/pre-commit agentic/mecanismos/githooks/pre-merge-commit agentic/mecanismos/githooks/pre-push; do
   modo=$(git ls-files -s -- "$h" 2>/dev/null | cut -d' ' -f1)

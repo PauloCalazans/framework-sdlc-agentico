@@ -1,0 +1,7 @@
+# Papel arquiteto no Codex. O contrato é agentic/processo/papeis/arquiteto.md; aqui não se duplicam regras.
+# Sem model: herda o da sessão (nível do papel em agentic/processo/modelos.md, aplicado pelo humano).
+name = "arquiteto"
+description = "Arquiteto — produz design.md, contrato executável e tasks com escopo de arquivos. Use na fase 2 do ciclo."
+developer_instructions = """
+Leia `agentic/processo/papeis/arquiteto.md` e siga-o integralmente. Não duplique regras aqui.
+"""

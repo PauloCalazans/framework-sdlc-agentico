@@ -1,6 +1,6 @@
 # Framework de SDLC Agêntico
 
-**Um kit que você instala no repositório do seu projeto para que agentes de IA (Claude Code, GitHub Copilot) desenvolvam seguindo um processo de engenharia com papéis separados, testes antes do código, dois gates humanos e controles que bloqueiam o agente de verdade.**
+**Um kit que você instala no repositório do seu projeto para que agentes de IA (Claude Code, GitHub Copilot, Codex, Antigravity) desenvolvam seguindo um processo de engenharia com papéis separados, testes antes do código, dois gates humanos e controles que bloqueiam o agente de verdade.**
 
 **Site:** https://paulocalazans.github.io/framework-sdlc-agentico/ — o que o kit resolve e as medições que o justificam.
 
@@ -24,9 +24,9 @@ Serve para **qualquer stack** (Java, Python, Node, .NET, front-end…) e para pr
 | desliga o teste que incomoda (`.skip`, `@Disabled`) | teste desabilitado na branch ou skip novo no relatório JUnit reprova | `verifica-skip.sh` |
 | "aproveita" e mexe em arquivos fora do pedido | cada task declara `## Arquivos`; arquivo fora da lista reprova | `verifica-escopo.sh` |
 | commita na `main` ou faz o merge do próprio PR | commit e push na branch protegida são bloqueados, e o merge com commit também; merge fast-forward local não dispara hook (o remoto continua protegido pelo `pre-push`) | `pre-commit`, `pre-push`, `pre-merge-commit`, `deny` de `gh pr merge` (e de `git merge` sem plataforma de PR, acrescentado no `/bootstrap`) |
-| pula os githooks (`--no-verify`) | comando git com `--no-verify`, `commit -n` ou `-c core.hooksPath` é barrado em qualquer posição | hook `PreToolUse` do Claude Code |
+| pula os githooks (`--no-verify`) | comando git com `--no-verify`, `commit -n` ou `-c core.hooksPath` é barrado em qualquer posição | hook `PreToolUse` (Claude Code, Codex, Antigravity) |
 | commita uma senha ou token | conteúdo staged é varrido antes do commit | `pre-commit` (gitleaks + palavras-chave) |
-| afrouxa as próprias permissões | edição de `agentic/config`, hooks e `.claude/settings.json` é negada | `deny` do Claude Code |
+| afrouxa as próprias permissões | edição de `agentic/config`, hooks e `.claude/settings.json` é negada | `deny` do Claude Code; hooks no Codex e no Antigravity |
 | revisa o próprio trabalho | o `revisor` roda em contexto limpo, escreve só o parecer e nunca corrige | contrato do papel + adaptador + conferência ao receber |
 | decide sozinho regra de negócio, segurança ou dependência nova | gatilhos N3 param a execução e chamam o humano | revisão |
 
@@ -137,7 +137,7 @@ Resultado medido: 84 linhas de código e teste, cerca de 80% menos documentaçã
 
 ## Início rápido
 
-**Pré-requisitos:** `git`, `sh` (no Windows, o Git Bash), [gitleaks](https://github.com/gitleaks/gitleaks) (o `pre-commit` falha sem ele) e o Claude Code. O GitHub Copilot é opcional.
+**Pré-requisitos:** `git`, `sh` (no Windows, o Git Bash), [gitleaks](https://github.com/gitleaks/gitleaks) (o `pre-commit` falha sem ele) e o Claude Code. GitHub Copilot, Codex e Antigravity são opcionais.
 
 **Experimente antes, num projeto descartável:**
 
@@ -148,14 +148,23 @@ cd ../demo-precos && claude      # dentro do Claude Code: /bootstrap
 
 O exemplo já traz as respostas da entrevista (`agentic/projeto/bootstrap-respostas.md`), então o `/bootstrap` roda sem perguntas. Há também `python-cli-novo` (Python, projeto novo).
 
-**Instale no seu projeto:**
+**Instale no seu projeto:** abra uma sessão do seu agente no projeto e entregue a ele o link deste repositório, `https://github.com/PauloCalazans/framework-sdlc-agentico`, pedindo que instale o kit. Ele conduz a instalação pelas instruções abaixo e diz a você o que só um humano faz.
 
-1. `sh bootstrap/instalar.sh <caminho-do-projeto>` — copia o kit. Não pergunta nada e não sobrescreve o que o projeto editou; arquivo do kit intacto é atualizado pelo manifesto. Com `--copilot`, acrescenta o adaptador do GitHub Copilot em `.github/` (veja `docs/portabilidade.md`).
-2. No projeto, abra o Claude Code e rode `/bootstrap` — entrevista sobre contexto e stack; preenche os perfis dos papéis e instancia os controles.
-3. Ative as proteções (ação humana): `sh agentic/mecanismos/scripts/ativar-protecoes.sh`.
-4. Comece pelo primeiro intent: `/intent <ideia>` (ou `/mudanca <descrição>` para uma mudança pequena).
+### Instruções para o agente
 
-No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); dentro do Claude Code isso já é tratado.
+Você foi chamado para instalar este kit no projeto aberto nesta sessão. Siga os passos em ordem e não pule nenhum.
+
+1. **Clone o kit fora do projeto** (numa pasta temporária, nunca dentro do repositório do projeto): `git clone --depth 1 https://github.com/PauloCalazans/framework-sdlc-agentico <pasta-do-kit>`.
+2. **Confira os pré-requisitos** no projeto: é um repositório git, e há `git`, `sh` (no Windows, o do Git Bash) e `gitleaks`. Se faltar algo, diga ao humano o que instalar e pare.
+3. **Pergunte ao humano quais ferramentas o time vai usar.** O Claude Code entra sempre. Para cada outra, há uma opção: `--copilot` (GitHub Copilot, em `.github/`), `--codex` e `--antigravity` (agentes, skills em `.agents/skills/` e hooks). Passe as opções de **todas** as ferramentas citadas: sem a opção, a ferramenta fica sem os agentes e sem as skills, inclusive a do `bootstrap`.
+4. **Rode o instalador você mesmo**, a partir da raiz do projeto: `sh <pasta-do-kit>/bootstrap/instalar.sh . <opções>`. Não peça ao humano para rodá-lo. No PowerShell (Codex, Antigravity), onde não há `sh`, use o `sh` do git: `git -c alias.agentic-sh=!sh agentic-sh <pasta-do-kit>/bootstrap/instalar.sh . <opções>`. O instalador não pergunta nada e não sobrescreve o que o projeto editou; arquivo do kit intacto é atualizado pelo manifesto.
+5. **Mostre ao humano a saída do instalador**: os arquivos em conflito (`agentic/.estado/conflitos-instalacao.txt`) e as proteções pendentes. Não rode o `ativar-protecoes.sh`: ativar as proteções é ação humana.
+6. **Termine aqui e passe ao humano os próximos passos**, nesta ordem:
+   1. Abrir **uma sessão nova** no projeto e rodar `/bootstrap` (no Codex, `$bootstrap`). As ferramentas carregam comandos e skills ao abrir a sessão: nesta sessão o `bootstrap` ainda não aparece. A entrevista preenche os perfis dos papéis e instancia os controles.
+   2. Depois do `/bootstrap`, ativar as proteções: `sh agentic/mecanismos/scripts/ativar-protecoes.sh` (no PowerShell, pelo mesmo `git -c alias.agentic-sh=!sh agentic-sh`). No Codex, também confiar no projeto e aprovar os hooks em `/hooks`.
+   3. Começar pelo primeiro intent: `/intent <ideia>` (ou `/mudanca <descrição>` para uma mudança pequena).
+
+Detalhes por ferramenta em `docs/portabilidade.md`. No Windows, dentro do Claude Code os comandos `sh ...` já funcionam; no Codex e no Antigravity, hooks e skills usam o lançador `git -c alias.agentic-sh=!sh agentic-sh <script>`.
 
 ## Enriqueça os perfis dos papéis
 
@@ -224,6 +233,7 @@ Na raiz entra só o que as ferramentas exigem lá; todo o resto fica em `agentic
 AGENTS.md              mapa e regras para qualquer agente
 CLAUDE.md              ponte mínima para o Claude Code
 .claude/               agentes, comandos, hooks e settings.json (proteções)
+.codex/, .agents/      só com --codex / --antigravity: agentes, skills, regras e hooks
 agentic/
   config, auto-mode    política da instância (só o humano edita)
   processo/            do kit: princípios, ciclo, entrevista, contratos dos papéis, templates, .kit-manifesto
@@ -257,6 +267,10 @@ Instâncias antigas continuam funcionando: as variáveis novas de `agentic/confi
 | `mecanismos/` | Controle determinístico: githooks e scripts `sh`, cada um com testes |
 | `adapters/claude-code/` | Adaptador fino para Claude Code: agentes, comandos, hooks, settings |
 | `adapters/copilot/` | Adaptador fino para GitHub Copilot (opcional, `--copilot`): instruções, agentes, prompts, setup do agente de nuvem |
+| `adapters/codex/` | Adaptador fino para Codex (opcional, `--codex`): agentes, regras de comando, hooks |
+| `adapters/antigravity/` | Adaptador fino para Antigravity (opcional, `--antigravity`): agentes (subagentes), hooks |
+| `adapters/agents-skills/` | Skills compartilhadas por Codex e Antigravity (`.agents/skills/`), apontando para os comandos do Claude |
+| `adapters/comum/` | Listas de comandos negados e caminhos protegidos e a lib dos hooks; conferidas contra o `deny` do Claude |
 | `bootstrap/` | Instalador, entrevista, checagem estrutural |
 | `exemplos/` | Projetos usados para validar o agnosticismo |
 | `docs/` | Spec, plano, validação, portabilidade entre ferramentas |

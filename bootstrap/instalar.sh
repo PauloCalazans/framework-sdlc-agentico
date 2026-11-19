@@ -1,20 +1,30 @@
 #!/bin/sh
-# instalar.sh <projeto-alvo> [--copilot] — copia o kit do framework para o projeto.
+# instalar.sh <projeto-alvo> [--copilot] [--codex] [--antigravity] — copia o kit do framework para o projeto.
 # --copilot acrescenta o adaptador do GitHub Copilot em .github/ (instruções, agentes, prompts, setup do agente de nuvem).
+# --codex e --antigravity acrescentam os agentes (.codex/agents, .agents/agents) e as skills (.agents/skills); hooks e
+# regras ficam pendentes em agentic/.estado/protecoes-pendentes até o ativar-protecoes.sh (ação humana).
+# Reinstalar sem opção mantém os adaptadores que o manifesto anterior registra.
 # Não pergunta nada e não sobrescreve edição da instância: conflitos vão para agentic/.estado/conflitos-instalacao.txt
 # e são resolvidos no /bootstrap. Arquivo do kit intacto desde a instalação anterior (hash igual ao do
 # manifesto agentic/processo/.kit-manifesto) recebe a versão nova sem merge.
 # Os perfis em agentic/projeto/papeis/ são da instância: criados do template só se ausentes, nunca sobrescritos.
 fw=$(cd "$(dirname "$0")/.." && pwd)
 . "$fw/bootstrap/lib-kit.sh"
+uso="uso: instalar.sh <projeto-alvo> [--copilot] [--codex] [--antigravity]"
 alvo=${1:-}
 copilot=""
-case "${2:-}" in
-  "") ;;
-  --copilot) copilot=1 ;;
-  *) echo "uso: instalar.sh <projeto-alvo> [--copilot]" >&2; exit 2 ;;
-esac
-{ [ -n "$alvo" ] && [ -d "$alvo" ]; } || { echo "uso: instalar.sh <projeto-alvo> [--copilot]" >&2; exit 2; }
+codex=""
+antigravity=""
+[ $# -gt 0 ] && shift
+for o in "$@"; do
+  case "$o" in
+    --copilot) copilot=1 ;;
+    --codex) codex=1 ;;
+    --antigravity) antigravity=1 ;;
+    *) echo "$uso" >&2; exit 2 ;;
+  esac
+done
+{ [ -n "$alvo" ] && [ -d "$alvo" ]; } || { echo "$uso" >&2; exit 2; }
 git -C "$alvo" rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "o alvo não é um repositório git: $alvo" >&2; exit 2; }
 alvo=$(cd "$alvo" && pwd)
 rm -f "$alvo/agentic/.estado/conflitos-instalacao.txt" # o arquivo reflete só a execução atual
@@ -23,6 +33,15 @@ conflitos=$(mktemp)
 atualizados=$(mktemp)
 manifesto=agentic/processo/.kit-manifesto
 manifesto_novo=$(mktemp)
+
+# Reinstalação lembra os adaptadores: o manifesto anterior diz quais foram instalados (sem estado novo).
+lembra() { # lembra <nome> <prefixo no manifesto>
+  grep -q "  $2" "$alvo/$manifesto" 2>/dev/null || return 1
+  echo "Reinstalação: mantendo o adaptador $1 (instalado antes, conforme $manifesto)."
+}
+[ -z "$copilot" ] && lembra copilot '\.github/agents/' && copilot=1
+[ -z "$codex" ] && lembra codex '\.codex/agents/' && codex=1
+[ -z "$antigravity" ] && lembra antigravity '\.agents/agents/' && antigravity=1
 
 guarda_kit() { # guarda_kit <origem> <caminho relativo> — versão do kit para o /bootstrap comparar
   mkdir -p "$(dirname "$alvo/agentic/.estado/kit-conflitos/$2")"
@@ -84,6 +103,50 @@ if [ -n "$copilot" ]; then
   copia "$fw/adapters/copilot/copilot-setup-steps.yml" .github/workflows/copilot-setup-steps.yml
   copia "$fw/adapters/copilot/agente-oraculo.tmpl.md" agentic/processo/templates/agente-oraculo-copilot.md
 fi
+# Proteções (hooks, regras, listas) do Codex e do Antigravity ficam pendentes: quem as instala é o humano,
+# pelo ativar-protecoes.sh. Têm manifesto próprio ($pendentes/.kit-manifesto): o pendente intacto recebe a versão
+# nova do kit; o editado pelo /bootstrap (passo 6 da entrevista) é mantido e vira conflito, como no resto do kit.
+pendentes=agentic/.estado/protecoes-pendentes
+pend_novo=$(mktemp)
+pendente() { # pendente <origem> <caminho final relativo ao alvo>
+  pd="$alvo/$pendentes/$2"
+  printf '%s  %s\n' "$(kit_hash "$1")" "$pendentes/$2" >> "$pend_novo"
+  if [ -e "$pd" ] && ! cmp -s "$1" "$pd"; then
+    anterior=$(kit_hash_manifesto "$alvo/$pendentes/.kit-manifesto" "$pendentes/$2")
+    if [ -z "$anterior" ] || [ "$anterior" != "$(kit_hash "$pd")" ]; then
+      printf '%s\n' "$pendentes/$2" >> "$conflitos"
+      guarda_kit "$1" "$pendentes/$2"
+      return 0
+    fi
+    printf '%s\n' "$pendentes/$2" >> "$atualizados"
+  fi
+  mkdir -p "$(dirname "$pd")"
+  cp "$1" "$pd"
+}
+if [ -n "$codex" ] || [ -n "$antigravity" ]; then
+  copia_dir "$fw/adapters/agents-skills" .agents/skills
+fi
+if [ -n "$codex" ]; then
+  copia_dir "$fw/adapters/codex/agents" .codex/agents
+  copia "$fw/adapters/codex/agente-oraculo.tmpl.toml" agentic/processo/templates/agente-oraculo-codex.toml
+  pendente "$fw/adapters/codex/hooks.json" .codex/hooks.json
+  pendente "$fw/adapters/codex/rules/agentic.rules" .codex/rules/agentic.rules
+  pendente "$fw/adapters/codex/hooks/guarda.sh" .codex/hooks/guarda.sh
+  for f in lib-guarda.sh caminhos-protegidos.txt comandos-negados.txt; do
+    pendente "$fw/adapters/comum/$f" ".codex/hooks/$f"
+  done
+fi
+if [ -n "$antigravity" ]; then
+  copia_dir "$fw/adapters/antigravity/agents" .agents/agents
+  copia "$fw/adapters/antigravity/agente-oraculo.tmpl.md" agentic/processo/templates/agente-oraculo-antigravity.md
+  pendente "$fw/adapters/antigravity/hooks.json" .agents/hooks.json
+  for f in guarda.sh inicio.sh; do
+    pendente "$fw/adapters/antigravity/hooks/$f" ".agents/hooks/$f"
+  done
+  for f in lib-guarda.sh caminhos-protegidos.txt comandos-negados.txt; do
+    pendente "$fw/adapters/comum/$f" ".agents/hooks/$f"
+  done
+fi
 
 for p in dominio arquiteto testes dev revisor; do
   [ -e "$alvo/agentic/projeto/papeis/$p.md" ] && continue
@@ -92,6 +155,8 @@ for p in dominio arquiteto testes dev revisor; do
 done
 LC_ALL=C sort "$manifesto_novo" > "$alvo/$manifesto"
 rm -f "$manifesto_novo"
+[ -s "$pend_novo" ] && LC_ALL=C sort "$pend_novo" > "$alvo/$pendentes/.kit-manifesto"
+rm -f "$pend_novo"
 
 acrescenta .gitignore "agentic/.estado/"
 acrescenta .gitattributes "*.sh text eol=lf"
@@ -116,4 +181,7 @@ if [ -s "$atualizados" ]; then
 fi
 rm -f "$conflitos" "$atualizados"
 echo "Kit instalado em $alvo."
-echo "Próximo passo: abra o Claude Code no projeto e rode /bootstrap."
+echo "Próximo passo: abra o Claude Code (ou o Antigravity) no projeto e rode /bootstrap; no Codex, \$bootstrap."
+if [ -n "$codex" ] || [ -n "$antigravity" ]; then
+  echo "Proteções do Codex/Antigravity pendentes em $pendentes: ative-as com sh agentic/mecanismos/scripts/ativar-protecoes.sh (ação humana)."
+fi

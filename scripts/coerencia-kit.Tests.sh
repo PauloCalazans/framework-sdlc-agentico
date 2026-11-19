@@ -373,7 +373,7 @@ tl_espera 0 "site: 36 execuções marcado" tem $s 'data-e="e1">36<'
 tl_espera 0 "site: menos de 5% marcado" tem $s 'data-e="e4">5%<'
 tl_espera 0 "site: 5 execuções de B marcado" tem $s 'data-e="e1">5<'
 tl_espera 0 "site: verify garantido por regra + script, como no README" tem $s '<code>regra + verify.sh</code>'
-tl_espera 0 "site: hook PreToolUse só no Claude Code" tem $s 'hook PreToolUse (só Claude Code)'
+tl_espera 0 "site: hook PreToolUse como no README" tem $s 'hook PreToolUse (Claude Code, Codex, Antigravity)'
 tl_espera 0 "site: ressalva do merge fast-forward" tem $s 'merge fast-forward local não dispara hook'
 tl_espera 0 "site: pre-merge-commit e deny de gh pr merge" tem $s 'pre-merge-commit · deny de gh pr merge'
 tl_espera 1 "site: sem 'cada regra nasceu de medição' (contradiz a base teórica)" tem $s 'Cada regra do kit nasceu de uma medição'
@@ -384,5 +384,85 @@ tl_espera 0 "parecer: seção 2.5 de pesquisa sobre agentes" linha docs/avaliaca
 tl_espera 0 "site: bloco de pesquisa sobre agentes" tem $s 'id="pesquisa"'
 site_cit_n() { [ "$(tr -d '\r' < "$raiz/$s" | grep -o '<blockquote class="citacao">' | wc -l)" -ge 10 ]; }
 tl_espera 0 "site: ao menos 10 citações (normas + pesquisa)" site_cit_n
+
+# --- Portabilidade Codex/Antigravity (docs/specs/2026-11-16-portabilidade-codex-antigravity-design.md)
+st=adapters/claude-code/settings.json.tmpl
+# util_lista <arquivo>: linhas úteis de uma lista de adapters/comum (sem #, sem vazias, sem \r).
+util_lista() { tr -d '\r' < "$raiz/$1" | grep -v -e '^#' -e '^[[:space:]]*$'; }
+deny_bash() { tr -d '\r' < "$raiz/$st" | grep -o '"Bash([^"]*:\*)"' | sed -n '/gh pr merge/,$p' | sed -E 's/^"Bash\((.*):\*\)"$/\1/'; }
+deny_edit() { tr -d '\r' < "$raiz/$st" | grep -o '"Edit([^"]*)"' | sed -E 's/^"Edit\((.*)\)"$/\1/' | grep -v '^\*\*/'; }
+# mesmas <A> <B>: as duas saídas (comandos) têm as mesmas linhas, em qualquer ordem; imprime a diferença.
+mesmas() { tl_a=$(mktemp); tl_b=$(mktemp); $1 | sort > "$tl_a"; $2 | sort > "$tl_b"; diff "$tl_a" "$tl_b"; tl_r=$?; rm -f "$tl_a" "$tl_b"; return $tl_r; }
+negados_txt() { util_lista adapters/comum/comandos-negados.txt; }
+caminhos_txt() { util_lista adapters/comum/caminhos-protegidos.txt; }
+tl_espera 0 "comandos-negados.txt = Bash(...) do deny do settings" mesmas deny_bash negados_txt
+tl_espera 0 "caminhos-protegidos.txt = Edit(...) do deny do settings (sem **/)" mesmas deny_edit caminhos_txt
+for x in '.codex/hooks.json' '.codex/hooks/**' '.codex/rules/**' '.codex/config.toml' '.agents/hooks.json' '.agents/hooks/**'; do
+  tl_espera 0 "settings: deny de Edit(**/$x)" tem $st "\"Edit(**/$x)\""
+done
+
+# Codex: regras geradas das listas, agentes dos 5 papéis, hooks pelo lançador do Windows
+ru=adapters/codex/rules/agentic.rules
+# padrao_starlark <prefixo>: o pattern que a regra do Codex usa para o prefixo ("a b" vira ["a", "b"]).
+padrao_starlark() { printf '%s\n' "$1" | awk '{ s = "pattern = ["; for (i = 1; i <= NF; i++) s = s (i > 1 ? ", " : "") "\"" $i "\""; print s "]," }'; }
+# regra <prefixo> <decisão>: a regra existe, com a decisão na linha seguinte ao pattern.
+regra() { tr -d '\r' < "$raiz/$ru" | grep -A1 -F -- "$(padrao_starlark "$1")" | grep -qF "decision = \"$2\""; }
+allow_bash() { tr -d '\r' < "$raiz/$st" | sed -n '/"allow"/,/\]/p' | grep -o '"Bash([^"]*:\*)"' | sed -E 's/^"Bash\((.*):\*\)"$/\1/'; }
+negados_txt > "$TL_SAIDA.neg"
+while IFS= read -r n; do
+  tl_espera 0 "codex: regra forbidden para $n" regra "$n" forbidden
+done < "$TL_SAIDA.neg"
+allow_bash > "$TL_SAIDA.alw"
+while IFS= read -r a; do
+  tl_espera 0 "codex: regra allow para $a" regra "$a" allow
+done < "$TL_SAIDA.alw"
+rm -f "$TL_SAIDA.neg" "$TL_SAIDA.alw"
+tl_espera 0 "codex: allow do verify pelo lançador" regra 'git -c alias.agentic-sh=!sh agentic-sh agentic/mecanismos/scripts/verify.sh' allow
+n_forb() { [ "$(tr -d '\r' < "$raiz/$ru" | grep -c 'decision = "forbidden"')" -eq "$(negados_txt | wc -l)" ]; }
+tl_espera 0 "codex: nenhuma regra forbidden além da lista" n_forb
+for pa in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "codex: agente $pa com name" linha adapters/codex/agents/$pa.toml "^name = \"$pa\"$"
+  tl_espera 0 "codex: agente $pa aponta o contrato" tem adapters/codex/agents/$pa.toml "agentic/processo/papeis/$pa.md"
+done
+tl_espera 0 "codex: revisor declara o limite por revisão" tem adapters/codex/agents/revisor.toml 'por revisão'
+tl_espera 0 "codex: hooks.json usa o lançador no PreToolUse" tem adapters/codex/hooks.json 'git -c alias.agentic-sh=!sh agentic-sh .codex/hooks/guarda.sh'
+tl_espera 1 "codex: hooks.json sem \$( (não roda no PowerShell)" tem adapters/codex/hooks.json '$('
+
+# Antigravity: agentes dos 5 papéis sem tools: (nome de ferramenta errado trava o subagente), hooks pelo lançador
+for pa in dominio arquiteto testes dev revisor; do
+  tl_espera 0 "antigravity: agente $pa com name" linha adapters/antigravity/agents/$pa.md "^name: $pa$"
+  tl_espera 0 "antigravity: agente $pa aponta o contrato" tem adapters/antigravity/agents/$pa.md "agentic/processo/papeis/$pa.md"
+done
+tl_espera 0 "antigravity: nenhum agente com tools:" nenhum '^tools:' adapters/antigravity
+tl_espera 0 "antigravity: revisor declara o limite por revisão" tem adapters/antigravity/agents/revisor.md 'por revisão'
+tl_espera 0 "antigravity: hooks.json usa o lançador no guarda" tem adapters/antigravity/hooks.json 'git -c alias.agentic-sh=!sh agentic-sh .agents/hooks/guarda.sh'
+tl_espera 0 "antigravity: hooks.json usa o lançador no início" tem adapters/antigravity/hooks.json 'git -c alias.agentic-sh=!sh agentic-sh .agents/hooks/inicio.sh'
+tl_espera 1 "antigravity: hooks.json sem \$(" tem adapters/antigravity/hooks.json '$('
+
+# Skills compartilhadas (.agents/skills): uma por comando do Claude, apontando para ele; instalador com as três opções
+for c in "$raiz"/adapters/claude-code/commands/*.md; do
+  c=$(basename "$c" .md)
+  tl_espera 0 "skill $c com name" linha adapters/agents-skills/$c/SKILL.md "^name: $c$"
+  tl_espera 0 "skill $c aponta para .claude/commands/$c.md" tem adapters/agents-skills/$c/SKILL.md ".claude/commands/$c.md"
+done
+n_skills() { [ "$(ls -d "$raiz"/adapters/agents-skills/*/ | wc -l)" -eq "$(ls "$raiz"/adapters/claude-code/commands/*.md | wc -l)" ]; }
+tl_espera 0 "skills: nenhuma sem comando do Claude" n_skills
+tl_espera 0 "instalar.sh: uso cita as três opções" tem bootstrap/instalar.sh 'uso: instalar.sh <projeto-alvo> [--copilot] [--codex] [--antigravity]'
+
+# Documentação da portabilidade acompanha os adaptadores
+pt=docs/portabilidade.md
+for x in '--codex' '--antigravity' '.codex/agents/' '.agents/agents/' '.agents/skills/' '/hooks' 'por revisão' 'git -c alias.agentic-sh=!sh agentic-sh'; do
+  tl_espera 0 "portabilidade cita $x" tem $pt "$x"
+done
+tl_espera 0 "portabilidade: seção do Codex" linha $pt '^## Codex'
+tl_espera 0 "portabilidade: seção do Antigravity" linha $pt '^## Antigravity'
+for x in '--codex' '--antigravity' 'adapters/codex/' 'adapters/antigravity/' 'adapters/agents-skills/' 'adapters/comum/'; do
+  tl_espera 0 "README cita $x" tem README.md "$x"
+done
+for x in 'agente-oraculo-codex.toml' 'agente-oraculo-antigravity.md' 'protecoes-pendentes' 'Codex' 'Antigravity'; do
+  tl_espera 0 "entrevista cita $x" tem bootstrap/entrevista.md "$x"
+done
+tl_espera 0 "AGENTS.md: lançador do Windows" tem core/templates/AGENTS.md 'git -c alias.agentic-sh=!sh agentic-sh'
+tl_espera 1 "README: hook PreToolUse não é mais só do Claude Code" tem README.md '| hook `PreToolUse` do Claude Code |'
 
 tl_fim
