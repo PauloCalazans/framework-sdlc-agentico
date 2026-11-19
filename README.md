@@ -257,6 +257,7 @@ Instâncias antigas continuam funcionando: as variáveis novas de `agentic/confi
 - O commit RED anota `CA<n> … → test: <arquivo>::<nome>`, conferido por `verifica-red.sh`; task sem anotação passa com `aviso:`.
 - O brief ganha `## Impacto`: antes do Gate 1, o orquestrador roda as buscas (specs aprovadas que citam a regra; para o `arquiteto`, também quem usa o que muda e os testes que o exercitam) e cola a saída, com os trechos em "Leia só isto"; depois do Gate 1, cola as linhas do Impacto aprovado que tocam a task, e o `testes` roda cada teste existente afetado antes do RED. A meta de ~40 linhas não conta essa seção nem os trechos que ela acrescenta a "Leia só isto".
 - A rodada do parecer conta todos os pareceres do mesmo artefato, também os de ajuste reaberto por Ruling; a 3ª devolução do `ciclo.md` é o 3º `DEVOLVIDO` entre esses mesmos pareceres, e a contagem nunca recomeça.
+- A resposta do humano deixa de ser gravada no Questionário: fica no `progress.md` como `N<n>` e, no Gate 1, no corpo do commit de registro; a regra cita `humano:<AAAA-MM-DD> N<n> "<trecho>"` e a pergunta respondida sai do Questionário. Specs já aprovadas não mudam, e o `verifica-artefato.sh` não verifica artefato aprovado.
 - Para medir: `grep` da coluna Causa nos pareceres de `agentic/.estado/execucao/` e das linhas "Rodadas" nos PRs.
 
 ## Estrutura do framework

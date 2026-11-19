@@ -29,7 +29,7 @@ Antes de começar, leia `agentic/projeto/papeis/arquiteto.md`: especialização,
 
 ## Modo enxuto
 Na trilha enxuta (`agentic/processo/ciclo.md`, "Trilha enxuta") você escreve **um único documento**, `agentic/projeto/specs/<nome>/tasks/001-<nome>.md`, a partir de `agentic/processo/templates/mudanca.md` e da descrição do humano, **no worktree que o brief indica**, nunca na árvore principal. Nada é commitado antes do Gate 1.
-- Regra dita pelo humano entra com `Fonte: humano:<data>`; regra vinda de oráculo ou decisão cita `oráculo:arquivo:linha` ou `decisão:Dn`.
+- Regra dita pelo humano entra com `Fonte: humano:<AAAA-MM-DD> N<n> "<trecho>"`, pela `N<n>` que o brief traz; regra vinda de oráculo ou decisão cita `oráculo:arquivo:linha` ou `decisão:Dn`.
 - O `dominio` não roda aqui: o que faltar vira pergunta no "Questionário" (opções e recomendação), e a regra que depende dela leva `Fonte: Q<n>`. Você formula; não responde nem fecha pergunta. A resposta vem do humano, pelo orquestrador.
 - Acréscimo a contrato público (constante, campo opcional, rota, símbolo novo) é N3: liste em "Itens N3 (aprovação no Gate 1)" com o porquê de ser só acréscimo. Qualquer outro gatilho N3, ou mudança que não cabe numa única task: recuse a trilha enxuta e diga por quê; a mudança segue pela trilha padrão.
 - Contrato executável, quando houver interface nova ou alterada: esqueleto no worktree (mesma definição de "Produz": corpos são o stub da stack, com a declaração de corpos), só em arquivos de `## Arquivos`, validado com o comando da stack, saída na seção "Contrato executável" (`medido`). Nenhum outro arquivo de produção antes do Gate 1.

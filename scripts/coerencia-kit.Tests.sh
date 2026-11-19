@@ -474,4 +474,12 @@ tl_espera 0 "Gate 1: corpo do commit lista as N<n>" tem core/processo/ciclo.md '
 tl_espera 0 "nenhuma resposta gravada no artefato" nenhum 'Resposta \((humano|Gate 1 delegado)' \
   core adapters docs/exemplos-brief README.md site
 
+tl_espera 0 "dominio: spec sem histórico no Pronto" tem core/papeis/dominio.md 'a spec não tem histórico de rodadas, e o Questionário só tem perguntas em aberto'
+tl_espera 0 "revisor spec: confere N<n> no progress.md" tem core/papeis/revisor.md 'entrada `N<n>` do `progress.md`'
+tl_espera 0 "revisor diff: N<n> no corpo do commit, nas duas trilhas" tem core/papeis/revisor.md 'que o corpo do commit do Gate 1 não registra, nas duas trilhas'
+tl_espera 1 "revisor: fim do texto antigo" tem core/papeis/revisor.md 'resposta do questionário que o corpo desse commit não registra'
+tl_espera 0 "README: nota sobre a fala do humano" tem README.md 'deixa de ser gravada no Questionário'
+
+tl_espera 0 "Fonte do humano sempre com N<n>" nenhum 'humano:<data>' core adapters
+
 tl_fim

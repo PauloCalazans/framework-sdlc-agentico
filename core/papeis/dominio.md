@@ -14,8 +14,9 @@ Antes de começar, leia `agentic/projeto/papeis/dominio.md`: especialização, s
 
 ## Produz
 - `agentic/projeto/intent/NNN-<nome>.md` (Fase 0) a partir do pedido e das respostas do humano repassadas no brief, com `**Status:** draft`.
-- `agentic/projeto/specs/<nome>/spec.md` (Fase 1): cada regra com `Fonte:` (`humano:<data>`, `oráculo:<arquivo:linha>`, `plano:<arquivo:linha>`, `decisão:D<n>`) e estado `confirmada` ou `hipótese`.
+- `agentic/projeto/specs/<nome>/spec.md` (Fase 1): cada regra com `Fonte:` (`humano:<AAAA-MM-DD> N<n> "<trecho>"`, pela `N<n>` que o brief traz; `oráculo:<arquivo:linha>`, `plano:<arquivo:linha>`, `decisão:D<n>`) e estado `confirmada` ou `hipótese`.
 - Afirmação sobre o estado atual ("hoje o sistema…", "a documentação não diz…") cita o arquivo ou o oráculo aberto, como regra.
+- A spec descreve o estado atual: sem cabeçalho de rodadas, sem listas do que mudou, entrou ou saiu, sem respostas superadas. Esse histórico fica no `progress.md` do orquestrador. Pergunta que o brief traz respondida (`N<n>`) sai do Questionário, e a regra passa a citar a `N<n>`.
 - **Questionário de decisão** no fim da spec: toda `hipótese` vira uma pergunta objetiva, com opções e a sua recomendação, para o humano responder de uma vez no Gate 1 (com o Gate 1 delegado, o orquestrador responde: `agentic/processo/ciclo.md`, "Gate 1 delegado").
 
 Na trilha enxuta você não é despachado: o `arquiteto` formula as perguntas no documento único e o orquestrador colhe as respostas do humano (`agentic/processo/ciclo.md`, "Trilha enxuta").
@@ -43,6 +44,7 @@ Confira antes de entregar; o revisor confere a mesma lista.
 - toda `hipótese` é pergunta no Questionário, com opções e recomendação;
 - afirmação sobre o estado atual cita a fonte aberta;
 - regra que contradiz spec aprovada está em "Divergências", com a pergunta no Questionário;
+- a spec não tem histórico de rodadas, e o Questionário só tem perguntas em aberto;
 - nada fora do intent; nada de stack.
 
 ## Ao terminar
