@@ -150,12 +150,12 @@ O exemplo já traz as respostas da entrevista (`agentic/projeto/bootstrap-respos
 
 **Instale no seu projeto:**
 
-1. `sh bootstrap/instalar.sh <caminho-do-projeto>` — copia o kit. Não pergunta nada e não sobrescreve o que o projeto editou; arquivo do kit intacto é atualizado pelo manifesto. Com `--copilot`, acrescenta o adaptador do GitHub Copilot em `.github/`; com `--codex` e `--antigravity`, os do Codex e do Antigravity (agentes, skills em `.agents/skills/` e hooks ativados no passo 3). Veja `docs/portabilidade.md`.
-2. No projeto, abra o Claude Code e rode `/bootstrap` — entrevista sobre contexto e stack; preenche os perfis dos papéis e instancia os controles.
+1. Peça ao agente, numa sessão aberta no seu projeto, que rode `sh <caminho-do-kit>/bootstrap/instalar.sh . <opções>`. Quem instala é o próprio agente; a única ação humana é o passo 3. O instalador copia o kit, não pergunta nada e não sobrescreve o que o projeto editou; arquivo do kit intacto é atualizado pelo manifesto. Passe as opções de **todas** as ferramentas que o time vai usar: `--copilot` acrescenta o adaptador do GitHub Copilot em `.github/`; `--codex` e `--antigravity`, os do Codex e do Antigravity (agentes, skills em `.agents/skills/` e hooks ativados no passo 3). Sem a opção, a ferramenta fica sem os agentes e sem as skills, inclusive a do `bootstrap`. Veja `docs/portabilidade.md`.
+2. **Abra uma sessão nova** no projeto e rode `/bootstrap` (no Codex, `$bootstrap`) — entrevista sobre contexto e stack; preenche os perfis dos papéis e instancia os controles. As ferramentas carregam comandos e skills ao abrir a sessão: na mesma sessão em que o kit foi instalado, o `bootstrap` ainda não aparece.
 3. Ative as proteções (ação humana): `sh agentic/mecanismos/scripts/ativar-protecoes.sh`.
 4. Comece pelo primeiro intent: `/intent <ideia>` (ou `/mudanca <descrição>` para uma mudança pequena).
 
-No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); dentro do Claude Code isso já é tratado. No Codex e no Antigravity, que usam o PowerShell, hooks e skills chamam `git -c alias.agentic-sh=!sh agentic-sh <script>`, que roda o `sh` do git.
+No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); dentro do Claude Code isso já é tratado. No Codex e no Antigravity, que usam o PowerShell, hooks e skills chamam `git -c alias.agentic-sh=!sh agentic-sh <script>`, que roda o `sh` do git. O agente instala da mesma forma: `git -c alias.agentic-sh=!sh agentic-sh <caminho-do-kit>/bootstrap/instalar.sh . --codex`.
 
 ## Enriqueça os perfis dos papéis
 
