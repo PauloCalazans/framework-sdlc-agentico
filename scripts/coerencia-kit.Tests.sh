@@ -465,4 +465,27 @@ done
 tl_espera 0 "AGENTS.md: lançador do Windows" tem core/templates/AGENTS.md 'git -c alias.agentic-sh=!sh agentic-sh'
 tl_espera 1 "README: hook PreToolUse não é mais só do Claude Code" tem README.md '| hook `PreToolUse` do Claude Code |'
 
+# --- Artefatos enxutos (docs/plans/2026-11-19-artefatos-enxutos.md)
+tl_espera 0 "fala do humano: formato N<n> no ciclo" tem core/processo/ciclo.md 'N<n> (humano:<AAAA-MM-DD>)'
+tl_espera 0 "fala do humano: delegado com N<n>" tem core/processo/ciclo.md 'N<n> (Gate 1 delegado, D<n>)'
+tl_espera 0 "fala do humano: Fonte com ID e trecho" tem core/templates/spec.md 'humano:<AAAA-MM-DD> N<n>'
+tl_espera 0 "fala do humano: Fonte com ID e trecho (enxuta)" tem core/templates/mudanca.md 'humano:<AAAA-MM-DD> N<n>'
+tl_espera 0 "Gate 1: corpo do commit lista as N<n>" tem core/processo/ciclo.md 'é o registro versionado da fala do humano'
+tl_espera 0 "nenhuma resposta gravada no artefato" nenhum 'Resposta \((humano|Gate 1 delegado)' \
+  core adapters docs/exemplos-brief README.md site
+
+tl_espera 0 "dominio: spec sem histórico no Pronto" tem core/papeis/dominio.md 'a spec não tem histórico de rodadas, e o Questionário só tem perguntas em aberto'
+tl_espera 0 "revisor spec: confere N<n> no progress.md" tem core/papeis/revisor.md 'entrada `N<n>` do `progress.md`'
+tl_espera 0 "revisor diff: N<n> no corpo do commit, nas duas trilhas" tem core/papeis/revisor.md 'que o corpo do commit do Gate 1 não registra, nas duas trilhas'
+tl_espera 1 "revisor: fim do texto antigo" tem core/papeis/revisor.md 'resposta do questionário que o corpo desse commit não registra'
+tl_espera 0 "README: nota sobre a fala do humano" tem README.md 'deixa de ser gravada no Questionário'
+
+tl_espera 0 "Fonte do humano sempre com N<n>" nenhum 'humano:<data>' core adapters
+
+tl_espera 0 "Gate 1: corpo lista toda N<n>, citada ou não" tem core/processo/ciclo.md 'citada ou não nos artefatos'
+tl_espera 0 "Gate 1 padrão: quem grava as respostas dadas no gate" tem core/processo/ciclo.md 'As respostas dadas no próprio Gate 1 entram nos artefatos antes desse commit'
+tl_espera 0 "brief: revisor recebe o progress.md com as N<n>" tem core/templates/brief.md 'o caminho do `progress.md` em "Leia só isto"'
+tl_espera 0 "intent: resposta da Fase 0 vira N<n>" tem adapters/claude-code/commands/intent.md 'grava cada resposta como `N<n>` no `progress.md`'
+tl_espera 0 "exemplos e README: Fonte do humano com N<n>" nenhum 'humano:[0-9]{4}-[0-9]{2}-[0-9]{2} *(\)|\||,)'   core adapters docs/exemplos-brief README.md site
+
 tl_fim

@@ -4,7 +4,7 @@
 <!-- pendente | em-revisão | publicada  (em-andamento e integrada não são escritos: derivam do git) -->
 **Branch:** <nome>/001-<nome>
 **Trilha:** enxuta
-<!-- Autoria (agentic/processo/ciclo.md, "Trilha enxuta"): o `arquiteto` escreve as seções; as respostas do Questionário, a coluna "Decisão do humano", "Questões em aberto" e "Rulings" são só do orquestrador. Ninguém escreve aprovação neste documento: o Gate 1 é o commit `docs(mudanca): <nome> aprovada (Gate 1)`. -->
+<!-- Autoria (agentic/processo/ciclo.md, "Trilha enxuta"): o `arquiteto` escreve as seções; tirar do Questionário a pergunta respondida (com a troca da `Fonte:` pela `N<n>`), a coluna "Decisão do humano", "Questões em aberto" e "Rulings" são só do orquestrador. Ninguém escreve aprovação neste documento: o Gate 1 é o commit `docs(mudanca): <nome> aprovada (Gate 1)`. -->
 
 ## Problema e resultado
 <2–4 linhas: o que incomoda hoje e como o comportamento deve ficar>
@@ -13,7 +13,7 @@
 <!-- Regra que depende de pergunta do Questionário leva `Q<n>` como fonte até a resposta; no Gate 1 toda regra tem fonte definitiva (nenhuma hipótese). -->
 | # | Regra | Fonte |
 |---|---|---|
-| R1 | <regra> | humano:<AAAA-MM-DD> \| oráculo:<arquivo>:<linha> \| plano:<arquivo>:<linha> \| decisão:D<n> \| Q<n> (antes da resposta) |
+| R1 | <regra> | humano:<AAAA-MM-DD> N<n> "<trecho>" \| oráculo:<arquivo>:<linha> \| plano:<arquivo>:<linha> \| decisão:D<n> \| Q<n> (antes da resposta) |
 
 ## Critérios de aceite
 - CA1 (R1): dado <contexto>, quando <ação>, então <resultado observável>
@@ -55,10 +55,8 @@
 - <o que esta mudança não faz>
 
 ## Questionário
-<!-- O `arquiteto` escreve a pergunta, as opções e a recomendação; nunca a resposta. O orquestrador leva ao humano no Gate 1 e grava a resposta abaixo de cada pergunta. -->
+<!-- O `arquiteto` escreve a pergunta, as opções e a recomendação; nunca a resposta. Só perguntas em aberto: o orquestrador leva ao humano no Gate 1, grava a resposta no progress.md e no corpo do commit do Gate 1 (agentic/processo/ciclo.md, "Resposta do humano") e tira daqui a pergunta respondida. -->
 1. Q1: <pergunta objetiva> — opções: (a) <…> (b) <…>. Recomendação: <…>, porque <…>.
-   <!-- Resposta (humano:AAAA-MM-DD): <opção> — <trecho da mensagem do humano>
-        Gate 1 delegado: Resposta (Gate 1 delegado, D<n>): <opção> — <motivo> -->
 <!-- ou: - Nenhuma. -->
 
 ## Questões em aberto

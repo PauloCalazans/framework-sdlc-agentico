@@ -27,7 +27,7 @@ Worktree: <caminho absoluto> (branch <branch>; antes do Gate 1 da trilha padrão
 <até 5 linhas; cada uma, uma entrega verificável — a entrega, nunca a solução: valor, nome, caminho de implementação só se vier de "Já decidido". No `revisor`, antes das entregas, uma linha a mais: `Rodada <k> do <artefato>; parecer anterior: <caminho absoluto | não há>`>
 
 ## Já decidido
-<só o que tem origem citável, um por linha com a origem: resposta do humano (data), R-n, D<n>, item N3 aprovado; ou: nenhum. Ruling nova: o orquestrador a escreve em `## Rulings` da task no worktree e o brief do próximo papel manda incluir essa mudança no próximo commit dele (RED, GREEN ou correção); o revisor `diff` só é despachado com a Ruling já commitada>
+<só o que tem origem citável, um por linha com a origem: resposta do humano (`N<n>`, data), R-n, D<n>, item N3 aprovado; ou: nenhum. Ruling nova: o orquestrador a escreve em `## Rulings` da task no worktree e o brief do próximo papel manda incluir essa mudança no próximo commit dele (RED, GREEN ou correção); o revisor `diff` só é despachado com a Ruling já commitada>
 
 ## Nunca faz
 <as linhas de "No brief" do contrato que valem nesta rodada, coladas; mais os itens de "Padrões" e "Nunca faz neste
@@ -72,6 +72,7 @@ e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferênci
 - [ ] cabeçalho de quatro linhas, caminhos absolutos, `Papel:` igual ao nome do contrato;
 - [ ] em correção: copiado do brief anterior, com "Desde a rodada anterior";
 - [ ] toda leitura com intervalo; todo comando com saída limitada;
+- [ ] revisor `spec` ou `mudanca` com regra que cita `N<n>`: o caminho do `progress.md` em "Leia só isto", com as linhas das `N<n>` citadas;
 - [ ] `## Impacto` com as buscas coladas (antes do Gate 1) ou as linhas do Impacto aprovado da task (depois), cada resultado com trecho em "Leia só isto";
 - [ ] revisor: linha da rodada em "O que fazer", com a rodada `<k>` e o último parecer do mesmo artefato, contados em todos os pareceres dele (`agentic/processo/templates/parecer.md`), e o mesmo `## Impacto` do brief do autor;
 - [ ] teto declarado;

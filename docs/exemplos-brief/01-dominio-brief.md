@@ -12,7 +12,7 @@ agentic/projeto/specs/pedidos/spec.md. Precisa de outro arquivo: PARE e pergunte
 - Questionário de decisão no fim: toda `hipótese` vira pergunta com opções e a sua recomendação.
 
 ## Já decidido
-- Pedido sem item é recusado (humano:2026-11-05, no intent).
+- Pedido sem item é recusado (humano:2026-11-05 N1, no intent).
 
 ## Nunca faz
 - Regra vinda de oráculo: cite `arquivo:linha`.
