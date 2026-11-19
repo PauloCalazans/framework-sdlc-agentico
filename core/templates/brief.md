@@ -72,6 +72,7 @@ e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferênci
 - [ ] cabeçalho de quatro linhas, caminhos absolutos, `Papel:` igual ao nome do contrato;
 - [ ] em correção: copiado do brief anterior, com "Desde a rodada anterior";
 - [ ] toda leitura com intervalo; todo comando com saída limitada;
+- [ ] revisor `spec` ou `mudanca` com regra que cita `N<n>`: o caminho do `progress.md` em "Leia só isto", com as linhas das `N<n>` citadas;
 - [ ] `## Impacto` com as buscas coladas (antes do Gate 1) ou as linhas do Impacto aprovado da task (depois), cada resultado com trecho em "Leia só isto";
 - [ ] revisor: linha da rodada em "O que fazer", com a rodada `<k>` e o último parecer do mesmo artefato, contados em todos os pareceres dele (`agentic/processo/templates/parecer.md`), e o mesmo `## Impacto` do brief do autor;
 - [ ] teto declarado;

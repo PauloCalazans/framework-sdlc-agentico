@@ -110,7 +110,7 @@ O `arquiteto` recusa a trilha enxuta: "mudança em regra de desconto" é gatilho
    **Trilha:** enxuta
 
    ## Regras
-   | R1 | Preço exibido no formato brasileiro: "R$ 10,00" | humano:2026-10-05 |
+   | R1 | Preço exibido no formato brasileiro: "R$ 10,00" | humano:2026-10-05 N1 "R$ 10,00" |
 
    ## Critérios de aceite
    - CA1 (R1): dado o preço 10, quando formatado, então o texto é "R$ 10,00"

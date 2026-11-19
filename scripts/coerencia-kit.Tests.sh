@@ -482,4 +482,10 @@ tl_espera 0 "README: nota sobre a fala do humano" tem README.md 'deixa de ser gr
 
 tl_espera 0 "Fonte do humano sempre com N<n>" nenhum 'humano:<data>' core adapters
 
+tl_espera 0 "Gate 1: corpo lista toda N<n>, citada ou não" tem core/processo/ciclo.md 'citada ou não nos artefatos'
+tl_espera 0 "Gate 1 padrão: quem grava as respostas dadas no gate" tem core/processo/ciclo.md 'As respostas dadas no próprio Gate 1 entram nos artefatos antes desse commit'
+tl_espera 0 "brief: revisor recebe o progress.md com as N<n>" tem core/templates/brief.md 'o caminho do `progress.md` em "Leia só isto"'
+tl_espera 0 "intent: resposta da Fase 0 vira N<n>" tem adapters/claude-code/commands/intent.md 'grava cada resposta como `N<n>` no `progress.md`'
+tl_espera 0 "exemplos e README: Fonte do humano com N<n>" nenhum 'humano:[0-9]{4}-[0-9]{2}-[0-9]{2} *(\)|\||,)'   core adapters docs/exemplos-brief README.md site
+
 tl_fim
