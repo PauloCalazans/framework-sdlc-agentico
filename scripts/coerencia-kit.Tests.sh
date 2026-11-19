@@ -465,4 +465,13 @@ done
 tl_espera 0 "AGENTS.md: lançador do Windows" tem core/templates/AGENTS.md 'git -c alias.agentic-sh=!sh agentic-sh'
 tl_espera 1 "README: hook PreToolUse não é mais só do Claude Code" tem README.md '| hook `PreToolUse` do Claude Code |'
 
+# --- Artefatos enxutos (docs/plans/2026-11-19-artefatos-enxutos.md)
+tl_espera 0 "fala do humano: formato N<n> no ciclo" tem core/processo/ciclo.md 'N<n> (humano:<AAAA-MM-DD>)'
+tl_espera 0 "fala do humano: delegado com N<n>" tem core/processo/ciclo.md 'N<n> (Gate 1 delegado, D<n>)'
+tl_espera 0 "fala do humano: Fonte com ID e trecho" tem core/templates/spec.md 'humano:<AAAA-MM-DD> N<n>'
+tl_espera 0 "fala do humano: Fonte com ID e trecho (enxuta)" tem core/templates/mudanca.md 'humano:<AAAA-MM-DD> N<n>'
+tl_espera 0 "Gate 1: corpo do commit lista as N<n>" tem core/processo/ciclo.md 'é o registro versionado da fala do humano'
+tl_espera 0 "nenhuma resposta gravada no artefato" nenhum 'Resposta \((humano|Gate 1 delegado)' \
+  core adapters docs/exemplos-brief README.md site
+
 tl_fim
