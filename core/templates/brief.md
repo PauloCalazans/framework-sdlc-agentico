@@ -27,7 +27,7 @@ Worktree: <caminho absoluto> (branch <branch>; antes do Gate 1 da trilha padrão
 <até 5 linhas; cada uma, uma entrega verificável — a entrega, nunca a solução: valor, nome, caminho de implementação só se vier de "Já decidido". No `revisor`, antes das entregas, uma linha a mais: `Rodada <k> do <artefato>; parecer anterior: <caminho absoluto | não há>`>
 
 ## Já decidido
-<só o que tem origem citável, um por linha com a origem: resposta do humano (`N<n>`, data), R-n, D<n>, item N3 aprovado; ou: nenhum. Ruling nova: o orquestrador a escreve em `## Rulings` da task no worktree e o brief do próximo papel manda incluir essa mudança no próximo commit dele (RED, GREEN ou correção); o revisor `diff` só é despachado com a Ruling já commitada>
+<só o que tem origem citável, um por linha com a origem: resposta do humano (`N<n>`, data), R-n, D<n>, item N3 aprovado; ou: nenhum. O que já está na spec, no design ou na task entra só pelo ID e a origem (`R25 — humano:2026-11-19 N1`), sem reescrever o conteúdo; a resposta do humano que ainda não está em artefato entra com o texto da entrada `N<n>`. Ruling nova: o orquestrador a escreve em `## Rulings` da task no worktree e o brief do próximo papel manda incluir essa mudança no próximo commit dele (RED, GREEN ou correção); o revisor `diff` só é despachado com a Ruling já commitada>
 
 ## Nunca faz
 <as linhas de "No brief" do contrato que valem nesta rodada, coladas; mais os itens de "Padrões" e "Nunca faz neste
@@ -35,9 +35,10 @@ projeto" do perfil que se aplicam. Em forma de ação: "PARE e diga", nunca um l
 
 ## Leia só isto
 - <arquivo>:<a>-<b> — <para quê> (até ~80 linhas por trecho; nada de "leia o arquivo" nem "veja o commit")
+- <revisor na rodada `k ≥ 2`: o delta vem primeiro. No modo `diff`: `git diff <SHA final revisado no parecer anterior>..HEAD`. Nos modos `spec`, `design` e `mudanca`: `diff -ruN <NN-revisado/ do despacho anterior> <NN-revisado/ deste despacho>`, que cobre todo arquivo revisado (design, tasks, esqueleto, `## Arquivos`). Sempre com a saída limitada; se o corte esconder parte do delta, divida por arquivo. O artefato inteiro só na rodada 1>
 
 ## Impacto
-<o que a entrega muda e quem já depende disso, `medido`, para o papel não descobrir tarde. Antes do Gate 1 (`dominio`, `arquiteto`): a saída das buscas que você rodou na árvore, colada com o comando de cada uma — para cada termo, símbolo, rota, schema ou regra que muda segundo o pedido ou o intent (para o `dominio`), a spec ou, na trilha enxuta, a descrição do humano (para o `arquiteto`): as specs aprovadas que citam a regra e, para o `arquiteto`, também quem usa (`arquivo:linha`) e os testes que o exercitam; todo resultado tem trecho em "Leia só isto". Depois do Gate 1 (`testes`, `dev`): as linhas de `## Impacto` do design (ou do documento enxuto) que tocam esta task, coladas, com o teste existente afetado; teste afetado que contradiz a spec leva a referência de remoção em "Já decidido" (`agentic/processo/ciclo.md`, "Remoção de comportamento"). O `revisor` recebe o mesmo `## Impacto` do brief do autor. Ou: nenhum (só arquivos novos), com a busca que mostrou isso>
+<o que a entrega muda e quem já depende disso, `medido`, para o papel não descobrir tarde. Antes do Gate 1 (`dominio`, `arquiteto`): para o `dominio`, também a resposta do oráculo consultado antes da spec, quando houver (`agentic/processo/ciclo.md`, "Oráculo"); a saída das buscas que você rodou na árvore, colada com o comando de cada uma — para cada termo, símbolo, rota, schema ou regra que muda segundo o pedido ou o intent (para o `dominio`), a spec ou, na trilha enxuta, a descrição do humano (para o `arquiteto`): as specs aprovadas que citam a regra e, para o `arquiteto`, também quem usa (`arquivo:linha`) e os testes que o exercitam; todo resultado tem trecho em "Leia só isto". Depois do Gate 1 (`testes`, `dev`): as linhas de `## Impacto` do design (ou do documento enxuto) que tocam esta task, coladas, com o teste existente afetado; teste afetado que contradiz a spec leva a referência de remoção em "Já decidido" (`agentic/processo/ciclo.md`, "Remoção de comportamento"). O `revisor` recebe o mesmo `## Impacto` do brief do autor. Ou: nenhum (só arquivos novos), com a busca que mostrou isso>
 
 ## Comandos
 - <comando exato, com saída limitada e em primeiro plano>
@@ -78,6 +79,7 @@ e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferênci
 - [ ] teto declarado;
 - [ ] "Nunca faz" colado, não linkado;
 - [ ] nenhuma linha decide algo sem origem citável;
+- [ ] mais de 60 linhas fora de ## Impacto e dos trechos que ele acrescenta: enxugue O que fazer e Já decidido antes de enviar;
 - [ ] "Casos a cobrir" igual no brief do autor e no do revisor.
 
 Ao receber (antes de passar a entrega adiante):

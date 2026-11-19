@@ -13,7 +13,7 @@ escreve o parecer, fora do worktree. Não corrige e não comita.
 - Revise o intervalo novo d4e5f6a..b7c8d9e: nada além do que I1 e M1 pediam, e o RED a1b2c3d intacto.
 
 ## Já decidido
-- Q1: desconto não acumula (humano:2026-11-06 N2). R-1: o erro é código, não mensagem.
+- CA-2 — humano:2026-11-06 N2. R-1 — `## Rulings` da task.
 
 ## Nunca faz
 - Escreva só o parecer, no caminho do brief, fora do worktree; não corrija nada.

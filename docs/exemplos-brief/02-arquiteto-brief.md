@@ -14,7 +14,7 @@ Task: /home/dev/loja/agentic/projeto/specs/pedidos/spec.md — fase 2 (design)
 - Tasks em tasks/NNN-<nome>.md, cada uma com `**Branch:**`, `## Arquivos` e critérios de pronto.
 
 ## Já decidido
-- Q1 do questionário: desconto não acumula (humano:2026-11-06 N2).
+- CA-2 — humano:2026-11-06 N2.
 
 ## Nunca faz
 - Contrato executável só com esqueleto: corpo com comportamento é o stub da stack; corpo que não é stub vai na declaração de corpos, com o porquê.

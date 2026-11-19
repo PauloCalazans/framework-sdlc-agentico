@@ -13,7 +13,7 @@ escreve o parecer, fora do worktree. Não corrige e não comita.
 - Critério de aceite a critério de aceite: o teste prova o CA? Aderência ao design (D1 a D3), segurança, escopo.
 
 ## Já decidido
-- Q1: desconto não acumula (humano:2026-11-06 N2). R-1: o erro é código, não mensagem.
+- CA-2 — humano:2026-11-06 N2. R-1 — `## Rulings` da task.
 
 ## Nunca faz
 - Escreva só o parecer, no caminho do brief, fora do worktree; não corrija nada.

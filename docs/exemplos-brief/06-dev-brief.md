@@ -13,7 +13,7 @@ src/pedidos/criar_pedido.*, src/pedidos/desconto.*, src/pedidos/erros.*. Nunca t
 - O RED a1b2c3d continua passando, sem mudar teste nenhum.
 
 ## Já decidido
-- Q1: desconto não acumula (humano:2026-11-06 N2). R-1: o erro é código, não mensagem.
+- CA-2 — humano:2026-11-06 N2. R-1 — `## Rulings` da task.
 
 ## Nunca faz
 - Teste do RED parece errado: PARE e reporte `BLOQUEADO`; não contorne no código de produção.

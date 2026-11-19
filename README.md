@@ -72,7 +72,7 @@ Regras completas: `core/processo/ciclo.md`.
 
 ### Modo automático e Gate 1 delegado
 
-Com `enabled: true` em `agentic/auto-mode`, o orquestrador encadeia as tasks e publica os PRs sem pedir confirmação. Com plataforma de PR, quando a task anterior ainda não foi integrada, a seguinte sai da branch dela: a task declara `**Base:** <branch anterior>` e o `verify.sh` compara com essa branch até ela entrar na principal.
+Com `enabled: true` em `agentic/auto-mode`, o orquestrador encadeia as tasks e publica os PRs sem pedir confirmação, e para na 3ª devolução de um artefato até o humano escolher a saída. Com plataforma de PR, quando a task anterior ainda não foi integrada, a seguinte sai da branch dela: a task declara `**Base:** <branch anterior>` e o `verify.sh` compara com essa branch até ela entrar na principal.
 
 O humano também pode delegar o Gate 1, por exemplo depois de escrever um plano longo. O orquestrador passa a aprovar intent, spec e design com base no plano e nos pareceres do `revisor`, e só chama o humano para o que a delegação não cobre. A delegação é uma decisão registrada e vale até ser revogada:
 
@@ -256,7 +256,7 @@ Instâncias antigas continuam funcionando: as variáveis novas de `agentic/confi
 - `em-andamento` é derivado do git; a Ruling vai no próximo commit da task, sem commit próprio.
 - O commit RED anota `CA<n> … → test: <arquivo>::<nome>`, conferido por `verifica-red.sh`; task sem anotação passa com `aviso:`.
 - O brief ganha `## Impacto`: antes do Gate 1, o orquestrador roda as buscas (specs aprovadas que citam a regra; para o `arquiteto`, também quem usa o que muda e os testes que o exercitam) e cola a saída, com os trechos em "Leia só isto"; depois do Gate 1, cola as linhas do Impacto aprovado que tocam a task, e o `testes` roda cada teste existente afetado antes do RED. A meta de ~40 linhas não conta essa seção nem os trechos que ela acrescenta a "Leia só isto".
-- A rodada do parecer conta todos os pareceres do mesmo artefato, também os de ajuste reaberto por Ruling; a 3ª devolução do `ciclo.md` é o 3º `DEVOLVIDO` entre esses mesmos pareceres, e a contagem nunca recomeça.
+- A rodada do parecer conta todos os pareceres do mesmo artefato, também os de ajuste reaberto por Ruling; a 3ª devolução do `ciclo.md` é o 3º `DEVOLVIDO` entre esses mesmos pareceres, e a contagem nunca recomeça. Nela o orquestrador para de verdade: grava a parada no `progress.md` e só despacha de novo quando o humano decide o ponto que reabre o artefato, reduz o escopo ou autoriza mais uma rodada.
 - A resposta do humano deixa de ser gravada no Questionário: fica no `progress.md` como `N<n>` e, no Gate 1, no corpo do commit de registro; a regra cita `humano:<AAAA-MM-DD> N<n> "<trecho>"` e a pergunta respondida sai do Questionário. Specs já aprovadas não mudam, e o `verifica-artefato.sh` não verifica artefato aprovado.
 - Para medir: `grep` da coluna Causa nos pareceres de `agentic/.estado/execucao/` e das linhas "Rodadas" nos PRs.
 

@@ -14,7 +14,7 @@ Antes de começar, leia `agentic/projeto/papeis/revisor.md`: especialização, s
 
 ## Rodada de correção
 - Confira cada achado anterior na tabela "Rodada anterior" do parecer.
-- Revise o delta e o impacto do delta.
+- Revise o delta e o impacto do delta: leia o delta do brief e abra o resto do artefato só onde o delta toca ou onde um achado anterior aponta.
 - Achado novo fora do delta, Crítico ou Importante, entra e bloqueia; marque `já na rodada 1` quando o defeito já estava no artefato da rodada 1.
 
 ## Consome
