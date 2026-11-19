@@ -502,4 +502,9 @@ tl_espera 0 "ciclo: cópia do artefato revisado" tem core/processo/ciclo.md 'NN-
 tl_espera 0 "revisor: lê o delta primeiro" tem core/papeis/revisor.md 'leia o delta do brief'
 tl_espera 0 "revisor: achado fora do delta continua bloqueando" tem core/papeis/revisor.md 'Achado novo fora do delta, Crítico ou Importante, entra e bloqueia'
 
+b=core/templates/brief.md
+tl_espera 0 "brief: Já decidido por ID" tem $b 'entra só pelo ID e a origem'
+tl_espera 0 "brief: aviso acima de 60 linhas" tem $b 'mais de 60 linhas fora de ## Impacto'
+tl_espera 0 "brief: correção continua copiando o anterior inteiro" tem $b 'copie para um arquivo novo o brief anterior do mesmo papel, inteiro'
+
 tl_fim
