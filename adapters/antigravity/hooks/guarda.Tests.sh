@@ -61,5 +61,23 @@ hook() { printf '%s' '{"toolCall":{"name":"run_command","args":{"CommandLine":"g
 tl_espera 0 "hooks.json: lançador roda o guarda (de uma subpasta)" hook
 tl_contem '"decision":"deny"' "hooks.json: lançador nega --no-verify"
 
+# Escapes que o JSON permite e o comando não pode esconder: & como escape unicode.
+tl_espera 0 "run_command && como escape unicode" roda '{"toolCall":{"name":"run_command","args":{"CommandLine":"git add . \u0026\u0026 gh pr merge 1"}}}'
+tl_contem '"decision":"deny"' "&& em escape unicode: deny"
+# pre-tool-use.sh com erro (código diferente de 2) nega: erro não vira liberação.
+cp "$r/.claude/hooks/pre-tool-use.sh" "$r/ptu.bak"
+printf '%s\n' '#!/bin/sh' 'echo falhou >&2' 'exit 1' > "$r/.claude/hooks/pre-tool-use.sh"
+tl_espera 0 "run_command com pre-tool-use.sh com erro" cmd 'git status'
+tl_contem '"decision":"deny"' "erro do pre-tool-use: deny"
+tl_espera 0 "erro do pre-tool-use: um objeto JSON" um_objeto
+cp "$r/ptu.bak" "$r/.claude/hooks/pre-tool-use.sh"
+
+# lib-guarda.sh ausente nega, com um objeto JSON.
+mv "$r/.agents/hooks/lib-guarda.sh" "$r/lib.bak"
+tl_espera 0 "run_command com lib-guarda.sh ausente" cmd 'git status'
+tl_contem '"decision":"deny"' "lib ausente: deny"
+tl_espera 0 "lib ausente: um objeto JSON" um_objeto
+mv "$r/lib.bak" "$r/.agents/hooks/lib-guarda.sh"
+
 rm -rf "$r"
 tl_fim

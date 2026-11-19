@@ -2,9 +2,15 @@
 # As listas (comandos-negados.txt, caminhos-protegidos.txt) espelham o deny de .claude/settings.json;
 # o coerencia-kit do kit confere. Lista ausente bloqueia: proteção que some não pode virar liberação.
 
-# guarda_norm <caminho>: barras "/", drive "/c/" vira "c:/", tudo em minúsculas (o Windows não distingue).
+# guarda_norm <caminho>: forma canônica para comparar. Barras "/", tudo em minúsculas (o Windows não distingue),
+# drive "/c/" vira "c:/", "//" vira "/", "." e "x/.." se resolvem, e o ponto ou espaço no fim de um nome some
+# (o Windows grava "config." como "config").
 guarda_norm() {
-  printf '%s\n' "$1" | tr '\' '/' | sed -E 's#^/([A-Za-z])/#\1:/#' | tr '[:upper:]' '[:lower:]'
+  printf '%s\n' "$1" | tr '\\' '/' | tr '[:upper:]' '[:lower:]' | sed -E \
+    -e 's#^/([a-z])/#\1:/#' -e 's#/+#/#g' \
+    -e ':p' -e 's#/\./#/#g' -e 'tp' -e 's#^(\./)+##' -e 's#/\.$##' \
+    -e ':q' -e 's#(^|/)([^/.][^/]*|\.[^/.][^/]*)/\.\.(/|$)#\1#' -e 'tq' \
+    -e 's#([^/.])[. ]+(/|$)#\1\2#g' -e 's#(.)/$#\1#'
 }
 
 # guarda_raiz: raiz do repositório com barras "/" (GUARDA_RAIZ, se definida, vence o git).
@@ -40,6 +46,8 @@ guarda_protegido() {
 
 # guarda_texto <json> <campo>: imprime o valor do campo — texto com os escapes JSON desfeitos, ou lista de textos
 # juntada com espaço (o Codex pode mandar o comando como lista). Campo ausente: retorno 1.
+# Escapes: \\ \" \/ \n \t (vira espaço), \r \b \f (somem) e o escape unicode de 00 a 7F (há codificador que escreve
+# "&" assim); fora dessa faixa o escape fica como está.
 guarda_texto() {
   gt_j=$(printf '%s' "$1" | tr -d '\r' | tr '\n' ' ')
   if printf '%s' "$gt_j" | grep -qE "\"$2\"[[:space:]]*:[[:space:]]*\""; then
@@ -50,21 +58,48 @@ guarda_texto() {
   else
     return 1
   fi
-  printf '%s\n' "$gt_v" | awk '{ gsub(/\\\\/, "\001"); gsub(/\\n/, "\n"); gsub(/\\t/, " "); gsub(/\\"/, "\""); gsub(/\001/, "\\"); print }'
+  printf '%s\n' "$gt_v" | awk '
+    function hx(c) { return index("0123456789abcdef", tolower(c)) - 1 }
+    {
+      gsub(/\\\\/, "\001")
+      out = ""
+      while (match($0, /[\\]u00[0-7][0-9a-fA-F]/)) {
+        n = hx(substr($0, RSTART + 4, 1)) * 16 + hx(substr($0, RSTART + 5, 1))
+        if (n == 10) ch = "\n"; else if (n == 9) ch = " "; else if (n == 92) ch = "\001"
+        else if (n < 32 || n == 127) ch = ""; else ch = sprintf("%c", n)
+        out = out substr($0, 1, RSTART - 1) ch
+        $0 = substr($0, RSTART + 6)
+      }
+      $0 = out $0
+      gsub(/\\n/, "\n"); gsub(/\\t/, " "); gsub(/\\[rbf]/, ""); gsub(/\\\//, "/"); gsub(/\\"/, "\"")
+      gsub(/\001/, "\\"); print
+    }'
 }
 
-# guarda_negado <comando> <lista>: 0 se algum trecho (separado por ; & | ou quebra de linha) começa por um
-# prefixo da lista seguido de espaço ou fim. Antes, tira o embrulho de shell (bash -lc, powershell -Command, cmd /c)
-# e reduz o lançador do Windows (git -c alias.agentic-sh=!sh agentic-sh) a "sh".
+# guarda_negado <comando> <lista>: 0 se algum trecho começa por um prefixo da lista seguido de espaço ou fim.
+# Compara em minúsculas, com espaços e tabs reduzidos a um espaço. Trechos: separados por ; & | ( ) { } crase e
+# quebra de linha. Em cada trecho, tira (repetindo) aspas, $ e ! iniciais, palavras-chave (then, do, if…), env,
+# command, exec, atribuições VAR=x e os embrulhos de shell (bash/sh [opções] -c, powershell/pwsh [opções]
+# -Command/-c, cmd /c). Depois reduz o lançador do Windows (git -c alias.agentic-sh=!sh agentic-sh), bash e sh.exe
+# a "sh", e tira as opções globais do git (-C x, -c k=v, --no-pager…). Bloquear demais é aceito; deixar passar não.
 guarda_negado() {
   gn_lista=$(guarda_lista "$2") || return 0
-  printf '%s\n' "$1" | tr ';&|' '\n\n\n' | sed -E \
+  gn_lista=$(printf '%s\n' "$gn_lista" | tr '[:upper:]' '[:lower:]' | tr -s ' \t' '  ')
+  printf '%s\n' "$1" | tr '[:upper:]' '[:lower:]' | tr ';&|(){}`' '\n\n\n\n\n\n\n\n' | tr -s ' \t' '  ' | sed -E \
+    -e ':a' \
     -e 's/^[[:space:]]+//' \
-    -e 's/^(bash|sh)(\.exe)?( -[a-z]+)* -[a-z]*c[[:space:]]+//' \
-    -e 's/^(powershell|pwsh)(\.exe)?( -[A-Za-z]+)* -[Cc]ommand[[:space:]]+//' \
-    -e 's#^cmd(\.exe)? /[cC][[:space:]]+##' \
-    -e "s/^[\"'[:space:]]+//" -e "s/[\"'[:space:]]+\$//" \
-    -e 's/^git -c alias\.agentic-sh=!sh agentic-sh /sh /' | {
+    -e "s/^[\"'\$!]+//" \
+    -e 's/^(then|do|else|elif|if|while|until|env|command|exec|nohup|time|sudo|[a-z_][a-z0-9_]*=[^ ]*) +//' \
+    -e 's/^(bash|sh)(\.exe)?( +-[-a-z]+)* +-[a-z]*c +//' \
+    -e 's/^(powershell|pwsh)(\.exe)?( +-(executionpolicy|ep|windowstyle|w|workingdirectory|wd|outputformat|of|inputformat|if|configurationname) +[^ ]+| +-[a-z]+)* +-c(ommand)? +//' \
+    -e 's#^cmd(\.exe)?( +/[a-z]+)+ +##' \
+    -e 'ta' \
+    -e "s/[\"'[:space:]]+\$//" \
+    -e 's/^git -c alias\.agentic-sh=!sh agentic-sh /sh /' \
+    -e 's/^(bash|bash\.exe|sh\.exe) /sh /' \
+    -e ':g' \
+    -e 's/^git +(-c +[^ ]+|-c[^ ]+|--(git-dir|work-tree|namespace|exec-path|super-prefix|config-env)(=| +)[^ ]+|--[a-z-]+) +/git /' \
+    -e 'tg' | {
     while IFS= read -r gn_t; do
       [ -n "$gn_t" ] || continue
       printf '%s\n' "$gn_lista" | {

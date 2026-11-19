@@ -41,5 +41,21 @@ hook() { printf '%s' "$1" | (cd "$r/.codex" && sh -c "$cmd"); }
 tl_espera 2 "hooks.json: lançador roda o guarda e bloqueia --no-verify (de uma subpasta)" hook '{"tool_name":"Bash","tool_input":{"command":"git push origin main --no-verify"}}'
 tl_espera 0 "hooks.json: lançador deixa passar git status" hook '{"tool_name":"Bash","tool_input":{"command":"git status"}}'
 
+# Escapes que o JSON permite e o comando não pode esconder: & como escape unicode, patch com CRLF.
+tl_espera 2 "bash: && como escape unicode" roda '{"tool_name":"Bash","tool_input":{"command":"git add . \u0026\u0026 gh pr merge 1"}}'
+tl_espera 2 "patch com CRLF: agentic/config" roda '{"tool_name":"apply_patch","tool_input":{"command":"*** Begin Patch\r\n*** Update File: agentic/config\r\n@@\r\n-a\r\n+b\r\n*** End Patch"}}'
+# pre-tool-use.sh com erro (código diferente de 2) bloqueia: o Codex trata outro código como erro que não bloqueia.
+cp "$r/.claude/hooks/pre-tool-use.sh" "$r/ptu.bak"
+printf '%s\n' '#!/bin/sh' 'echo falhou >&2' 'exit 1' > "$r/.claude/hooks/pre-tool-use.sh"
+tl_espera 2 "pre-tool-use.sh com erro bloqueia" roda '{"tool_name":"Bash","tool_input":{"command":"git status"}}'
+tl_contem "agentic:" "erro do pre-tool-use: motivo começa por agentic:"
+cp "$r/ptu.bak" "$r/.claude/hooks/pre-tool-use.sh"
+
+# lib-guarda.sh ausente bloqueia (sem ele o "." abortaria com 1, que o Codex não trata como bloqueio).
+mv "$r/.codex/hooks/lib-guarda.sh" "$r/lib.bak"
+tl_espera 2 "lib-guarda.sh ausente bloqueia" roda '{"tool_name":"Bash","tool_input":{"command":"git status"}}'
+tl_contem "agentic:" "lib ausente: motivo começa por agentic:"
+mv "$r/lib.bak" "$r/.codex/hooks/lib-guarda.sh"
+
 rm -rf "$r"
 tl_fim

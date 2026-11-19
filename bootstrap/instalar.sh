@@ -104,11 +104,24 @@ if [ -n "$copilot" ]; then
   copia "$fw/adapters/copilot/agente-oraculo.tmpl.md" agentic/processo/templates/agente-oraculo-copilot.md
 fi
 # Proteções (hooks, regras, listas) do Codex e do Antigravity ficam pendentes: quem as instala é o humano,
-# pelo ativar-protecoes.sh. São cópia do kit, fora do manifesto, e sempre atualizadas.
+# pelo ativar-protecoes.sh. Têm manifesto próprio ($pendentes/.kit-manifesto): o pendente intacto recebe a versão
+# nova do kit; o editado pelo /bootstrap (passo 6 da entrevista) é mantido e vira conflito, como no resto do kit.
 pendentes=agentic/.estado/protecoes-pendentes
+pend_novo=$(mktemp)
 pendente() { # pendente <origem> <caminho final relativo ao alvo>
-  mkdir -p "$(dirname "$alvo/$pendentes/$2")"
-  cp "$1" "$alvo/$pendentes/$2"
+  pd="$alvo/$pendentes/$2"
+  printf '%s  %s\n' "$(kit_hash "$1")" "$pendentes/$2" >> "$pend_novo"
+  if [ -e "$pd" ] && ! cmp -s "$1" "$pd"; then
+    anterior=$(kit_hash_manifesto "$alvo/$pendentes/.kit-manifesto" "$pendentes/$2")
+    if [ -z "$anterior" ] || [ "$anterior" != "$(kit_hash "$pd")" ]; then
+      printf '%s\n' "$pendentes/$2" >> "$conflitos"
+      guarda_kit "$1" "$pendentes/$2"
+      return 0
+    fi
+    printf '%s\n' "$pendentes/$2" >> "$atualizados"
+  fi
+  mkdir -p "$(dirname "$pd")"
+  cp "$1" "$pd"
 }
 if [ -n "$codex" ] || [ -n "$antigravity" ]; then
   copia_dir "$fw/adapters/agents-skills" .agents/skills
@@ -142,6 +155,8 @@ for p in dominio arquiteto testes dev revisor; do
 done
 LC_ALL=C sort "$manifesto_novo" > "$alvo/$manifesto"
 rm -f "$manifesto_novo"
+[ -s "$pend_novo" ] && LC_ALL=C sort "$pend_novo" > "$alvo/$pendentes/.kit-manifesto"
+rm -f "$pend_novo"
 
 acrescenta .gitignore "agentic/.estado/"
 acrescenta .gitattributes "*.sh text eol=lf"

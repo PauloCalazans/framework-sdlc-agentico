@@ -5,6 +5,10 @@
 # bloqueio de desvio dos githooks. apply_patch: nega patch que toca caminho de caminhos-protegidos.txt.
 # Bloqueio = exit 2 com o motivo no stderr. Entrada sem o campo esperado bloqueia: o formato mudou e a falha aparece.
 d=$(cd "$(dirname "$0")" && pwd)
+if [ ! -f "$d/lib-guarda.sh" ]; then
+  echo "agentic: BLOQUEADO — .codex/hooks/lib-guarda.sh ausente; o comando não foi conferido. Avise o humano." >&2
+  exit 2
+fi
 . "$d/lib-guarda.sh"
 entrada=$(cat)
 ferramenta=$(guarda_texto "$entrada" tool_name)
@@ -40,3 +44,10 @@ if [ ! -f "$ptu" ]; then
 fi
 esc=$(printf '%s\n' "$cmd" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | awk 'NR > 1 { printf "\\n" } { printf "%s", $0 }')
 printf '{"tool_input":{"command":"%s"}}' "$esc" | sh "$ptu"
+c=$?
+# O Codex só bloqueia com 2; outro código de erro deixaria o comando passar sem conferência.
+case "$c" in
+  0|2) exit "$c" ;;
+esac
+echo "agentic: BLOQUEADO — .claude/hooks/pre-tool-use.sh falhou (código $c); o comando não foi conferido. Avise o humano." >&2
+exit 2

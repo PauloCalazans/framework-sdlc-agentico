@@ -25,6 +25,7 @@ com_pendentes() {
   echo '{"codex":1}' > "$1/$pend/.codex/hooks.json"
   echo 'guarda' > "$1/$pend/.codex/hooks/guarda.sh"
   echo '{"ag":1}' > "$1/$pend/.agents/hooks.json"
+  echo 'hash  x' > "$1/$pend/.kit-manifesto"
 }
 r=$(tl_repo); mkdir -p "$r/agentic/.estado"; com_pendentes "$r"
 tl_espera 0 "instala settings e proteções pendentes" sh -c "cd '$r' && sh '$dir/ativar-protecoes.sh'"
@@ -33,6 +34,7 @@ tl_contem ".codex/hooks.json" "orienta o commit das proteções do Codex"
 tl_espera 0 "copiou o hooks.json do Codex" grep -q '"codex":1' "$r/.codex/hooks.json"
 tl_espera 0 "copiou o guarda do Codex" test -f "$r/.codex/hooks/guarda.sh"
 tl_espera 0 "copiou o hooks.json do Antigravity" grep -q '"ag":1' "$r/.agents/hooks.json"
+tl_espera 1 "manifesto dos pendentes não vai para a raiz" test -e "$r/.kit-manifesto"
 tl_espera 0 "rodar de novo: destino igual não acusa nada" sh -c "cd '$r' && rm .claude/settings.json && sh '$dir/ativar-protecoes.sh'"
 
 r=$(tl_repo); mkdir -p "$r/agentic/.estado" "$r/.claude"; com_pendentes "$r"; echo '{"meu":true}' > "$r/.claude/settings.json"

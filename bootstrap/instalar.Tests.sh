@@ -164,6 +164,23 @@ tl_espera 1 "--codex: pendentes fora do manifesto" grep -q "protecoes-pendentes"
 tl_espera 0 "reinstala sem opção" sh "$dir/instalar.sh" "$r"
 tl_contem "mantendo o adaptador codex" "reinstalação avisa que mantém o Codex"
 tl_espera 0 "reinstalação mantém o Codex no manifesto" grep -q "  .codex/agents/dev.toml$" "$r/agentic/processo/.kit-manifesto"
+tl_espera 1 "reinstalação sem edição: pendentes sem conflito" sh -c "cat '$r/agentic/.estado/conflitos-instalacao.txt' 2>/dev/null | grep -q protecoes-pendentes"
+# Acréscimo do /bootstrap (passo 6) num pendente não se perde na reinstalação: vira conflito, como no resto do kit.
+neg=$pend/.codex/hooks/comandos-negados.txt
+echo "git merge" >> "$r/$neg"
+tl_espera 0 "reinstala com pendente editado" sh "$dir/instalar.sh" "$r"
+tl_espera 0 "pendente editado é mantido" grep -qx "git merge" "$r/$neg"
+tl_espera 0 "pendente editado vira conflito" grep -qx "$neg" "$r/agentic/.estado/conflitos-instalacao.txt"
+tl_espera 0 "versão do kit do pendente guardada para o /bootstrap" cmp -s "$dir/../adapters/comum/comandos-negados.txt" "$r/agentic/.estado/kit-conflitos/$neg"
+# Pendente intacto desde a instalação anterior recebe a versão nova do kit sem conflito.
+r=$(tl_repo)
+sh "$dir/instalar.sh" "$r" --codex >/dev/null 2>&1
+echo "# versão antiga" > "$r/$neg"
+h=$(sha256sum "$r/$neg" | cut -d' ' -f1)
+sed -i "s#^[0-9a-f]*  $neg\$#$h  $neg#" "$r/$pend/.kit-manifesto"
+tl_espera 0 "reinstala com pendente intacto de versão antiga" sh "$dir/instalar.sh" "$r"
+tl_espera 0 "pendente intacto atualizado para o kit" cmp -s "$dir/../adapters/comum/comandos-negados.txt" "$r/$neg"
+tl_espera 1 "pendente intacto não vira conflito" sh -c "cat '$r/agentic/.estado/conflitos-instalacao.txt' 2>/dev/null | grep -q protecoes-pendentes"
 
 r=$(tl_repo)
 tl_espera 0 "instala com --antigravity" sh "$dir/instalar.sh" "$r" --antigravity

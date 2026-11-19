@@ -47,7 +47,7 @@ Grave `agentic/projeto/bootstrap.md` com todas as respostas, cada uma marcada `c
 9. Gate 1 delegado: se o humano delegar, grave em `agentic/projeto/decisoes.md` a decisão `D<n> — Delegação do Gate 1` pelo modelo comentado do template (plano em `agentic/projeto/planos/`, escopo, itens N3) e proponha ao humano `enabled: true` e `gate1: D<n>` em `agentic/auto-mode` (ação humana). Sem delegação, `gate1:` fica vazio.
 
 ## Passo 5 — Conflitos
-O instalador grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo do kit instalado). Numa reinstalação, arquivo do kit intacto desde a instalação anterior recebe a versão nova sem merge; só o que foi editado na instância vira conflito.
+O instalador grava `agentic/processo/.kit-manifesto` (sha256 de cada arquivo do kit instalado). Numa reinstalação, arquivo do kit intacto desde a instalação anterior recebe a versão nova sem merge; só o que foi editado na instância vira conflito. As proteções pendentes do Codex e do Antigravity seguem a mesma regra, com manifesto próprio (`agentic/.estado/protecoes-pendentes/.kit-manifesto`): o acréscimo do passo 6 nelas não se perde na reinstalação.
 
 Para cada arquivo em `agentic/.estado/conflitos-instalacao.txt`, compare a versão do projeto com a do kit, que o instalador guardou em `agentic/.estado/kit-conflitos/<mesmo caminho>` (para `.claude/settings.json`, o guardado é o template de settings do kit), mostre a diferença ao humano e proponha um merge. Aplique só o que o humano aprovar.
 

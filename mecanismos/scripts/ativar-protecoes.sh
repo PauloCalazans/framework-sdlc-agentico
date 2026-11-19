@@ -29,7 +29,8 @@ if [ -f agentic/.estado/settings.pendente.json ]; then
 fi
 
 if [ -d "$pend" ]; then
-  lista=$(cd "$pend" && find . -type f | sed 's|^\./||' | LC_ALL=C sort)
+  # .kit-manifesto é do instalar.sh (hash de cada pendente), não uma proteção
+  lista=$(cd "$pend" && find . -type f ! -path ./.kit-manifesto | sed 's|^\./||' | LC_ALL=C sort)
   diferentes=""
   for f in $lista; do
     if [ -f "$f" ]; then

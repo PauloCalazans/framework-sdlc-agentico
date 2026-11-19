@@ -6,6 +6,10 @@
 # Responde sempre com um objeto JSON no stdout ({"decision":"allow"|"deny","reason":…}) e sai com 0.
 # Entrada sem o campo esperado nega: o formato mudou e a falha aparece.
 d=$(cd "$(dirname "$0")" && pwd)
+if [ ! -f "$d/lib-guarda.sh" ]; then
+  printf '%s\n' '{"decision":"deny","reason":"agentic: BLOQUEADO — .agents/hooks/lib-guarda.sh ausente; o comando não foi conferido. Avise o humano."}'
+  exit 0
+fi
 . "$d/lib-guarda.sh"
 
 # responde <allow|deny> [motivo]
@@ -35,7 +39,9 @@ case "$ferramenta" in
     [ -f "$ptu" ] || responde deny "agentic: BLOQUEADO — .claude/hooks/pre-tool-use.sh ausente; o hook do Antigravity depende dele."
     esc=$(printf '%s\n' "$cmd" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | awk 'NR > 1 { printf "\\n" } { printf "%s", $0 }')
     motivo=$(printf '{"tool_input":{"command":"%s"}}' "$esc" | sh "$ptu" 2>&1 >/dev/null)
-    [ $? -eq 2 ] && responde deny "$motivo"
+    c=$?
+    [ "$c" -eq 2 ] && responde deny "$motivo"
+    [ "$c" -eq 0 ] || responde deny "agentic: BLOQUEADO — .claude/hooks/pre-tool-use.sh falhou (código $c); o comando não foi conferido. Avise o humano."
     responde allow
     ;;
   write_to_file|replace_file_content|multi_replace_file_content)
