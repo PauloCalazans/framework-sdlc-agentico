@@ -148,14 +148,23 @@ cd ../demo-precos && claude      # dentro do Claude Code: /bootstrap
 
 O exemplo já traz as respostas da entrevista (`agentic/projeto/bootstrap-respostas.md`), então o `/bootstrap` roda sem perguntas. Há também `python-cli-novo` (Python, projeto novo).
 
-**Instale no seu projeto:**
+**Instale no seu projeto:** abra uma sessão do seu agente no projeto e entregue a ele o link deste repositório, `https://github.com/PauloCalazans/framework-sdlc-agentico`, pedindo que instale o kit. Ele conduz a instalação pelas instruções abaixo e diz a você o que só um humano faz.
 
-1. Peça ao agente, numa sessão aberta no seu projeto, que rode `sh <caminho-do-kit>/bootstrap/instalar.sh . <opções>`. Quem instala é o próprio agente; a única ação humana é o passo 3. O instalador copia o kit, não pergunta nada e não sobrescreve o que o projeto editou; arquivo do kit intacto é atualizado pelo manifesto. Passe as opções de **todas** as ferramentas que o time vai usar: `--copilot` acrescenta o adaptador do GitHub Copilot em `.github/`; `--codex` e `--antigravity`, os do Codex e do Antigravity (agentes, skills em `.agents/skills/` e hooks ativados no passo 3). Sem a opção, a ferramenta fica sem os agentes e sem as skills, inclusive a do `bootstrap`. Veja `docs/portabilidade.md`.
-2. **Abra uma sessão nova** no projeto e rode `/bootstrap` (no Codex, `$bootstrap`) — entrevista sobre contexto e stack; preenche os perfis dos papéis e instancia os controles. As ferramentas carregam comandos e skills ao abrir a sessão: na mesma sessão em que o kit foi instalado, o `bootstrap` ainda não aparece.
-3. Ative as proteções (ação humana): `sh agentic/mecanismos/scripts/ativar-protecoes.sh`.
-4. Comece pelo primeiro intent: `/intent <ideia>` (ou `/mudanca <descrição>` para uma mudança pequena).
+### Instruções para o agente
 
-No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); dentro do Claude Code isso já é tratado. No Codex e no Antigravity, que usam o PowerShell, hooks e skills chamam `git -c alias.agentic-sh=!sh agentic-sh <script>`, que roda o `sh` do git. O agente instala da mesma forma: `git -c alias.agentic-sh=!sh agentic-sh <caminho-do-kit>/bootstrap/instalar.sh . --codex`.
+Você foi chamado para instalar este kit no projeto aberto nesta sessão. Siga os passos em ordem e não pule nenhum.
+
+1. **Clone o kit fora do projeto** (numa pasta temporária, nunca dentro do repositório do projeto): `git clone --depth 1 https://github.com/PauloCalazans/framework-sdlc-agentico <pasta-do-kit>`.
+2. **Confira os pré-requisitos** no projeto: é um repositório git, e há `git`, `sh` (no Windows, o do Git Bash) e `gitleaks`. Se faltar algo, diga ao humano o que instalar e pare.
+3. **Pergunte ao humano quais ferramentas o time vai usar.** O Claude Code entra sempre. Para cada outra, há uma opção: `--copilot` (GitHub Copilot, em `.github/`), `--codex` e `--antigravity` (agentes, skills em `.agents/skills/` e hooks). Passe as opções de **todas** as ferramentas citadas: sem a opção, a ferramenta fica sem os agentes e sem as skills, inclusive a do `bootstrap`.
+4. **Rode o instalador você mesmo**, a partir da raiz do projeto: `sh <pasta-do-kit>/bootstrap/instalar.sh . <opções>`. Não peça ao humano para rodá-lo. No PowerShell (Codex, Antigravity), onde não há `sh`, use o `sh` do git: `git -c alias.agentic-sh=!sh agentic-sh <pasta-do-kit>/bootstrap/instalar.sh . <opções>`. O instalador não pergunta nada e não sobrescreve o que o projeto editou; arquivo do kit intacto é atualizado pelo manifesto.
+5. **Mostre ao humano a saída do instalador**: os arquivos em conflito (`agentic/.estado/conflitos-instalacao.txt`) e as proteções pendentes. Não rode o `ativar-protecoes.sh`: ativar as proteções é ação humana.
+6. **Termine aqui e passe ao humano os próximos passos**, nesta ordem:
+   1. Abrir **uma sessão nova** no projeto e rodar `/bootstrap` (no Codex, `$bootstrap`). As ferramentas carregam comandos e skills ao abrir a sessão: nesta sessão o `bootstrap` ainda não aparece. A entrevista preenche os perfis dos papéis e instancia os controles.
+   2. Depois do `/bootstrap`, ativar as proteções: `sh agentic/mecanismos/scripts/ativar-protecoes.sh` (no PowerShell, pelo mesmo `git -c alias.agentic-sh=!sh agentic-sh`). No Codex, também confiar no projeto e aprovar os hooks em `/hooks`.
+   3. Começar pelo primeiro intent: `/intent <ideia>` (ou `/mudanca <descrição>` para uma mudança pequena).
+
+Detalhes por ferramenta em `docs/portabilidade.md`. No Windows, dentro do Claude Code os comandos `sh ...` já funcionam; no Codex e no Antigravity, hooks e skills usam o lançador `git -c alias.agentic-sh=!sh agentic-sh <script>`.
 
 ## Enriqueça os perfis dos papéis
 
