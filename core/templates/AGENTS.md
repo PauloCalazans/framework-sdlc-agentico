@@ -29,7 +29,7 @@ Todo trabalho segue `agentic/processo/ciclo.md`. Princípios em `agentic/process
 | Arquitetura | `{{CMD_ARQUITETURA}}` |
 | **Verificação completa** | `sh agentic/mecanismos/scripts/verify.sh` |
 
-No Windows, rode os comandos `sh ...` no Git Bash (o PowerShell não tem `sh`); dentro do Claude Code isso já é tratado.
+No Windows, rode os comandos `sh ...` no Git Bash; dentro do Claude Code isso já é tratado. No PowerShell ou no cmd (Codex, Antigravity), `sh` não está no PATH e `bash` pode ser o do WSL: rode `git -c alias.agentic-sh=!sh agentic-sh agentic/mecanismos/scripts/<script>.sh`, que usa o `sh` do git e roda a partir da raiz do repositório.
 
 ## Regras invioláveis
 - Nunca faça merge na branch principal nem altere permissões do agente.

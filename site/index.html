@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kit de SDLC Agêntico</title>
-<meta name="description" content="Kit que faz agentes de IA (Claude Code, GitHub Copilot) desenvolverem com 5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Conceitos consolidados de engenharia de software, ajustados por medições de execuções reais.">
+<meta name="description" content="Kit que faz agentes de IA (Claude Code, GitHub Copilot, Codex, Antigravity) desenvolverem com 5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Conceitos consolidados de engenharia de software, ajustados por medições de execuções reais.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Kit de SDLC Agêntico — agentes de IA com processo de engenharia">
 <meta property="og:description" content="5 papéis, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente. Engenharia de software consolidada, ajustada por medições em execuções reais.">
@@ -41,7 +41,7 @@
   <div class="hero-texto">
     <p class="eyebrow">Kit open source · SWEBOK v4 · ISO/IEC/IEEE · NIST SSDF</p>
     <h1>Agentes de IA que seguem um processo de engenharia — e um kit que diz <em>não</em> quando eles saem dele.</h1>
-    <p class="lead">Conceitos consolidados de engenharia de software, do SWEBOK às normas ISO/IEC/IEEE, levados à prática para Claude Code e GitHub Copilot: 5 papéis com contrato fixo, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Qualquer stack, projeto novo ou existente.</p>
+    <p class="lead">Conceitos consolidados de engenharia de software, do SWEBOK às normas ISO/IEC/IEEE, levados à prática para Claude Code, GitHub Copilot, Codex e Antigravity: 5 papéis com contrato fixo, testes antes do código, 2 gates humanos e githooks que bloqueiam o agente de verdade. Qualquer stack, projeto novo ou existente.</p>
     <div class="ctas">
       <a class="botao" href="https://github.com/PauloCalazans/framework-sdlc-agentico">Ver no GitHub →</a>
       <a class="botao-contorno" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md">Ler as evidências</a>
@@ -85,7 +85,7 @@
       <div class="linha" role="row"><span role="cell" class="sem">desliga o teste que incomoda</span><span role="cell"><p class="mecanismo">teste desabilitado na branch ou skip novo no relatório JUnit reprova</p></span><span role="cell"><code>verifica-skip.sh</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">"aproveita" e mexe em arquivos fora do pedido</span><span role="cell"><p class="com">cada task declara ## Arquivos; arquivo fora da lista reprova</p></span><span role="cell"><code>verifica-escopo.sh</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">commita na main ou faz o merge do próprio PR</span><span role="cell"><p class="mecanismo">commit e push na branch protegida são bloqueados, e o merge com commit também; merge fast-forward local não dispara hook</p><p class="com">o remoto continua protegido pelo pre-push</p></span><span role="cell"><code>pre-commit · pre-push · pre-merge-commit · deny de gh pr merge</code></span></div>
-      <div class="linha" role="row"><span role="cell" class="sem">pula os githooks (--no-verify)</span><span role="cell"><p class="com">comando git com --no-verify, commit -n ou -c core.hooksPath é barrado em qualquer posição</p></span><span role="cell"><code>hook PreToolUse (só Claude Code)</code></span></div>
+      <div class="linha" role="row"><span role="cell" class="sem">pula os githooks (--no-verify)</span><span role="cell"><p class="com">comando git com --no-verify, commit -n ou -c core.hooksPath é barrado em qualquer posição</p></span><span role="cell"><code>hook PreToolUse (Claude Code, Codex, Antigravity)</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">commita uma senha ou token</span><span role="cell"><p class="mecanismo">conteúdo staged é varrido antes do commit</p></span><span role="cell"><code>pre-commit (gitleaks)</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">revisa o próprio trabalho</span><span role="cell"><p class="com">o revisor roda em contexto limpo, escreve só o parecer e nunca corrige</p></span><span role="cell"><code>contrato do papel</code></span></div>
       <div class="linha" role="row"><span role="cell" class="sem">decide sozinho regra de negócio, segurança ou dependência nova</span><span role="cell"><p class="mecanismo">gatilhos N3 param a execução e chamam o humano</p></span><span role="cell"><code>revisão</code></span></div>

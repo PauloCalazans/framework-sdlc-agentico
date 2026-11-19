@@ -373,7 +373,7 @@ tl_espera 0 "site: 36 execuções marcado" tem $s 'data-e="e1">36<'
 tl_espera 0 "site: menos de 5% marcado" tem $s 'data-e="e4">5%<'
 tl_espera 0 "site: 5 execuções de B marcado" tem $s 'data-e="e1">5<'
 tl_espera 0 "site: verify garantido por regra + script, como no README" tem $s '<code>regra + verify.sh</code>'
-tl_espera 0 "site: hook PreToolUse só no Claude Code" tem $s 'hook PreToolUse (só Claude Code)'
+tl_espera 0 "site: hook PreToolUse como no README" tem $s 'hook PreToolUse (Claude Code, Codex, Antigravity)'
 tl_espera 0 "site: ressalva do merge fast-forward" tem $s 'merge fast-forward local não dispara hook'
 tl_espera 0 "site: pre-merge-commit e deny de gh pr merge" tem $s 'pre-merge-commit · deny de gh pr merge'
 tl_espera 1 "site: sem 'cada regra nasceu de medição' (contradiz a base teórica)" tem $s 'Cada regra do kit nasceu de uma medição'
@@ -448,5 +448,21 @@ done
 n_skills() { [ "$(ls -d "$raiz"/adapters/agents-skills/*/ | wc -l)" -eq "$(ls "$raiz"/adapters/claude-code/commands/*.md | wc -l)" ]; }
 tl_espera 0 "skills: nenhuma sem comando do Claude" n_skills
 tl_espera 0 "instalar.sh: uso cita as três opções" tem bootstrap/instalar.sh 'uso: instalar.sh <projeto-alvo> [--copilot] [--codex] [--antigravity]'
+
+# Documentação da portabilidade acompanha os adaptadores
+pt=docs/portabilidade.md
+for x in '--codex' '--antigravity' '.codex/agents/' '.agents/agents/' '.agents/skills/' '/hooks' 'por revisão' 'git -c alias.agentic-sh=!sh agentic-sh'; do
+  tl_espera 0 "portabilidade cita $x" tem $pt "$x"
+done
+tl_espera 0 "portabilidade: seção do Codex" linha $pt '^## Codex'
+tl_espera 0 "portabilidade: seção do Antigravity" linha $pt '^## Antigravity'
+for x in '--codex' '--antigravity' 'adapters/codex/' 'adapters/antigravity/' 'adapters/agents-skills/' 'adapters/comum/'; do
+  tl_espera 0 "README cita $x" tem README.md "$x"
+done
+for x in 'agente-oraculo-codex.toml' 'agente-oraculo-antigravity.md' 'protecoes-pendentes' 'Codex' 'Antigravity'; do
+  tl_espera 0 "entrevista cita $x" tem bootstrap/entrevista.md "$x"
+done
+tl_espera 0 "AGENTS.md: lançador do Windows" tem core/templates/AGENTS.md 'git -c alias.agentic-sh=!sh agentic-sh'
+tl_espera 1 "README: hook PreToolUse não é mais só do Claude Code" tem README.md '| hook `PreToolUse` do Claude Code |'
 
 tl_fim
