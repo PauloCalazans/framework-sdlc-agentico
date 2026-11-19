@@ -496,4 +496,10 @@ tl_espera 0 "3ª devolução: não afrouxa o revisor" tem $c 'Nenhuma saída ace
 tl_espera 0 "oráculo antes do primeiro brief do dominio" tem $c 'antes do primeiro brief do `dominio`'
 tl_espera 0 "kit sem aceite com achado pendente" nenhum 'aceitar .{0,40}(achados|Importantes?) .{0,30}(pendentes|em aberto)' core adapters README.md
 
+tl_espera 0 "brief: delta do revisor nos modos sem commit" tem core/templates/brief.md 'diff -u <NN-revisado-<arquivo>'
+tl_espera 0 "brief: delta do revisor no modo diff" tem core/templates/brief.md 'git diff <SHA final revisado no parecer anterior>..HEAD'
+tl_espera 0 "ciclo: cópia do artefato revisado" tem core/processo/ciclo.md 'NN-revisado-<arquivo>'
+tl_espera 0 "revisor: lê o delta primeiro" tem core/papeis/revisor.md 'leia o delta do brief'
+tl_espera 0 "revisor: achado fora do delta continua bloqueando" tem core/papeis/revisor.md 'Achado novo fora do delta, Crítico ou Importante, entra e bloqueia'
+
 tl_fim

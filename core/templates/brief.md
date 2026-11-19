@@ -35,6 +35,7 @@ projeto" do perfil que se aplicam. Em forma de ação: "PARE e diga", nunca um l
 
 ## Leia só isto
 - <arquivo>:<a>-<b> — <para quê> (até ~80 linhas por trecho; nada de "leia o arquivo" nem "veja o commit")
+- <revisor na rodada `k ≥ 2`: o delta vem primeiro. No modo `diff`: `git diff <SHA final revisado no parecer anterior>..HEAD`. Nos modos `spec`, `design` e `mudanca`: `diff -u <NN-revisado-<arquivo> do despacho anterior> <artefato>`. Sempre com a saída limitada. O artefato inteiro só na rodada 1>
 
 ## Impacto
 <o que a entrega muda e quem já depende disso, `medido`, para o papel não descobrir tarde. Antes do Gate 1 (`dominio`, `arquiteto`): a saída das buscas que você rodou na árvore, colada com o comando de cada uma — para cada termo, símbolo, rota, schema ou regra que muda segundo o pedido ou o intent (para o `dominio`), a spec ou, na trilha enxuta, a descrição do humano (para o `arquiteto`): as specs aprovadas que citam a regra e, para o `arquiteto`, também quem usa (`arquivo:linha`) e os testes que o exercitam; todo resultado tem trecho em "Leia só isto". Depois do Gate 1 (`testes`, `dev`): as linhas de `## Impacto` do design (ou do documento enxuto) que tocam esta task, coladas, com o teste existente afetado; teste afetado que contradiz a spec leva a referência de remoção em "Já decidido" (`agentic/processo/ciclo.md`, "Remoção de comportamento"). O `revisor` recebe o mesmo `## Impacto` do brief do autor. Ou: nenhum (só arquivos novos), com a busca que mostrou isso>
