@@ -488,4 +488,12 @@ tl_espera 0 "brief: revisor recebe o progress.md com as N<n>" tem core/templates
 tl_espera 0 "intent: resposta da Fase 0 vira N<n>" tem adapters/claude-code/commands/intent.md 'grava cada resposta como `N<n>` no `progress.md`'
 tl_espera 0 "exemplos e README: Fonte do humano com N<n>" nenhum 'humano:[0-9]{4}-[0-9]{2}-[0-9]{2} *(\)|\||,)'   core adapters docs/exemplos-brief README.md site
 
+# --- Rodadas que terminam (docs/plans/2026-11-19-artefatos-enxutos.md, PR 2)
+c=core/processo/ciclo.md
+tl_espera 0 "3ª devolução: parada gravada" tem $c 'Parada (3ª devolução): <artefato>'
+tl_espera 0 "3ª devolução: vale com modo automático" tem $c 'Sem resposta, nada é despachado, também com o modo automático ligado'
+tl_espera 0 "3ª devolução: não afrouxa o revisor" tem $c 'Nenhuma saída aceita o artefato com Crítico ou Importante pendente'
+tl_espera 0 "oráculo antes do primeiro brief do dominio" tem $c 'antes do primeiro brief do `dominio`'
+tl_espera 0 "kit sem aceite com achado pendente" nenhum 'aceitar .{0,40}(achados|Importantes?) .{0,30}(pendentes|em aberto)' core adapters README.md
+
 tl_fim
