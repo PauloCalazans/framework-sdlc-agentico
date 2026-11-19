@@ -13,7 +13,7 @@ tests/pedidos/criar_pedido_test.* e no documento da task. Nunca toque em src/. O
 - Cada teste falha hoje pelo motivo certo (asserção, não erro de compilação).
 
 ## Já decidido
-- Q1: desconto não acumula (humano:2026-11-06 N2). R-1: o erro é código, não mensagem.
+- CA-2 — humano:2026-11-06 N2. R-1 — `## Rulings` da task.
 
 ## Nunca faz
 - Escreva só nos diretórios de teste (e no documento da task); nunca em código de produção.

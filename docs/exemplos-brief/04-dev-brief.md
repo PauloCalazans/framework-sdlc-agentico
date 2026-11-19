@@ -12,7 +12,7 @@ src/pedidos/criar_pedido.*, src/pedidos/desconto.*. Nunca toque em tests/. Outro
 - Implementação mais simples que respeita o design (D2: o desconto é calculado em desconto.*, não no pedido).
 
 ## Já decidido
-- Q1: desconto não acumula (humano:2026-11-06 N2). R-1: o erro é código, não mensagem.
+- CA-2 — humano:2026-11-06 N2. R-1 — `## Rulings` da task.
 
 ## Nunca faz
 - Teste do RED parece errado: PARE e reporte `BLOQUEADO`; não contorne no código de produção.

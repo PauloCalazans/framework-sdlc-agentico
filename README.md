@@ -72,7 +72,7 @@ Regras completas: `core/processo/ciclo.md`.
 
 ### Modo automático e Gate 1 delegado
 
-Com `enabled: true` em `agentic/auto-mode`, o orquestrador encadeia as tasks e publica os PRs sem pedir confirmação. Com plataforma de PR, quando a task anterior ainda não foi integrada, a seguinte sai da branch dela: a task declara `**Base:** <branch anterior>` e o `verify.sh` compara com essa branch até ela entrar na principal.
+Com `enabled: true` em `agentic/auto-mode`, o orquestrador encadeia as tasks e publica os PRs sem pedir confirmação, e para na 3ª devolução de um artefato até o humano escolher a saída. Com plataforma de PR, quando a task anterior ainda não foi integrada, a seguinte sai da branch dela: a task declara `**Base:** <branch anterior>` e o `verify.sh` compara com essa branch até ela entrar na principal.
 
 O humano também pode delegar o Gate 1, por exemplo depois de escrever um plano longo. O orquestrador passa a aprovar intent, spec e design com base no plano e nos pareceres do `revisor`, e só chama o humano para o que a delegação não cobre. A delegação é uma decisão registrada e vale até ser revogada:
 

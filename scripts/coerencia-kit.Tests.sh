@@ -496,9 +496,18 @@ tl_espera 0 "3ª devolução: não afrouxa o revisor" tem $c 'Nenhuma saída ace
 tl_espera 0 "oráculo antes do primeiro brief do dominio" tem $c 'antes do primeiro brief do `dominio`'
 tl_espera 0 "kit sem aceite com achado pendente" nenhum 'aceitar .{0,40}(achados|Importantes?) .{0,30}(pendentes|em aberto)' core adapters README.md
 
-tl_espera 0 "brief: delta do revisor nos modos sem commit" tem core/templates/brief.md 'diff -u <NN-revisado-<arquivo>'
+tl_espera 0 "brief: delta do revisor nos modos sem commit" tem core/templates/brief.md 'diff -ruN <NN-revisado/ do despacho anterior> <NN-revisado/ deste despacho>'
 tl_espera 0 "brief: delta do revisor no modo diff" tem core/templates/brief.md 'git diff <SHA final revisado no parecer anterior>..HEAD'
-tl_espera 0 "ciclo: cópia do artefato revisado" tem core/processo/ciclo.md 'NN-revisado-<arquivo>'
+tl_espera 0 "ciclo: cópia do artefato revisado" tem core/processo/ciclo.md 'copia todo arquivo revisado para `NN-revisado/<caminho relativo>`'
+tl_espera 0 "ciclo: cópia fora do que o hash confere" tem core/processo/ciclo.md 'a cópia não entra no que o hash confere'
+tl_espera 0 "3ª devolução: saída do humano também com o Gate 1 delegado" tem core/processo/ciclo.md 'a saída é sempre do humano (`humano:`), nunca da delegação (`D<n>`)'
+tl_espera 0 "modo automático para na 3ª devolução" tem core/processo/ciclo.md 'Para na 3ª devolução até o humano escolher a saída'
+tl_espera 0 "README: modo automático para na 3ª devolução" tem README.md 'para na 3ª devolução de um artefato até o humano escolher a saída'
+tl_espera 0 "enxuta: DEVOLVIDO com a parada da 3ª devolução" tem core/processo/ciclo.md '`DEVOLVIDO` volta ao `arquiteto`, salvo na parada da 3ª devolução'
+tl_espera 0 "/mudanca: DEVOLVIDO com a parada da 3ª devolução" tem adapters/claude-code/commands/mudanca.md '`DEVOLVIDO` volta ao `arquiteto`, salvo na parada da 3ª devolução'
+tl_espera 0 "/intent: oráculo antes do dominio" tem adapters/claude-code/commands/intent.md 'consulte o oráculo antes deste despacho'
+tl_espera 0 "brief: Impacto do dominio com a resposta do oráculo" tem core/templates/brief.md 'a resposta do oráculo consultado antes da spec'
+tl_espera 0 "exemplos: Já decidido só por ID" nenhum 'R-1: o erro é código|Q1( do questionário)?: desconto não acumula' docs/exemplos-brief
 tl_espera 0 "revisor: lê o delta primeiro" tem core/papeis/revisor.md 'leia o delta do brief'
 tl_espera 0 "revisor: achado fora do delta continua bloqueando" tem core/papeis/revisor.md 'Achado novo fora do delta, Crítico ou Importante, entra e bloqueia'
 
