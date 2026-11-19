@@ -162,6 +162,12 @@ r=$(prepara_spec)
 sub 's/^| R1 | Pedido nasce aberto | humano:2026-11-15 |/| R1 | Pedido nasce aberto | Q2 |/' $S/spec.md
 tl_espera 1 "spec: confirmada com fonte Q<n> bloqueia" roda spec $S
 tl_contem "R1 confirmada com fonte Q2" "nomeia a regra"
+r=$(prepara_spec)
+sub 's/^## Questionário de decisão$/&\n1. Q1: pergunta? (a) (b)\n   Resposta (humano:2026-11-19): a — ok/' $S/spec.md
+tl_espera 1 "spec: resposta no Questionário escrita fora de comentário" roda spec $S
+tl_contem "corpo do commit do Gate 1" "diz onde a resposta fica"
+r=$(prepara_spec)
+tl_espera 0 "spec: resposta em comentário não conta" roda spec $S
 
 r=$(prepara_spec)
 tl_espera 0 "design válido passa" roda design $S
@@ -263,6 +269,7 @@ tl_espera 1 "mudança: Rulings não vazia antes do Gate 1" roda mudanca $M
 r=$(prepara_mudanca)
 sub 's/^## Questionário$/&\n1. Q1: pergunta? opções (a) (b)\n   Resposta (humano:2026-11-15): a — ok/' $M
 tl_espera 1 "mudança: resposta no Questionário escrita fora de comentário" roda mudanca $M
+tl_contem "corpo do commit do Gate 1" "diz onde a resposta fica"
 r=$(prepara_mudanca)
 sub 's|`src/ajuste.py`|`src/api/novo.py`|' $M
 mkdir -p "$r/agentic"; cfg 'CAMINHOS_N3="src/api/*"'

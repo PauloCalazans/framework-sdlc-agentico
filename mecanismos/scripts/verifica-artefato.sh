@@ -198,9 +198,9 @@ ck_sem_aprovacao() {  # 4
       done > "$T/sec"
       ! [ -s "$T/sec" ] || falha "'$s' não está vazia antes do Gate 1 ($doc)"
     done
-    if secao "$doc" Questionário | grep -qE '^[[:space:]]*Resposta'; then
-      falha "resposta escrita no Questionário fora de comentário ($doc): só o orquestrador a grava, no Gate 1"
-    fi
+  fi
+  if [ "$modo" != design ] && secao "$doc" Questionário | grep -qE '^[[:space:]]*Resposta'; then
+    falha "resposta escrita no Questionário fora de comentário ($doc): a resposta fica no progress.md e no corpo do commit do Gate 1; a pergunta respondida sai do Questionário"
   fi
 }
 
