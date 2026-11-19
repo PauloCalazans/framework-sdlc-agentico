@@ -100,7 +100,7 @@ Pare a execução e chame o humano — mesmo fora de um gate — quando a mudan�
 ## Orquestração
 
 O orquestrador não é um papel. Qual sessão o é (com e sem orquestrador externo, com e sem subagentes) está em `AGENTS.md`, "Quem é você neste repositório". Ele:
-1. lê `status-projeto` (injetado no início da sessão) e escolhe a próxima task;
+1. lê `status-projeto` (injetado no início da sessão), relê no `ciclo.md` o que a seção "Kit" aponta como alterado na última atualização e escolhe a próxima task; nota ou memória de sessão anterior não vale contra o texto atual;
 2. cria o worktree (na trilha padrão, a partir do registro do Gate 1) e o registro de execução em `agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/`:
    - `progress.md` — task atual, SHA base, próximo passo e as respostas do humano (`N<n>`, "Resposta do humano");
    - **brief** `NN-<papel>[-<modo>]-brief.md` (`NN` = ordem do despacho: `01`, `02`, …) — o que o papel recebe, montado por `agentic/processo/templates/brief.md` e conferido pela lista "Antes de enviar" do template: cabeçalho com `Papel: <papel>` e os caminhos absolutos do contrato e do perfil (o perfil vai mesmo que o contrato já o cite), escopo, o que fazer, "Nunca faz" colado da seção "No brief" do contrato, leitura com intervalo, `## Impacto` medido (antes do Gate 1, as buscas que o orquestrador roda na árvore — quem usa, testes, specs que citam a regra; depois, as linhas do Impacto aprovado que tocam a task; o papel não busca além dos comandos do brief, e só a revisão confere isso, porque os adaptadores dão ferramenta de busca aos papéis), comandos com saída limitada, teto e entrega. Por quê: cada requisição do papel reenvia o contexto inteiro, e a regra que fica só no contrato linkado não chega ao papel;

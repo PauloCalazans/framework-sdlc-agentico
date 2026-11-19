@@ -67,6 +67,25 @@ tl_espera 1 "PR aberto não aparece como integrada" grep -q "002-aberta.md: inte
 tl_espera 0 "status diferente de publicada não muda" grep -q "003-andamento.md: em-andamento$" "$copia_saida"
 tl_espera 0 "publicada na principal remota (local desatualizada): integrada" grep -q "004-remota.md: integrada (derivado do git) — publicada$" "$copia_saida"
 
+# Só a primeira linha **Status:** conta, no arquivo e na versão da principal; nome com espaço e Status vazio.
+r7=$(tl_repo)
+mkdir -p "$r7/$t"
+printf '# Task 001\n**Status:** pendente\n\nExemplo:\n**Status:** publicada\n' > "$r7/$t/001-exemplo.md"
+printf '# Task 002\n**Status:** aprovado\n' > "$r7/$t/002 com espaco.md"
+printf '# Task 003\n**Status:**\n' > "$r7/$t/003-vazio.md"
+git -C "$r7" add -A; git -C "$r7" commit -q -m "Gate 1"
+git -C "$r7" checkout -q -b pedidos/001
+printf '# Task 001\n**Status:** publicada\n\nExemplo:\n**Status:** publicada\n' > "$r7/$t/001-exemplo.md"
+git -C "$r7" commit -q -am "docs(task): 001 publicada (PR aberto)"
+tl_espera 0 "status com segunda linha Status sai com 0" sh -c "cd '$r7' && sh '$dir/status-projeto.sh'"
+tl_contem "001-exemplo.md: publicada" "publicada na branch"
+tl_contem "002 com espaco.md: aprovado" "artefato com espaço no nome é listado"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "segunda linha Status da principal não torna a task integrada" grep -q "001-exemplo.md: integrada" "$copia_saida"
+tl_espera 1 "Status vazio não é listado" grep -q "003-vazio.md" "$copia_saida"
+git -C "$r7" checkout -q main
+tl_espera 0 "status na principal sai com 0" sh -c "cd '$r7' && sh '$dir/status-projeto.sh'"
+tl_contem "001-exemplo.md: pendente" "a primeira linha Status é a que vale"
 
 # em-andamento deriva do git: task pendente cuja branch (**Branch:**) está à frente da principal.
 r4=$(tl_repo)
@@ -137,5 +156,58 @@ tl_espera 0 "status com a principal em dia sai com 0" sh -c "cd '$r6' && sh '$di
 tl_contem "main: em dia com origin/main" "principal em dia"
 tl_espera 0 "sem origin/main sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
 tl_contem "main: sem origin/main" "sem remota, diz que não há com o que comparar"
+
+# Kit atualizado: o status aponta o que mudou no ciclo.md, derivado do último commit que o tocou. Importar a
+# atualização não basta: a sessão do orquestrador só relê o que lhe apontam no início.
+ciclo() { # ciclo <repo> <texto de Onde> <linha da tabela> <item de Commits, ou vazio>
+  mkdir -p "$1/agentic/processo/templates" "$1/agentic/processo/papeis"
+  {
+    printf '# Ciclo\n\nLeia antes de qualquer trabalho.\n\n## Trilha padrão\n\n| # | Fase |\n|---|---|\n| 3 | %s |\n\n' "$3"
+    printf '## Regras de fluxo\n\n- **Isolamento:** um worktree por task.\n'
+    [ -n "$4" ] && printf -- '- **Commits:** %s\n' "$4"
+    printf '\n## Orquestração\n\n1. lê `status-projeto`;\n\n**Oráculo:** só leitura.\n\n## Rulings\n\n- **Onde:** %s\n- **Limite:** não contradiz a spec.\n' "$2"
+  } > "$1/agentic/processo/ciclo.md"
+}
+r8=$(tl_repo)
+tl_espera 0 "status sem o kit instalado sai com 0" sh -c "cd '$r8' && sh '$dir/status-projeto.sh'"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "sem ciclo.md, não há seção do kit" grep -q "^### Kit" "$copia_saida"
+ciclo "$r8" "commit próprio da Ruling." "RED" "um commit por passo."
+printf 'brief v1\n' > "$r8/agentic/processo/templates/brief.md"; printf 'revisor v1\n' > "$r8/agentic/processo/papeis/revisor.md"
+tl_espera 0 "status com o kit ainda sem commit sai com 0" sh -c "cd '$r8' && sh '$dir/status-projeto.sh'"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "ciclo.md ainda sem commit: não há o que derivar" grep -q "^### Kit" "$copia_saida"
+git -C "$r8" add -A; git -C "$r8" commit -q -m "chore: instancia o kit"
+sha=$(git -C "$r8" log -1 --format=%h); dia=$(git -C "$r8" log -1 --format=%cd --date=short)
+tl_espera 0 "status com o kit recém-instalado sai com 0" sh -c "cd '$r8' && sh '$dir/status-projeto.sh'"
+tl_contem "### Kit" "seção do kit"
+tl_contem "- agentic/processo/ciclo.md instalado em $dia ($sha): leia-o inteiro antes de orquestrar." "instalação: manda ler inteiro"
+
+ciclo "$r8" "no próximo commit do papel; não há commit só de Ruling." "RED provado" "um commit por passo."
+printf 'brief v2\n' > "$r8/agentic/processo/templates/brief.md"
+printf 'x\n' > "$r8/fora-do-kit.txt"
+git -C "$r8" add -A; git -C "$r8" commit -q -m "chore(kit): atualiza o kit"
+sha=$(git -C "$r8" log -1 --format=%h)
+git -C "$r8" commit -q --allow-empty -m "feat: trabalho depois da atualização"
+tl_espera 0 "status depois de atualizar o kit sai com 0" sh -c "cd '$r8' && sh '$dir/status-projeto.sh'"
+tl_contem "- agentic/processo/ciclo.md mudou em $dia ($sha). Releia antes de orquestrar: \"Trilha padrão\"; \"Rulings\" (Onde)." "aponta as seções e os itens alterados, na ordem do arquivo"
+tl_contem "- No mesmo commit, em agentic/processo/: templates/brief.md" "lista os outros arquivos do processo que mudaram"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "seção não alterada não é apontada" grep -q '"Orquestração"\|"Regras de fluxo"\|Limite' "$copia_saida"
+tl_espera 1 "arquivo de fora do processo não é listado" grep -q "fora-do-kit" "$copia_saida"
+tl_espera 1 "arquivo do processo que não mudou não é listado" grep -q "papeis/revisor.md" "$copia_saida"
+tl_espera 0 "a seção do kit vem antes dos worktrees" sh -c "awk '/^### Kit/ { k = NR } /^### Worktrees/ { w = NR } END { exit (k && w && k < w) ? 0 : 1 }' '$copia_saida'"
+
+# Item removido: a seção onde ele estava é apontada.
+ciclo "$r8" "no próximo commit do papel; não há commit só de Ruling." "RED provado" ""
+git -C "$r8" commit -q -am "chore(kit): tira um item"
+sha=$(git -C "$r8" log -1 --format=%h)
+tl_espera 0 "status depois de remover um item sai com 0" sh -c "cd '$r8' && sh '$dir/status-projeto.sh'"
+tl_contem "($sha). Releia antes de orquestrar: \"Regras de fluxo\"" "remoção: aponta a seção"
+
+# Kit copiado e ainda não commitado (instalador acabou de rodar): o aviso já sai.
+ciclo "$r8" "no próximo commit do papel; não há commit só de Ruling." "RED provado" "um commit por passo do ciclo."
+tl_espera 0 "status com atualização do kit sem commit sai com 0" sh -c "cd '$r8' && sh '$dir/status-projeto.sh'"
+tl_contem "- agentic/processo/ciclo.md tem mudança ainda sem commit. Releia antes de orquestrar: \"Regras de fluxo\" (Commits)." "sem commit: aponta o que difere do HEAD"
 
 tl_fim

@@ -516,4 +516,14 @@ tl_espera 0 "brief: Já decidido por ID" tem $b 'entra só pelo ID e a origem'
 tl_espera 0 "brief: aviso acima de 60 linhas" tem $b 'mais de 60 linhas fora de ## Impacto'
 tl_espera 0 "brief: correção continua copiando o anterior inteiro" tem $b 'copie para um arquivo novo o brief anterior do mesmo papel, inteiro'
 
+# --- A atualização do kit chega ao orquestrador: o status aponta o que mudou no ciclo.md e o ciclo manda reler.
+s=mecanismos/scripts/status-projeto.sh
+tl_espera 0 "status: seção Kit" tem $s 'echo "### Kit"'
+tl_espera 0 "status: manda reler o que mudou" tem $s 'Releia antes de orquestrar'
+tl_espera 0 "ciclo: o orquestrador relê o que a seção Kit aponta" tem core/processo/ciclo.md 'relê no `ciclo.md` o que a seção "Kit" aponta'
+tl_espera 0 "ciclo: nota de sessão anterior não vale contra o texto" tem core/processo/ciclo.md 'nota ou memória de sessão anterior não vale contra o texto atual'
+tl_espera 0 "README: a atualização aponta o que reler" tem README.md 'a seção "Kit" do `status-projeto.sh`'
+tl_espera 0 "README: verify interrompido não segue" tem README.md '`VERIFY: INTERROMPIDO`'
+tl_espera 0 "verify: interrupção declarada" tem mecanismos/scripts/verify.sh 'INTERROMPIDO'
+
 tl_fim
