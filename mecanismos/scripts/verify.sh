@@ -32,7 +32,17 @@ if ! mkdir "$lock" 2>/dev/null; then
   mkdir "$lock" || exit 3
 fi
 echo $$ > "$lock/pid"
-trap 'rm -rf "$lock"' EXIT INT TERM
+trap 'rm -rf "$lock"' EXIT
+# INT/TERM: o sh só atende o sinal quando a etapa em primeiro plano volta; até lá o lock fica preso. Depois disso
+# nenhuma etapa seguinte roda e a saída é 128 + sinal (o trap de EXIT solta o lock). Um trap que só apagasse o lock
+# deixaria o verify seguir sem ele até o fim.
+interrompido() {
+  i_rotulo="VERIFY"; [ "$modo" = rapido ] && i_rotulo="VERIFY RÁPIDO"
+  echo; echo "$i_rotulo: INTERROMPIDO ($1) — as etapas seguintes não rodaram"
+  exit "$2"
+}
+trap 'interrompido INT 130' INT
+trap 'interrompido TERM 143' TERM
 
 falhas=""
 etapa() {

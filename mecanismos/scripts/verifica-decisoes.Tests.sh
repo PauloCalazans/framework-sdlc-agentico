@@ -41,7 +41,29 @@ printf 'Tratado em D1\n' > "$r/agentic/projeto/nota.md"; printf '\n### D9 — ex
 sed -i.bak 's/D1$/D1, D9/' "$r/agentic/projeto/nota.md"; rm -f "$r/agentic/projeto/nota.md.bak"
 tl_espera 0 "título de decisão com sufixo (D9 — extensão) conta como definida" roda "$r"
 
+# Varredura em lote: vários arquivos, subpastas, nome com espaço; o registro e o que não é .md ficam de fora.
+r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
+mkdir -p "$r/agentic/projeto/specs/a/tasks" "$r/agentic/projeto/planos/com espaco"
+printf 'Usa D1.\nLinha com D8 e D9; de novo D8.\n' > "$r/agentic/projeto/specs/a/tasks/001-t.md"
+printf '(D2) e :D7.\r\n' > "$r/agentic/projeto/planos/com espaco/plano um.md"
+printf 'D5\n' > "$r/agentic/projeto/nota.txt"
+printf '\nSubstitui a D6 antiga.\n' >> "$r/agentic/projeto/decisoes.md"
+tl_espera 1 "referências órfãs em vários arquivos bloqueiam" roda "$r"
+tl_contem "  D7 (em agentic/projeto/planos/com espaco/plano um.md)" "órfã em arquivo com espaço no nome"
+tl_contem "  D8 (em agentic/projeto/specs/a/tasks/001-t.md)" "órfã em subpasta"
+tl_contem "  D9 (em agentic/projeto/specs/a/tasks/001-t.md)" "segunda órfã da mesma linha"
+copia=$(mktemp); cp "$TL_SAIDA" "$copia"
+tl_espera 0 "cada órfã aparece uma vez por arquivo, em ordem" sh -c "[ \"\$(grep -c ' (em ' '$copia')\" = 3 ] && [ \"\$(grep ' (em ' '$copia' | cut -c3-4 | tr -d '\n')\" = D7D8D9 ]"
+tl_espera 1 "arquivo que não é .md não é varrido" grep -q "D5" "$copia"
+tl_espera 1 "o próprio registro não é varrido" grep -q "D6" "$copia"
+rm -f "$copia"
+
 # (2) decisão da base que sumiu
+r=$(tl_repo); reg "$r" 1 2 3 4; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
+reg "$r" 1 3; confirma "$r" "perde a D2 e a D4"
+tl_espera 1 "várias decisões da base ausentes em HEAD bloqueiam" roda "$r"
+tl_contem "revogue-a): D2 D4" "nomeia todas as decisões perdidas, em ordem"
+
 r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
 reg "$r" 1; confirma "$r" "perde a D2"
 tl_espera 1 "decisão da base ausente em HEAD bloqueia" roda "$r"

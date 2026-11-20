@@ -187,4 +187,34 @@ tl_contem "VERIFY RÁPIDO: OK" "--task --rapido: rótulo rápido"
 tl_espera 2 "opção desconhecida é erro de uso" sh -c "cd '$r' && sh '$dir/verify.sh' --foo"
 tl_contem "uso: verify.sh [--rapido] [--task <task.md>]" "mostra o uso"
 
+# --- Interrupção: TERM/INT não deixam o verify seguir para a etapa seguinte, nem soltar o lock com ele vivo.
+# interrompe <repo> <sinal>: sobe o verify, espera a etapa stack começar, manda o sinal e devolve o código de saída.
+# A saída do verify vai para a saída padrão; o estado do lock no instante do sinal, para <repo>/lock-no-sinal.
+interrompe() {
+  i_log=$(mktemp)
+  ( cd "$1" && exec sh "$dir/verify.sh" ) > "$i_log" 2>&1 &
+  i_pid=$!
+  i_n=0
+  until grep -q '^== stack' "$i_log" || [ "$i_n" -ge 60 ]; do sleep 1; i_n=$((i_n + 1)); done
+  kill -s "$2" "$i_pid"
+  if [ -d "$1/agentic/.estado/verify.lock" ]; then echo preso; else echo solto; fi > "$1/lock-no-sinal"
+  wait "$i_pid"; i_rc=$?
+  cat "$i_log"; rm -f "$i_log"
+  return "$i_rc"
+}
+r=$(prepara)
+echo "- agentic/config" >> "$r/agentic/projeto/specs/x/tasks/001-t.md"
+printf 'CMD_VERIFY_STACK="sh tests/lenta.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
+printf 'sleep 4\necho STACK_TERMINOU\n' > "$r/tests/lenta.sh"
+tl_espera 143 "TERM no meio da stack: sai com 143" interrompe "$r" TERM
+tl_contem "VERIFY: INTERROMPIDO" "declara a interrupção"
+copia=$(mktemp); cp "$TL_SAIDA" "$copia"
+tl_espera 1 "interrompido não segue para a etapa seguinte (skip)" grep -q "^== skip" "$copia"
+tl_espera 1 "interrompido não imprime VERIFY: OK" grep -q "^VERIFY: OK" "$copia"
+tl_espera 0 "o lock continua preso enquanto a etapa em curso não termina" grep -qx preso "$r/lock-no-sinal"
+tl_espera 1 "o lock é solto na saída" test -d "$r/agentic/.estado/verify.lock"
+rm -f "$r/lock-no-sinal"
+tl_espera 0 "depois da interrupção, o verify roda de novo" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "VERIFY: OK" "verify seguinte à interrupção passa"
+
 tl_fim

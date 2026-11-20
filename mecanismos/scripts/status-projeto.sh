@@ -7,6 +7,65 @@ cd "$agentic_raiz" || exit 0
 echo "## Estado do projeto (derivado — não edite à mão)"
 echo "Branch atual: $(git symbolic-ref --short -q HEAD || echo '(detached)')"
 
+# Kit: o que mudou no ciclo.md no último commit que o tocou (ou na árvore, se a atualização ainda não foi
+# commitada). Importar a atualização não entrega a regra nova: a sessão do orquestrador só relê o que este
+# status, injetado no início dela, apontar.
+ciclo=agentic/processo/ciclo.md
+kit_commit=""
+[ -f "$ciclo" ] && kit_commit=$(git log -1 --format='%h %cd' --date=short -- "$ciclo" 2>/dev/null)
+# secoes <args do git diff>: seções "## " do ciclo.md atual tocadas pelo diff, na ordem do arquivo, cada uma com
+# os itens "**Nome:**" alterados. Linha em branco acrescentada não conta; trecho removido conta na seção onde estava.
+secoes() {
+  faixas=$(git diff -U0 "$@" -- "$ciclo" 2>/dev/null \
+    | sed -n 's/^@@ -[0-9,]* +\([0-9]*\),\{0,1\}\([0-9]*\) @@.*/\1:\2/p' | tr '\n' ' ')
+  awk -v faixas="$faixas" '
+    BEGIN {
+      n = split(faixas, f, " ")
+      for (i = 1; i <= n; i++) {
+        split(f[i], p, ":"); ini = p[1] + 0; qtd = (p[2] == "") ? 1 : p[2] + 0
+        if (qtd == 0) { removida[ini < 1 ? 1 : ini] = 1; continue }
+        for (l = ini; l < ini + qtd; l++) mudou[l] = 1
+      }
+    }
+    { sub(/\r$/, "") }
+    /^## / { sec = substr($0, 4) }
+    (FNR in removida) || ((FNR in mudou) && $0 !~ /^[ \t]*$/) {
+      s = (sec == "") ? "início" : sec
+      if (!(s in visto)) { visto[s] = 1; ordem[++ns] = s }
+      if ((FNR in mudou) && $0 ~ /^[ \t]*([-*]|[0-9]+\.)?[ \t]*\*\*[^*]+\*\*/) {
+        t = $0; sub(/^[ \t]*([-*]|[0-9]+\.)?[ \t]*\*\*/, "", t); t = substr(t, 1, index(t, "**") - 1); sub(/:$/, "", t)
+        if (!((s, t) in tem)) { tem[s, t] = 1; itens[s] = (itens[s] == "") ? t : itens[s] ", " t }
+      }
+    }
+    END {
+      for (i = 1; i <= ns; i++) {
+        s = ordem[i]
+        saida = saida (i > 1 ? "; " : "") "\"" s "\"" (itens[s] == "" ? "" : " (" itens[s] ")")
+      }
+      print saida
+    }' "$ciclo"
+}
+if [ -n "$kit_commit" ]; then
+  kit_sha=${kit_commit%% *}; kit_dia=${kit_commit#* }
+  echo
+  echo "### Kit"
+  if ! git diff --quiet HEAD -- "$ciclo" 2>/dev/null; then
+    s=$(secoes HEAD)
+    echo "- $ciclo tem mudança ainda sem commit.${s:+ Releia antes de orquestrar: $s.}"
+  elif git diff-tree --root --no-commit-id --name-status -r "$kit_sha" -- "$ciclo" 2>/dev/null | grep -q '^A'; then
+    echo "- $ciclo instalado em $kit_dia ($kit_sha): leia-o inteiro antes de orquestrar."
+  else
+    s=$(secoes "$kit_sha^" "$kit_sha")
+    echo "- $ciclo mudou em $kit_dia ($kit_sha).${s:+ Releia antes de orquestrar: $s.}"
+    outros=$(git -c core.quotepath=off diff-tree --no-commit-id --name-only -r "$kit_sha" -- agentic/processo 2>/dev/null \
+      | awk -v ciclo="$ciclo" '
+          $0 == ciclo || /\.kit-manifesto$/ { next }
+          { sub(/^agentic\/processo\//, ""); n++; if (n <= 8) lista = lista (n > 1 ? ", " : "") $0 }
+          END { if (n) print lista (n > 8 ? " e mais " (n - 8) : "") }')
+    [ -n "$outros" ] && echo "- No mesmo commit, em agentic/processo/: $outros"
+  fi
+fi
+
 echo
 echo "### Worktrees"
 git worktree list 2>/dev/null
@@ -54,26 +113,47 @@ fi
 
 echo
 echo "### Artefatos"
-find agentic/projeto/intent agentic/projeto/specs -name '*.md' ! -name '_*' 2>/dev/null | sort | while read -r f; do
-  s=$(grep -m1 '^\*\*Status:\*\*' "$f" | sed 's/^\*\*Status:\*\*[[:space:]]*//')
+# Os campos de todos os artefatos saem de uma leitura só, e as tasks publicadas na principal, de um git grep por
+# ref: um processo por arquivo custava dezenas de segundos em projeto com centenas de artefatos.
+sep=$(printf '\034') # separador de campos que não é espaço: o read preserva campo vazio
+nl='
+'
+# publicadas_em <ref>: os artefatos cuja primeira linha **Status:** naquela ref é "publicada", um por linha.
+publicadas_em() {
+  git -c core.quotepath=off grep -n -e '^\*\*Status:\*\*' "$1" -- agentic/projeto/intent agentic/projeto/specs 2>/dev/null \
+    | awk -v ref="$1:" '
+        index($0, ref) == 1 {
+          resto = substr($0, length(ref) + 1)
+          i = index(resto, ":"); arquivo = substr(resto, 1, i - 1); resto = substr(resto, i + 1)
+          i = index(resto, ":"); linha = substr(resto, i + 1)
+          if (arquivo in visto) next
+          visto[arquivo] = 1
+          if (index(linha, "**Status:** publicada") == 1) print arquivo
+        }'
+}
+publicadas="$nl$(publicadas_em "$BRANCH_PRINCIPAL")$nl$(publicadas_em "origin/$BRANCH_PRINCIPAL")$nl"
+
+find agentic/projeto/intent agentic/projeto/specs -name '*.md' ! -name '_*' -exec awk -v sep="$sep" '
+  function campo(texto, nome) { sub("^\\*\\*" nome ":\\*\\*[ \t\r\f\v]*", "", texto); return texto }
+  function limpo(texto, nome) { gsub(/[\r`]/, "", texto); texto = campo(texto, nome); sub(/[ \t\f\v]*$/, "", texto); return texto }
+  function sai() { if (arquivo != "" && status != "") print arquivo sep status sep branch sep base }
+  FNR == 1 { sai(); arquivo = FILENAME; status = branch = base = ""; ts = tb = tx = 0 }
+  !ts && /^\*\*Status:\*\*/ { ts = 1; status = campo($0, "Status") }
+  !tb && /^\*\*Branch:\*\*/ { tb = 1; branch = limpo($0, "Branch") }
+  !tx && /^\*\*Base:\*\*/ { tx = 1; base = limpo($0, "Base") }
+  END { sai() }' {} + 2>/dev/null | sort -t "$sep" -k1,1 | while IFS=$sep read -r f s br base; do
   # integrada não é um Status escrito (ciclo.md, "Status dos artefatos"): deriva do git. Task publicada cuja versão
   # na principal (local ou, desatualizada ou ausente, a remota) também está publicada foi integrada — o commit
   # docs(task): … publicada é feito na branch da task e só chega à principal pelo merge.
   case "$s" in
     publicada*)
-      for p in "$BRANCH_PRINCIPAL" "origin/$BRANCH_PRINCIPAL"; do
-        case "$(git show "$p:$f" 2>/dev/null | grep -m1 '^\*\*Status:\*\*')" in
-          "**Status:** publicada"*) s="integrada (derivado do git) — $s"; break ;;
-        esac
-      done
+      case "$publicadas" in *"$nl$f$nl"*) s="integrada (derivado do git) — $s" ;; esac
       ;;
     pendente*)
       # em-andamento não é escrito (ciclo.md, "Status dos artefatos"): pendente com branch própria à frente da
       # principal está em andamento. Sem branch, branch inexistente ou ainda sem commit à frente: continua pendente.
       # Só conta commit além do registro do Gate 1 (docs(…): … aprovada (Gate 1)). Task empilhada (**Base:** com
       # branch existente) conta a partir da branch-base, não da principal.
-      br=$(grep -m1 '^\*\*Branch:\*\*' "$f" | tr -d '\r`' | sed 's/^\*\*Branch:\*\*[[:space:]]*//; s/[[:space:]]*$//')
-      base=$(grep -m1 '^\*\*Base:\*\*' "$f" | tr -d '\r`' | sed 's/^\*\*Base:\*\*[[:space:]]*//; s/[[:space:]]*$//')
       if [ -n "$br" ] && git rev-parse --verify -q "$br^{commit}" >/dev/null 2>&1; then
         if [ -n "$base" ] && git rev-parse --verify -q "$base^{commit}" >/dev/null 2>&1; then
           cmp_com="$base"
