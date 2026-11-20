@@ -1,0 +1,5 @@
+# .codex/config.toml — configuração de projeto do Codex trazida pelo kit. O Codex só a lê em projeto confiável.
+# É arquivo de proteção: quem instala (ativar-protecoes.sh) e edita é o humano.
+# A sessão é compactada ao chegar a 200 mil tokens, em vez de perto do limite da janela do modelo: o estado da
+# execução vive no progress.md, e o hook SessionStart reinjeta o status do projeto depois da compactação.
+model_auto_compact_token_limit = 200000

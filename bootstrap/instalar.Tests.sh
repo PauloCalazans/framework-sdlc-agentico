@@ -159,6 +159,9 @@ for f in .codex/hooks.json .codex/rules/agentic.rules .codex/hooks/guarda.sh .co
          .codex/hooks/caminhos-protegidos.txt .codex/hooks/comandos-negados.txt; do
   tl_espera 0 "--codex: pendente $f" test -f "$r/$pend/$f"
 done
+tl_espera 0 "--codex: pendente .codex/config.toml" test -f "$r/$pend/.codex/config.toml"
+tl_espera 0 "--codex: config pendente compacta a sessão aos 200 mil tokens" grep -qx "model_auto_compact_token_limit = 200000" "$r/$pend/.codex/config.toml"
+tl_espera 1 "--codex: config.toml não vai direto (ação humana)" test -e "$r/.codex/config.toml"
 tl_espera 1 "--codex: sem agentes do Antigravity" test -e "$r/.agents/agents"
 tl_espera 1 "--codex: pendentes fora do manifesto" grep -q "protecoes-pendentes" "$r/agentic/processo/.kit-manifesto"
 tl_espera 0 "reinstala sem opção" sh "$dir/instalar.sh" "$r"
