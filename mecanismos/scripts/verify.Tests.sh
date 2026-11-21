@@ -3,6 +3,10 @@
 dir=$(cd "$(dirname "$0")" && pwd)
 . "$dir/testlib.sh"
 
+# Os cenários de etapa repetem o verify na mesma árvore; sem isto, a prova do completo os responderia.
+# A seção "Prova do completo", no fim, liga a prova de novo.
+AGENTIC_VERIFY_SEM_CACHE=1; export AGENTIC_VERIFY_SEM_CACHE
+
 # Instância com os githooks ligados, como o instalar.sh deixa (a etapa hooks exige).
 repo() { rr=$(tl_repo); git -C "$rr" config core.hooksPath agentic/mecanismos/githooks; printf '%s\n' "$rr"; }
 
@@ -216,5 +220,99 @@ tl_espera 1 "o lock é solto na saída" test -d "$r/agentic/.estado/verify.lock"
 rm -f "$r/lock-no-sinal"
 tl_espera 0 "depois da interrupção, o verify roda de novo" sh -c "cd '$r' && sh '$dir/verify.sh'"
 tl_contem "VERIFY: OK" "verify seguinte à interrupção passa"
+
+# --- Tempo por etapa: cada linha de fechamento traz a duração em segundos.
+r=$(prepara)
+tl_espera 0 "verify com tempo por etapa" sh -c "cd '$r' && sh '$dir/verify.sh'"
+copia=$(mktemp); cp "$TL_SAIDA" "$copia"
+for e in hooks escopo decisoes red stack skip; do
+  tl_espera 0 "etapa $e fecha com a duração" grep -qE "^-- $e: OK \([0-9]+ s\)$" "$copia"
+done
+
+# --- Log: a saída inteira fica em agentic/.estado/verify.log (rápido: verify-rapido.log), e a etapa que
+# falhou é repetida no fim, logo antes da linha VERIFY. Um `| tail` basta para ver o motivo.
+r=$(prepara)
+echo "- agentic/config" >> "$r/agentic/projeto/specs/x/tasks/001-t.md"
+printf 'CMD_VERIFY_STACK="echo SAIDA_COMPLETA"\nCMD_VERIFY_RAPIDO="echo SAIDA_RAPIDA"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
+tl_espera 0 "completo grava o log" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "log: agentic/.estado/verify.log" "aponta o log"
+tl_espera 0 "o log tem a saída da stack" grep -q SAIDA_COMPLETA "$r/agentic/.estado/verify.log"
+tl_espera 0 "o log termina com a linha VERIFY" sh -c "tail -n 1 '$r/agentic/.estado/verify.log' | grep -qx 'VERIFY: OK'"
+tl_espera 0 "rápido grava o próprio log" sh -c "cd '$r' && sh '$dir/verify.sh' --rapido"
+tl_contem "log: agentic/.estado/verify-rapido.log" "rápido aponta o próprio log"
+tl_espera 0 "rápido: o log tem a saída rápida" grep -q SAIDA_RAPIDA "$r/agentic/.estado/verify-rapido.log"
+tl_espera 0 "rápido não sobrescreve o log do completo" grep -q SAIDA_COMPLETA "$r/agentic/.estado/verify.log"
+tl_espera 0 "o log não conta como arquivo fora do escopo" sh -c "cd '$r' && sh '$dir/verify.sh'"
+cat > "$r/tests/longa.sh" <<'EOF'
+i=0; while [ $i -lt 200 ]; do echo "linha $i"; i=$((i + 1)); done
+echo MOTIVO_DA_FALHA
+exit 1
+EOF
+printf 'CMD_VERIFY_STACK="sh tests/longa.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
+tl_espera 1 "stack longa que falha" sh -c "cd '$r' && sh '$dir/verify.sh'"
+copia=$(mktemp); cp "$TL_SAIDA" "$copia"
+tl_espera 0 "o motivo da falha aparece nas últimas linhas da saída" sh -c "tail -n 8 '$copia' | grep -q MOTIVO_DA_FALHA"
+tl_espera 0 "a linha VERIFY continua a última" sh -c "tail -n 1 '$copia' | grep -qx 'VERIFY: FALHOU em: stack'"
+tl_espera 0 "o fim repete só o trecho final da etapa" sh -c "[ \$(grep -c '^linha 10\$' '$copia') -eq 1 ]"
+
+# --- Prova do completo: OK numa árvore limpa fica guardada em <git-common-dir>/agentic/verify-provados;
+# o completo seguinte na mesma árvore, base e config não roda de novo.
+unset AGENTIC_VERIFY_SEM_CACHE
+prova() {
+  r=$(prepara)
+  printf 'agentic/.estado/\n' > "$r/.gitignore"
+  printf 'echo x >> "%s/contagem"\n' "$r/.git" > "$r/tests/conta.sh"
+  echo "- agentic/config" >> "$r/agentic/projeto/specs/x/tasks/001-t.md"
+  echo "- .gitignore" >> "$r/agentic/projeto/specs/x/tasks/001-t.md"
+  printf 'CMD_VERIFY_STACK="sh tests/conta.sh"\nCMD_VERIFY_RAPIDO="sh tests/conta.sh"\nCMD_TESTE="sh tests/stack.sh"\nDIRS_TESTE="tests/"\n' > "$r/agentic/config"
+  git -C "$r" add -A; git -C "$r" commit -q -m "config com contagem"
+  printf '%s\n' "$r"
+}
+contagem() { [ "$(wc -l < "$1/.git/contagem" | tr -d ' ')" -eq "$2" ]; }
+r=$(prova)
+tl_espera 0 "1º completo roda" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 0 "2º completo na mesma árvore" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "VERIFY: OK (já provado nesta árvore)" "declara a prova reaproveitada"
+tl_contem "AGENTIC_VERIFY_SEM_CACHE=1" "diz como refazer"
+tl_espera 0 "a stack rodou uma vez só" contagem "$r" 1
+tl_espera 0 "a prova fica no git-common-dir" test -s "$r/.git/agentic/verify-provados"
+tl_espera 0 "AGENTIC_VERIFY_SEM_CACHE=1 roda de novo" env AGENTIC_VERIFY_SEM_CACHE=1 sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 0 "sem cache: a stack rodou" contagem "$r" 2
+tl_espera 0 "rápido nunca usa a prova" sh -c "cd '$r' && sh '$dir/verify.sh' --rapido"
+tl_espera 0 "rápido: a stack rodou" contagem "$r" 3
+d=$(mktemp -d)/wt; git -C "$r" worktree add -q --detach "$d" x/001 2>/dev/null
+git -C "$d" config core.hooksPath agentic/mecanismos/githooks
+tl_espera 0 "outro worktree no mesmo commit reaproveita a prova" sh -c "cd '$d' && sh '$dir/verify.sh' --task agentic/projeto/specs/x/tasks/001-t.md"
+tl_contem "já provado nesta árvore" "worktree: prova reaproveitada"
+tl_espera 0 "worktree: a stack não rodou" contagem "$r" 3
+printf 'a\n' > "$r/tests/novo.txt"; git -C "$r" add -A; git -C "$r" commit -q -m "muda a árvore"
+tl_espera 0 "árvore nova roda de novo" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 0 "árvore nova: a stack rodou" contagem "$r" 4
+printf 'b\n' > "$r/tests/solto.txt"
+tl_espera 0 "árvore suja roda" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 0 "árvore suja não usa a prova" contagem "$r" 5
+tl_espera 0 "árvore suja de novo" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 0 "árvore suja não guarda prova" contagem "$r" 6
+rm "$r/tests/solto.txt"
+
+r=$(prova)
+printf 'echo x >> "%s/contagem"\nexit 1\n' "$r/.git" > "$r/tests/conta.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "stack vermelha"
+tl_espera 1 "falha não vira prova (1)" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 1 "falha não vira prova (2)" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 0 "falha: a stack rodou as duas vezes" contagem "$r" 2
+
+r=$(prova)
+printf 'echo x >> "%s/contagem"\necho y > tests/gerado.txt\n' "$r/.git" > "$r/tests/conta.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "stack suja a árvore"
+tl_espera 0 "stack que suja a árvore" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "prova do completo não guardada" "avisa que a stack sujou a árvore"
+tl_contem "tests/gerado.txt" "nomeia o arquivo"
+tl_espera 0 "stack que suja: roda de novo" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 0 "stack que suja: a stack rodou as duas vezes" contagem "$r" 2
+
+r=$(prova)
+tl_espera 0 "prova guardada na branch x/001" sh -c "cd '$r' && sh '$dir/verify.sh'"
+inicial=$(git -C "$r" rev-list --max-parents=0 HEAD)
+tl_espera 0 "mesma árvore com outra base" env AGENTIC_BASE="$inicial" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 0 "outra base: a stack rodou" contagem "$r" 2
 
 tl_fim
