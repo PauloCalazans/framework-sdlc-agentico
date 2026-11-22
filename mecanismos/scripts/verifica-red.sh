@@ -1,10 +1,15 @@
 #!/bin/sh
 # verifica-red.sh [base] — prova que cada commit test(red):
-#   (1) não tocou código de produção: só DIRS_TESTE; documentação sob docs/ e agentic/projeto/ é isenta (o
-#       documento da task pode ser atualizado no mesmo commit);
-#   (2) falhava de fato, num worktree isolado no commit RED: com CMD_TESTE_ARQUIVO configurado, roda o
-#       comando para CADA arquivo de teste tocado pelo RED (arquivo sob DIRS_TESTE com asserção) e exige
-#       que cada um falhe; sem ele, roda CMD_TESTE (suíte inteira) e exige falha — modo degradado;
+#   (1) não tocou código de produção: só arquivos de teste — prefixo de DIRS_TESTE ou padrão de algum
+#       TESTE_<n>_PADROES (teste colocalizado, ex.: src/*.spec.ts); documentação sob docs/ e agentic/projeto/ é
+#       isenta (o documento da task pode ser atualizado no mesmo commit);
+#   (2) falhava de fato, num worktree isolado no commit RED. Cada arquivo de teste tocado pelo RED (com asserção)
+#       é provado pelo caminho dele e precisa falhar: o executor TESTE_<n>_COMANDO cujo padrão casa com o arquivo;
+#       sem executor, o CMD_TESTE_ARQUIVO; sem os dois, a suíte inteira (CMD_TESTE), uma vez por RED, com
+#       "degradado: <arquivo> sem executor". Sem executor nenhum nem CMD_TESTE_ARQUIVO, o RED inteiro vai pela
+#       suíte (modo degradado). O preparo é o TESTE_<n>_PREPARO de cada executor usado (sem repetir) mais o
+#       CMD_PREPARAR_TESTE quando há prova por CMD_TESTE_ARQUIVO ou pela suíte. Com TESTE_<n>_RC_RED, só esse
+#       código é RED (ajuda: red-junit.sh); sem ele, qualquer código fora de 0, 126 e 127;
 #   (3) não teve asserções removidas depois, POR ARQUIVO: para cada arquivo de teste tocado pelo RED, o
 #       número de linhas que casam MARCADOR_ASSERCAO em HEAD não pode ser menor que no RED (arquivo
 #       removido em HEAD conta zero). Arquivos não tocados pelo RED não entram na comparação.
@@ -15,13 +20,17 @@
 #       X vem depois do RED e não depois do commit do trailer; a referência foi acrescentada sob agentic/projeto/
 #       entre a base e o pai de X (registrada antes da remoção). O crédito de X é no máximo a queda de asserções
 #       do arquivo em X, mesmo com várias declarações; o limite passa a ser (asserções no RED - créditos).
-#   (4) cache: a prova de (2) é guardada por SHA do RED e assinatura dos comandos de teste, e reaproveitada (ver
-#       "Cache (4)" mais abaixo); AGENTIC_RED_SEM_CACHE=1 ignora a leitura. (1) e (3) rodam sempre.
+#   (4) cache: a prova de (2) é guardada por SHA do RED e assinatura do caminho de prova, e reaproveitada (ver
+#       "Cache (4)" mais abaixo); ligar executores num projeto em andamento não refaz o RED já provado pela suíte
+#       ("provado antes pela suíte (assinatura anterior)"). AGENTIC_RED_SEM_CACHE=1 ignora a leitura. (1) e (3)
+#       rodam sempre.
 #   (5) vínculo CA → teste: cada CA da task (AGENTIC_TASK, exportada pelo verify.sh, inclusive com --task; ou a
 #       task de **Branch:** igual à branch atual) tem "→ test: <arquivo>::<nome>" e o arquivo é tocado por commit
 #       RED; task sem nenhuma anotação só avisa; sem task (trilha rápida), não checa. Task com CA e nenhum commit
 #       RED bloqueia quando a branch tem código além de docs só de documentação, chore e test: só de teste (GREEN sem RED), salvo
 #       task de remoção de comportamento (trailer Assercoes-removidas:).
+#   (6) log: a saída do preparo e de cada execução fica em agentic/.estado/verifica-red.log (reescrito a cada
+#       execução); no bloqueio, as últimas 40 linhas daquela execução são repetidas.
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 if [ -n "${1:-}" ]; then
@@ -311,7 +320,7 @@ avalia_rc() {
   return 0
 }
 
-# Log (5): a saída do preparo e de cada execução vai para agentic/.estado/verifica-red.log, reescrito a cada
+# Log (6): a saída do preparo e de cada execução vai para agentic/.estado/verifica-red.log, reescrito a cada
 # execução do script: "== RED <sha> <arquivo|*suite*|preparo> (<executor n|CMD_TESTE_ARQUIVO|CMD_TESTE|
 # CMD_PREPARAR_TESTE>)", a saída e "-- <código> em <s> s". Em bloqueio, as últimas 40 linhas daquela execução
 # são repetidas na saída.

@@ -560,4 +560,18 @@ tl_espera 0 "portabilidade: Copilot sem limite configurável" tem docs/portabili
 tl_espera 0 "README: Codex e as ferramentas sem limite" tem README.md '`model_auto_compact_token_limit = 200000`'
 tl_espera 0 "README não diz mais que nada foi conferido" nenhum 'nenhum equivalente foi conferido' README.md
 
+# Prova do RED por caminho: executores TESTE_<n>_*, migração das provas pela suíte e log do verifica-red.
+tl_espera 0 "config.padrao: documenta TESTE_<n>_PADROES" tem bootstrap/config.padrao 'TESTE_1_PADROES'
+tl_espera 0 "config.padrao: cita red-junit.sh" tem bootstrap/config.padrao 'red-junit.sh'
+tl_espera 0 "config.padrao: cita {classe}" tem bootstrap/config.padrao '{classe}'
+tl_espera 0 "ciclo: prova por executor do caminho" tem core/processo/ciclo.md 'TESTE_<n>_'
+tl_espera 0 "ciclo: log do verifica-red" tem core/processo/ciclo.md 'verifica-red.log'
+tl_espera 0 "ciclo: migração das provas pela suíte" tem core/processo/ciclo.md 'provado antes pela suíte'
+tl_espera 0 "lib: os quatro campos documentados existem" tem mecanismos/scripts/lib-agentic.sh 'PADROES PREPARO COMANDO RC_RED'
+tl_espera 0 "entrevista: pergunta por executor" tem bootstrap/entrevista.md 'TESTE_<n>_'
+tl_espera 0 "README: verifica-red prova pelo executor do caminho" tem README.md 'TESTE_<n>_'
+tl_espera 0 "verifica-red: topo descreve executor, migração e log" sh -c "tr -d '\r' < '$raiz/mecanismos/scripts/verifica-red.sh' | head -n 40 | grep -qF 'TESTE_<n>_COMANDO' && tr -d '\r' < '$raiz/mecanismos/scripts/verifica-red.sh' | head -n 40 | grep -qF 'verifica-red.log'"
+tl_espera 0 "ciclo e verifica-red: mesma mensagem de migração" tem mecanismos/scripts/verifica-red.sh 'provado antes pela suíte (assinatura anterior)'
+tl_espera 0 "escopo ignora o log do verifica-red" tem mecanismos/scripts/verifica-escopo.sh 'agentic/.estado/verifica-red.log'
+
 tl_fim
