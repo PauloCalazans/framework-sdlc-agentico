@@ -101,11 +101,8 @@ if [ -z "$reds" ]; then
           gr_tipo=${gr_s%%[(:]*}
           gr_prod=$(git -c core.quotepath=off diff-tree --no-commit-id --name-only -r "$c" | while IFS= read -r f; do
             case "$f" in docs/*|agentic/projeto/*|*.md) continue ;; esac
-            gr_t=""
-            if [ "$gr_tipo" = test ]; then
-              set -f; for d in $DIRS_TESTE; do case "$f" in "$d"*) gr_t=1 ;; esac; done; set +f
-            fi
-            [ -n "$gr_t" ] || echo "$f"
+            [ "$gr_tipo" = test ] && agentic_e_teste "$f" && continue
+            echo "$f"
           done)
           [ -n "$gr_prod" ] && gr_green="$gr_green ${c%"${c#???????}"}" ;;
         *) gr_green="$gr_green ${c%"${c#???????}"}" ;;
@@ -121,8 +118,18 @@ if [ -z "$reds" ]; then
 fi
 [ -n "$CMD_TESTE" ] || agentic_falha "CMD_TESTE não configurado em agentic/config"
 [ -n "$MARCADOR_ASSERCAO" ] || agentic_falha "MARCADOR_ASSERCAO vazio em agentic/config — não há como comparar asserções"
-[ -n "$(printf '%s' "$DIRS_TESTE" | tr -d '[:space:]')" ] || agentic_falha "DIRS_TESTE vazio em agentic/config"
-if [ -z "$CMD_TESTE_ARQUIVO" ]; then
+agentic_executores >/dev/null # avisa bloco TESTE_<n> ignorado (buraco na numeração)
+executores=$(agentic_executores 2>/dev/null)
+[ -n "$(printf '%s' "$DIRS_TESTE" | tr -d '[:space:]')" ] || [ -n "$executores" ] || agentic_falha "DIRS_TESTE vazio em agentic/config"
+for n in $executores; do
+  [ -n "$(agentic_executor_campo "$n" COMANDO)" ] || agentic_falha "TESTE_${n}_COMANDO vazio em agentic/config"
+  v=$(agentic_executor_campo "$n" RC_RED)
+  case $v in *[!0-9]*) agentic_falha "TESTE_${n}_RC_RED não numérico em agentic/config: $v" ;; esac
+done
+# Prova por arquivo: há executor ou CMD_TESTE_ARQUIVO. Sem nenhum dos dois, o RED inteiro vai pela suíte (degradado).
+por_arquivo=""
+[ -n "$executores" ] || [ -n "$CMD_TESTE_ARQUIVO" ] && por_arquivo=1
+if [ -z "$por_arquivo" ]; then
   echo "degradado: CMD_TESTE_ARQUIVO não configurado — RED provado pela suíte inteira"
 fi
 
@@ -196,9 +203,12 @@ removidas_autorizadas() {
 }
 
 # Cache (4): uma prova legítima (o teste falhou no RED) é guardada em <git-common-dir>/agentic/red-provados, uma
-# linha "<sha do RED> <assinatura> <arquivo>" (modo degradado: arquivo = *suite*). A assinatura é o hash de
-# CMD_PREPARAR_TESTE, CMD_TESTE_ARQUIVO e CMD_TESTE, então mudar qualquer um invalida a prova. O diretório comum
-# é compartilhado entre worktrees. Nunca se guarda RED que passava, comando não encontrado nem preparo com falha.
+# linha "<sha do RED> <assinatura> <arquivo>" (prova pela suíte: arquivo = *suite*). A assinatura depende do caminho
+# de prova: pelo executor n, o hash de TESTE_<n>_PADROES, _PREPARO, _COMANDO e _RC_RED (mudar um executor não
+# invalida a prova dos outros); por CMD_TESTE_ARQUIVO ou pela suíte, o hash de CMD_PREPARAR_TESTE, CMD_TESTE_ARQUIVO
+# e CMD_TESTE. Migração: com executores configurados, um RED que tem prova *suite* guardada, de qualquer assinatura,
+# conta como provado ("provado antes pela suíte (assinatura anterior)"). O diretório comum é compartilhado entre
+# worktrees. Nunca se guarda RED que passava, comando não encontrado, código fora do RC_RED nem preparo com falha.
 # A recusa de produção e a contagem de asserções rodam sempre. AGENTIC_RED_SEM_CACHE=1 ignora a leitura.
 cache_dir=$(git rev-parse --git-common-dir 2>/dev/null | tr -d '\r')
 case "$cache_dir" in
@@ -206,68 +216,130 @@ case "$cache_dir" in
   /*|?:*) cache_arq="$cache_dir/agentic/red-provados" ;;
   *) cache_dir="$agentic_raiz/$cache_dir"; cache_arq="$cache_dir/agentic/red-provados" ;;
 esac
-assinatura=$(printf '%s\n%s\n%s\n' "$CMD_PREPARAR_TESTE" "$CMD_TESTE_ARQUIVO" "$CMD_TESTE" | git hash-object --stdin) || cache_arq=""
+# assinatura_de <tipo>: n (executor) → hash dos quatro campos do bloco; a (CMD_TESTE_ARQUIVO) ou s (suíte) → hash
+# de CMD_PREPARAR_TESTE, CMD_TESTE_ARQUIVO e CMD_TESTE.
+assinatura_de() {
+  case $1 in
+    a|s) printf '%s\n%s\n%s\n' "$CMD_PREPARAR_TESTE" "$CMD_TESTE_ARQUIVO" "$CMD_TESTE" ;;
+    *) for as_k in PADROES PREPARO COMANDO RC_RED; do agentic_executor_campo "$1" "$as_k"; done ;;
+  esac | git hash-object --stdin
+}
+assinatura_de s >/dev/null || cache_arq=""
 
-# red_provado <sha> <arquivo>: 0 se há prova guardada com a assinatura atual (e o cache não está desligado).
+# red_provado <sha> <arquivo> <assinatura>: 0 se há prova guardada com essa assinatura (e o cache não está desligado).
 red_provado() {
   [ "${AGENTIC_RED_SEM_CACHE:-}" = 1 ] && return 1
-  [ -n "$cache_arq" ] && [ -f "$cache_arq" ] || return 1
-  RP_SHA=$1 RP_SIG=$assinatura RP_ARQ=$2 awk '
+  [ -n "$cache_arq" ] && [ -f "$cache_arq" ] && [ -n "$3" ] || return 1
+  RP_SHA=$1 RP_SIG=$3 RP_ARQ=$2 awk '
     BEGIN { sha = ENVIRON["RP_SHA"]; sig = ENVIRON["RP_SIG"]; arq = ENVIRON["RP_ARQ"] }
     { sub(/\r$/, "") }
     $1 == sha && $2 == sig && substr($0, length(sha) + length(sig) + 3) == arq { ok = 1 }
     END { exit ok ? 0 : 1 }' "$cache_arq"
 }
 
-# guarda_prova <sha> <arquivo>: acrescenta a prova ao cache (falha de gravação não derruba a verificação).
+# red_provado_suite <sha>: 0 se há prova *suite* guardada para o RED, com qualquer assinatura (migração).
+red_provado_suite() {
+  [ "${AGENTIC_RED_SEM_CACHE:-}" = 1 ] && return 1
+  [ -n "$cache_arq" ] && [ -f "$cache_arq" ] || return 1
+  RP_SHA=$1 awk '
+    BEGIN { sha = ENVIRON["RP_SHA"] }
+    { sub(/\r$/, "") }
+    $1 == sha && NF == 3 && $3 == "*suite*" { ok = 1 }
+    END { exit ok ? 0 : 1 }' "$cache_arq"
+}
+
+# guarda_prova <sha> <arquivo> <assinatura>: acrescenta a prova ao cache (falha de gravação não derruba a verificação).
 guarda_prova() {
-  [ -n "$cache_arq" ] || return 0
+  [ -n "$cache_arq" ] && [ -n "$3" ] || return 0
   mkdir -p "$cache_dir/agentic" 2>/dev/null || return 0
-  printf '%s %s %s\n' "$1" "$assinatura" "$2" >> "$cache_arq" 2>/dev/null
+  printf '%s %s %s\n' "$1" "$3" "$2" >> "$cache_arq" 2>/dev/null
   return 0
 }
 
-# comando_arquivo <arquivo>: CMD_TESTE_ARQUIVO com cada {} trocado pelo caminho entre aspas simples.
-comando_arquivo() {
-  cf_q="'$(printf '%s' "$1" | sed "s/'/'\\\\''/g")'"
-  cf_resto=$CMD_TESTE_ARQUIVO
-  cf_saida=""
+# aspas <texto>: o texto entre aspas simples, pronto para eval.
+aspas() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
+
+# troca <texto> <marca> <valor>: cada ocorrência literal da marca trocada pelo valor (o valor não é relido).
+troca() {
+  tr_resto=$1; tr_saida=""
   while :; do
-    case "$cf_resto" in
-      *"{}"*)
-        cf_saida="$cf_saida${cf_resto%%\{\}*}$cf_q"
-        cf_resto=${cf_resto#*\{\}} ;;
+    case "$tr_resto" in
+      *"$2"*) tr_saida="$tr_saida${tr_resto%%"$2"*}$3"; tr_resto=${tr_resto#*"$2"} ;;
       *) break ;;
     esac
   done
-  printf '%s%s' "$cf_saida" "$cf_resto"
+  printf '%s%s' "$tr_saida" "$tr_resto"
 }
 
-# avalia_rc <rc> <rotulo> <comando> <chave-do-cache>: interpreta o código de saída de uma execução de teste no RED;
-# só a falha legítima é guardada no cache.
+# classe_jvm <caminho no disco> <arquivo>: nome qualificado JVM — linha "package" do arquivo + nome sem extensão;
+# arquivo sem "package" dá só o nome.
+classe_jvm() {
+  cj_nome=${2##*/}; cj_nome=${cj_nome%.*}
+  cj_pac=$(tr -d '\r' < "$1" 2>/dev/null | sed -n 's/^[[:space:]]*package[[:space:]][[:space:]]*\([A-Za-z0-9_.]*\).*/\1/p' | head -n 1)
+  printf '%s\n' "${cj_pac:+$cj_pac.}$cj_nome"
+}
+
+# comando_arquivo <modelo> <arquivo> [worktree]: o modelo com cada {} trocado pelo caminho entre aspas simples; com
+# o worktree (executor), também cada {classe} pela classe JVM do arquivo, entre aspas simples.
+comando_arquivo() {
+  cf_saida=$1
+  if [ -n "${3:-}" ]; then
+    case "$cf_saida" in *"{classe}"*) cf_saida=$(troca "$cf_saida" '{classe}' "$(aspas "$(classe_jvm "$3/$2" "$2")")") ;; esac
+  fi
+  troca "$cf_saida" '{}' "$(aspas "$2")"
+}
+
+# avalia_rc <rc> <rotulo> <comando> <chave-do-cache> [rc_red]: interpreta o código de saída de uma execução de teste no
+# RED (com rc_red, só esse código é RED); só a falha legítima é guardada no cache, com a assinatura em $sig.
+# Retorna 1 quando a execução bloqueia.
 avalia_rc() {
   case $1 in
     0)
       echo "agentic: BLOQUEADO — os testes PASSAVAM no RED $curto ($2): não é evidência de RED."
-      status=1 ;;
+      status=1; return 1 ;;
     126|127)
       echo "agentic: BLOQUEADO — comando de teste não encontrado/não executável no RED $curto (código $1): $3"
-      status=1 ;;
-    *)
-      echo "RED $curto: falhava ($2) (ok)"
-      # rc >= 124 é timeout (124) ou sinal (>= 128): execução interrompida não é prova permanente.
-      [ "$1" -ge 124 ] || guarda_prova "$c" "$4" ;;
+      status=1; return 1 ;;
   esac
+  if [ -n "${5:-}" ] && [ "$1" -ne "$5" ]; then
+    echo "agentic: BLOQUEADO — $2 não é evidência no RED $curto (código $1, esperado $5)"
+    status=1; return 1
+  fi
+  echo "RED $curto: falhava ($2) (ok)"
+  # rc >= 124 é timeout (124) ou sinal (>= 128): execução interrompida não é prova permanente.
+  [ "$1" -ge 124 ] || guarda_prova "$c" "$4" "$sig"
+  return 0
 }
 
+# Log (5): a saída do preparo e de cada execução vai para agentic/.estado/verifica-red.log, reescrito a cada
+# execução do script: "== RED <sha> <arquivo|*suite*|preparo> (<executor n|CMD_TESTE_ARQUIVO|CMD_TESTE|
+# CMD_PREPARAR_TESTE>)", a saída e "-- <código> em <s> s". Em bloqueio, as últimas 40 linhas daquela execução
+# são repetidas na saída.
+log_red=agentic/.estado/verifica-red.log
+{ mkdir -p agentic/.estado && : > "$log_red"; } 2>/dev/null || log_red=/dev/null
+# executa <rotulo> <origem> <comando>: roda o comando na raiz do worktree, com </dev/null (um comando que lê stdin
+# não pode consumir a lista de arquivos); anexa a seção ao log e deixa o código em ex_rc.
+executa() {
+  ex_ini=$(date +%s)
+  ( cd "$wt" && eval "$3" ) >"$saida_ex" 2>&1 </dev/null
+  ex_rc=$?
+  { echo "== RED $curto $1 ($2)"; cat "$saida_ex"; echo "-- $ex_rc em $(( $(date +%s) - ex_ini )) s"; } >> "$log_red" 2>/dev/null
+  return 0
+}
+trecho() { echo "== (falhou; últimas 40 linhas)"; tail -n 40 "$saida_ex"; }
+
 status=0
+tab=$(printf '\t')
+nl='
+'
 lista=$(mktemp) || agentic_falha "mktemp falhou"
-pend=$(mktemp) || { rm -f "$lista" "$pend"; agentic_falha "mktemp falhou"; }
+pend=$(mktemp) || { rm -f "$lista"; agentic_falha "mktemp falhou"; }
+saida_ex=$(mktemp) || { rm -f "$lista" "$pend" "$saida_ex"; agentic_falha "mktemp falhou"; }
 for c in $reds; do
   curto=$(git rev-parse --short "$c")
 
   arquivos=$(git -c core.quotepath=off diff-tree --no-commit-id --name-only -r "$c") \
-    || { rm -f "$lista" "$pend"; agentic_falha "falha ao listar arquivos do RED $curto"; }
+    || { rm -f "$lista" "$pend" "$saida_ex"; agentic_falha "falha ao listar arquivos do RED $curto"; }
   : > "$lista" # arquivos de teste tocados pelo RED que têm asserção no RED, um por linha
   while IFS= read -r f; do
     [ -n "$f" ] || continue
@@ -275,73 +347,110 @@ for c in $reds; do
     teste=1
     # Documentação não é código de produção: os scripts só leem agentic/projeto/specs/*/tasks/*.md e agentic/projeto/intent/.
     case "$f" in docs/*|agentic/projeto/*) dentro=0 ;; esac
-    set -f
-    for d in $DIRS_TESTE; do
-      case "$f" in "$d"*) dentro=0; teste=0 ;; esac
-    done
-    set +f
+    if agentic_e_teste "$f"; then dentro=0; teste=0; fi
     if [ "$dentro" -ne 0 ]; then
       echo "agentic: BLOQUEADO — RED $curto toca arquivo fora dos diretórios de teste (código de produção): $f"
       status=1
     elif [ "$teste" -eq 0 ]; then
-      n=$(conta_assercoes "$c" "$f") || { rm -f "$lista" "$pend"; agentic_falha "falha ao contar asserções no RED $curto (git grep com erro; MARCADOR_ASSERCAO='$MARCADOR_ASSERCAO')"; }
+      n=$(conta_assercoes "$c" "$f") || { rm -f "$lista" "$pend" "$saida_ex"; agentic_falha "falha ao contar asserções no RED $curto (git grep com erro; MARCADOR_ASSERCAO='$MARCADOR_ASSERCAO')"; }
       [ "$n" -gt 0 ] && printf '%s\n' "$f" >> "$lista"
     fi
   done <<EOT
 $arquivos
 EOT
 
-  if [ -n "$CMD_TESTE_ARQUIVO" ] && [ ! -s "$lista" ]; then
+  if [ -n "$por_arquivo" ] && [ ! -s "$lista" ]; then
     echo "agentic: BLOQUEADO — RED $curto não toca nenhum arquivo de teste com asserção ('$MARCADOR_ASSERCAO'): não há o que provar por arquivo."
     status=1
   fi
 
-  # Filtra o que já foi provado neste SHA com esta assinatura; o resto precisa subir o worktree.
+  # Caminho de prova de cada arquivo ($pend: "<tipo>\t<arquivo>"; tipo = n do executor, a = CMD_TESTE_ARQUIVO,
+  # s = suíte, no máximo uma por RED). O que já foi provado neste SHA com a assinatura do caminho sai da lista.
   : > "$pend"
-  if [ -n "$CMD_TESTE_ARQUIVO" ]; then
+  if [ -z "$por_arquivo" ]; then
+    if red_provado "$c" '*suite*' "$(assinatura_de s)"; then
+      echo "RED $curto: já provado (*suite*) (ok)"
+    else
+      printf 's\t*suite*\n' > "$pend"
+    fi
+  else
+    antiga=""; migrado=""; suite=""
+    [ -n "$executores" ] && red_provado_suite "$c" && antiga=1
     while IFS= read -r f; do
       [ -n "$f" ] || continue
-      if red_provado "$c" "$f"; then
-        echo "RED $curto: já provado ($f) (ok)"
+      if tipo=$(agentic_executor "$f"); then
+        chave=$f
+      elif [ -n "$CMD_TESTE_ARQUIVO" ]; then
+        tipo=a; chave=$f
       else
-        printf '%s\n' "$f" >> "$pend"
+        echo "degradado: $f sem executor — RED provado pela suíte inteira"
+        [ -z "$suite" ] || continue
+        suite=1; tipo=s; chave='*suite*'
+      fi
+      if red_provado "$c" "$chave" "$(assinatura_de "$tipo")"; then
+        echo "RED $curto: já provado ($chave) (ok)"
+      elif [ -n "$antiga" ]; then
+        migrado=1
+      else
+        printf '%s\t%s\n' "$tipo" "$chave" >> "$pend"
       fi
     done < "$lista"
-  elif red_provado "$c" '*suite*'; then
-    echo "RED $curto: já provado (*suite*) (ok)"
-  else
-    echo '*suite*' > "$pend"
+    if [ -n "$migrado" ]; then
+      echo "RED $curto: provado antes pela suíte (assinatura anterior) (ok)"
+      : > "$pend"
+    fi
   fi
 
   if [ -s "$pend" ]; then
     wt=$(mktemp -d)
     rmdir "$wt"
-    git worktree add -q --detach "$wt" "$c" || { rm -f "$lista" "$pend"; agentic_falha "não foi possível criar worktree para $curto"; }
+    git worktree add -q --detach "$wt" "$c" || { rm -f "$lista" "$pend" "$saida_ex"; agentic_falha "não foi possível criar worktree para $curto"; }
     # Entre worktree add e remove não há saída via agentic_falha: o worktree é sempre removido.
-    # Toda execução de teste recebe </dev/null: um comando que lê stdin não pode consumir a lista de arquivos.
-    if [ -n "$CMD_PREPARAR_TESTE" ] && ! ( cd "$wt" && eval "$CMD_PREPARAR_TESTE" ) >/dev/null 2>&1 </dev/null; then
-      echo "agentic: BLOQUEADO — CMD_PREPARAR_TESTE falhou no RED $curto; não há evidência."
-      status=1
-    elif [ -n "$CMD_TESTE_ARQUIVO" ]; then
-      while IFS= read -r f; do
-        [ -n "$f" ] || continue
-        cmd=$(comando_arquivo "$f")
-        ( cd "$wt" && eval "$cmd" ) >/dev/null 2>&1 </dev/null
-        avalia_rc $? "$f" "$cmd" "$f"
+    # Preparo: o TESTE_<n>_PREPARO de cada executor usado (distintos, na ordem de n) e o CMD_PREPARAR_TESTE quando há
+    # prova por CMD_TESTE_ARQUIVO ou pela suíte. Qualquer falha bloqueia o RED sem rodar os testes.
+    prep_ok=1; vistos=$nl
+    for tipo in $(cut -f1 "$pend" | grep -E '^[0-9]+$' | sort -n -u); do
+      p=$(agentic_executor_campo "$tipo" PREPARO)
+      [ -n "$p" ] || continue
+      case "$vistos" in *"$nl$p$nl"*) continue ;; esac
+      vistos="$vistos$p$nl"
+      executa preparo "executor $tipo" "$p"
+      if [ "$ex_rc" -ne 0 ]; then
+        echo "agentic: BLOQUEADO — TESTE_${tipo}_PREPARO falhou no RED $curto; não há evidência."
+        trecho; status=1; prep_ok=""; break
+      fi
+    done
+    if [ -n "$prep_ok" ] && [ -n "$CMD_PREPARAR_TESTE" ] && grep -q "^[as]$tab" "$pend"; then
+      executa preparo CMD_PREPARAR_TESTE "$CMD_PREPARAR_TESTE"
+      if [ "$ex_rc" -ne 0 ]; then
+        echo "agentic: BLOQUEADO — CMD_PREPARAR_TESTE falhou no RED $curto; não há evidência."
+        trecho; status=1; prep_ok=""
+      fi
+    fi
+    if [ -n "$prep_ok" ]; then
+      while IFS="$tab" read -r tipo f; do
+        [ -n "$tipo" ] || continue
+        rcr=""
+        case $tipo in
+          s) cmd=$CMD_TESTE; rot="suíte inteira"; origem=CMD_TESTE ;;
+          a) cmd=$(comando_arquivo "$CMD_TESTE_ARQUIVO" "$f"); rot=$f; origem=CMD_TESTE_ARQUIVO ;;
+          *) cmd=$(comando_arquivo "$(agentic_executor_campo "$tipo" COMANDO)" "$f" "$wt"); rot=$f; origem="executor $tipo"
+             rcr=$(agentic_executor_campo "$tipo" RC_RED) ;;
+        esac
+        sig=$(assinatura_de "$tipo")
+        executa "$f" "$origem" "$cmd"
+        avalia_rc "$ex_rc" "$rot" "$cmd" "$f" "$rcr" || trecho
       done < "$pend"
-    else
-      ( cd "$wt" && eval "$CMD_TESTE" ) >/dev/null 2>&1 </dev/null
-      avalia_rc $? "suíte inteira" "$CMD_TESTE" '*suite*'
     fi
     git worktree remove --force "$wt"
   fi
 
   while IFS= read -r f; do
     [ -n "$f" ] || continue
-    a_red=$(conta_assercoes "$c" "$f") || { rm -f "$lista" "$pend"; agentic_falha "falha ao contar asserções no RED $curto (git grep com erro; MARCADOR_ASSERCAO='$MARCADOR_ASSERCAO')"; }
-    a_head=$(conta_assercoes HEAD "$f") || { rm -f "$lista" "$pend"; agentic_falha "falha ao contar asserções em HEAD (git grep com erro; MARCADOR_ASSERCAO='$MARCADOR_ASSERCAO')"; }
+    a_red=$(conta_assercoes "$c" "$f") || { rm -f "$lista" "$pend" "$saida_ex"; agentic_falha "falha ao contar asserções no RED $curto (git grep com erro; MARCADOR_ASSERCAO='$MARCADOR_ASSERCAO')"; }
+    a_head=$(conta_assercoes HEAD "$f") || { rm -f "$lista" "$pend" "$saida_ex"; agentic_falha "falha ao contar asserções em HEAD (git grep com erro; MARCADOR_ASSERCAO='$MARCADOR_ASSERCAO')"; }
     [ "$a_head" -lt "$a_red" ] || continue
-    rem=$(removidas_autorizadas "$c" "$f") || { rm -f "$lista" "$pend"; agentic_falha "mktemp falhou"; }
+    rem=$(removidas_autorizadas "$c" "$f") || { rm -f "$lista" "$pend" "$saida_ex"; agentic_falha "mktemp falhou"; }
     if [ "$a_head" -lt $((a_red - rem)) ]; then
       sufixo=""
       [ "$rem" -gt 0 ] && sufixo=" (removidas autorizadas: $rem)"
@@ -383,5 +492,5 @@ if [ -n "$vinc_task" ]; then
     fi
   fi
 fi
-rm -f "$lista" "$pend"
+rm -f "$lista" "$pend" "$saida_ex"
 exit $status
