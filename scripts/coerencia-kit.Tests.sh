@@ -16,7 +16,7 @@ nenhum() { tl_p=$1; shift; ! ( cd "$raiz" && grep -rniE -- "$tl_p" "$@" ); }
 # fora do git: a lista não pode publicar os nomes que proíbe). Sem a lista, avisa e passa.
 sem_nomes_proibidos() {
   [ -f "$raiz/.nomes-proibidos" ] || { echo "aviso: .nomes-proibidos ausente — nomes não conferidos"; return 0; }
-  tr -d '' < "$raiz/.nomes-proibidos" | while IFS= read -r tl_n; do
+  tr -d '\r' < "$raiz/.nomes-proibidos" | while IFS= read -r tl_n; do
     [ -n "$tl_n" ] || continue
     nenhum "$tl_n" "$@" || return 1
   done
@@ -525,6 +525,20 @@ tl_espera 0 "ciclo: nota de sessão anterior não vale contra o texto" tem core/
 tl_espera 0 "README: a atualização aponta o que reler" tem README.md 'a seção "Kit" do `status-projeto.sh`'
 tl_espera 0 "README: verify interrompido não segue" tem README.md '`VERIFY: INTERROMPIDO`'
 tl_espera 0 "verify: interrupção declarada" tem mecanismos/scripts/verify.sh 'INTERROMPIDO'
+
+# --- Prova do completo, log e tempo por etapa (medido: em duas instâncias, o orquestrador rodou o completo no mesmo
+# commit que o revisor diff tinha aprovado, 4 de 4; em outra, 21 de 61 completos do revisor foram para reler a saída).
+for f in mecanismos/scripts/verify.sh core/processo/ciclo.md README.md; do
+  tl_espera 0 "$f: prova do completo em verify-provados" tem $f 'agentic/verify-provados'
+  tl_espera 0 "$f: como refazer a prova" tem $f 'AGENTIC_VERIFY_SEM_CACHE=1'
+  tl_espera 0 "$f: log do verify" tem $f 'agentic/.estado/verify.log'
+done
+tl_espera 0 "verify: a linha da prova reaproveitada" tem mecanismos/scripts/verify.sh 'VERIFY: OK (já provado nesta árvore)'
+tl_espera 0 "ciclo: a linha da prova reaproveitada" tem core/processo/ciclo.md '`VERIFY: OK (já provado nesta árvore)`'
+tl_espera 0 "/verify: a prova reaproveitada é sucesso" tem adapters/claude-code/commands/verify.md '`VERIFY: OK (já provado nesta árvore)` é sucesso'
+tl_espera 0 "ciclo: reler pelo log, não rodando de novo" tem core/processo/ciclo.md 'Para ler outra parte da saída, abra o log'
+tl_espera 0 "escopo: o log do verify não conta como arquivo da branch" tem mecanismos/scripts/verifica-escopo.sh 'agentic/.estado/verify.log'
+tl_espera 0 "a prova fica sob o deny de .git/agentic" tem adapters/comum/caminhos-protegidos.txt '.git/agentic/**'
 
 # --- Contexto do orquestrador: a sessão compacta cedo e retoma pelo progress.md (medido: contexto médio de 378 mil
 # tokens por requisição numa instância, com a compactação só perto do limite da janela de 1 milhão).

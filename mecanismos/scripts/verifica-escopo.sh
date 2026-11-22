@@ -36,7 +36,7 @@ fora=$(
       [ -n "$f" ] || continue
       case "$f" in "$dir_spec"/*) continue ;; esac
       [ -n "$intent_spec" ] && [ "$f" = "$intent_spec" ] && continue
-      case "$f" in agentic/.estado/verify.lock/*|agentic/.estado/execucao/*|agentic/.estado/worktrees/*) continue ;; esac
+      case "$f" in agentic/.estado/verify.lock/*|agentic/.estado/verify.log|agentic/.estado/verify-rapido.log|agentic/.estado/execucao/*|agentic/.estado/worktrees/*) continue ;; esac
       dentro=1
       for p in $padroes; do
         case "$f" in $p) dentro=0; break ;; esac
