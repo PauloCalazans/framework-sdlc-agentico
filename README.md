@@ -20,7 +20,7 @@ Serve para **qualquer stack** (Java, Python, Node, .NET, front-end…) e para pr
 | Sem o kit, o agente… | Com o kit | Quem garante |
 |---|---|---|
 | diz "está funcionando" sem rodar nada | `verify.sh` é o ponto único de verificação; sucesso só com a saída do nível do passo (`VERIFY: OK` no completo, `VERIFY RÁPIDO: OK` no laço do `dev`) | regra + `verify.sh` |
-| altera o teste até ele passar | o commit `test(red):` prova que os testes falhavam; asserção removida depois, num arquivo de teste que o RED tocou, reprova, salvo remoção declarada em trailer com decisão registrada antes | `verifica-red.sh` |
+| altera o teste até ele passar | o commit `test(red):` prova que os testes falhavam; asserção removida depois, num arquivo de teste que o RED tocou, reprova, salvo remoção declarada em trailer com decisão registrada antes; cada arquivo é provado pelo executor do caminho dele (`TESTE_<n>_` no `agentic/config`), pelo `CMD_TESTE_ARQUIVO` ou, sem os dois, pela suíte; a saída fica em `agentic/.estado/verifica-red.log` | `verifica-red.sh` |
 | desliga o teste que incomoda (`.skip`, `@Disabled`) | teste desabilitado na branch ou skip novo no relatório JUnit reprova | `verifica-skip.sh` |
 | "aproveita" e mexe em arquivos fora do pedido | cada task declara `## Arquivos`; arquivo fora da lista reprova | `verifica-escopo.sh` |
 | commita na `main` ou faz o merge do próprio PR | commit e push na branch protegida são bloqueados, e o merge com commit também; merge fast-forward local não dispara hook (o remoto continua protegido pelo `pre-push`) | `pre-commit`, `pre-push`, `pre-merge-commit`, `deny` de `gh pr merge` (e de `git merge` sem plataforma de PR, acrescentado no `/bootstrap`) |

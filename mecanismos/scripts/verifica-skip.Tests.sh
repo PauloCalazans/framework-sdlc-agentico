@@ -86,4 +86,34 @@ git -C "$r" branch -m main trunk
 tl_espera 1 "marcador configurado sem base (sem main) bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 tl_contem "BLOQUEADO" "marcador sem base não é apenas degradado"
 
+# Teste colocalizado (TESTE_<n>_PADROES): a varredura usa a mesma classificação do verifica-red.
+colocal() {
+  r=$(prepara); junit "$r" ""; mkdir -p "$r/src"
+  printf '%s\n' "$1" >> "$r/agentic/config"; git -C "$r" add -A; git -C "$r" commit -q -m "executor"
+}
+colocal 'TESTE_1_PADROES="src/*.spec.py"'
+printf '@unittest.skip("x")\ndef test_e(): pass\n' > "$r/src/x.spec.py"; git -C "$r" add -A; git -C "$r" commit -q -m "skip colocalizado"
+tl_espera 1 "colocalizado: marcador em src/x.spec.py commitado bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+colocal 'TESTE_1_PADROES="src/*.spec.py"'
+printf 'P = "@unittest.skip("\n' > "$r/src/x.py"; git -C "$r" add -A; git -C "$r" commit -q -m "produção"
+tl_espera 0 "colocalizado: marcador em src/x.py (produção) não bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+colocal 'TESTE_1_PADROES="src/*.spec.py"'
+printf '@unittest.skip("x")\n' > "$r/src/y.spec.py"
+tl_espera 1 "colocalizado: marcador em arquivo novo não rastreado bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+colocal 'DIRS_TESTE=""
+TESTE_1_PADROES="src/*.spec.py"'
+tl_espera 0 "colocalizado: DIRS_TESTE vazio com executor não bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+r=$(prepara); junit "$r" ""; echo 'DIRS_TESTE="test"' >> "$r/agentic/config"; git -C "$r" add -A; git -C "$r" commit -q -m "sem barra"
+mkdir -p "$r/testsuite"; printf '@unittest.skip("x")\n' > "$r/testsuite/x.py"; git -C "$r" add -A; git -C "$r" commit -q -m "fora de test/"
+tl_espera 0 "sem executor: DIRS_TESTE sem barra segue pathspec (testsuite/ não é test/)" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+colocal 'TESTE_1_PADROES="src/*.spec.py"'
+printf '@unittest.skip("x")\n' > "$r/tests/t.py"; git -C "$r" add -A; git -C "$r" commit -q -m "skip em DIRS_TESTE com executor"
+tl_espera 1 "com executor: marcador sob DIRS_TESTE segue bloqueando" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+r=$(prepara); junit "$r" ""
+printf '+++ falso\n@unittest.skip("x")\n' > "$r/tests/t.py"; git -C "$r" add -A; git -C "$r" commit -q -m "linha que parece cabeçalho"
+tl_espera 1 "linha adicionada que começa com ++ não vira cabeçalho" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+r=$(prepara); junit "$r" ""
+printf '@unittest.skip("x")\n' > "$r/tests/com espaço.py"; git -C "$r" add -A; git -C "$r" commit -q -m "nome com espaço"
+tl_espera 1 "marcador em arquivo commitado com espaço no nome bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+
 tl_fim

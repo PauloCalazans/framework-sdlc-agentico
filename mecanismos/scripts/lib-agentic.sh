@@ -19,6 +19,10 @@ CMD_VERIFY_RAPIDO=""
 CMD_VALIDA_CONTRATO=""
 CAMINHOS_N3=""
 GITLEAKS_BIN="gitleaks"
+# Executores TESTE_<n>_* só valem do agentic/config (superfície protegida): os herdados do ambiente são apagados.
+for agentic_v in $(set | sed -nE 's/^(TESTE_[0-9]+_(PADROES|PREPARO|COMANDO|RC_RED))=.*/\1/p'); do
+  unset "$agentic_v"
+done
 
 if [ -f "$agentic_raiz/agentic/config" ]; then
   . "$agentic_raiz/agentic/config"
@@ -74,6 +78,60 @@ agentic_base() {
     return
   fi
   git merge-base HEAD "$BRANCH_PRINCIPAL" 2>/dev/null || git merge-base HEAD "origin/$BRANCH_PRINCIPAL" 2>/dev/null
+}
+
+# --- Executores por caminho: blocos TESTE_<n>_* do agentic/config (n = 1, 2, …), com os campos
+# PADROES PREPARO COMANDO RC_RED. PADROES são padrões do case do sh separados por espaço (o * cruza /); o bloco
+# só existe com PADROES. A leitura para no primeiro n sem PADROES.
+
+# agentic_executores: imprime os n válidos, um por linha; um TESTE_<m>_PADROES além do buraco vira aviso em stderr.
+agentic_executores() {
+  agentic_n=1
+  while eval "[ -n \"\${TESTE_${agentic_n}_PADROES:-}\" ]"; do
+    printf '%s\n' "$agentic_n"
+    agentic_n=$((agentic_n + 1))
+  done
+  for agentic_m in $(set | sed -n 's/^TESTE_\([1-9][0-9]*\)_PADROES=.*/\1/p'); do
+    [ "$agentic_m" -gt "$agentic_n" ] || continue
+    eval "[ -n \"\${TESTE_${agentic_m}_PADROES:-}\" ]" || continue
+    echo "aviso: TESTE_${agentic_m}_PADROES ignorado — falta TESTE_${agentic_n}_PADROES" >&2
+  done
+  return 0
+}
+
+# agentic_executor_campo <n> <CAMPO>: imprime TESTE_<n>_<CAMPO> (vazio se não definido); n ou CAMPO inválido → 1.
+agentic_executor_campo() {
+  case $1 in ''|*[!0-9]*) return 1 ;; esac
+  case " PADROES PREPARO COMANDO RC_RED " in *" $2 "*) ;; *) return 1 ;; esac
+  eval "agentic_v=\${TESTE_${1}_${2}:-}"
+  printf '%s\n' "$agentic_v"
+}
+
+# agentic_executor <arquivo>: imprime o primeiro n cujo padrão casa o arquivo; 1 se nenhum.
+agentic_executor() {
+  case $- in *f*) agentic_sf=1 ;; *) agentic_sf= ;; esac
+  for agentic_n in $(agentic_executores 2>/dev/null); do
+    agentic_ps=$(agentic_executor_campo "$agentic_n" PADROES)
+    set -f
+    for agentic_p in $agentic_ps; do
+      # shellcheck disable=SC2254
+      case "$1" in $agentic_p) [ -n "$agentic_sf" ] || set +f; printf '%s\n' "$agentic_n"; return 0 ;; esac
+    done
+    [ -n "$agentic_sf" ] || set +f
+  done
+  return 1
+}
+
+# agentic_e_teste <arquivo>: a única regra de "arquivo de teste": prefixo de DIRS_TESTE ou padrão de algum
+# executor. Não trata docs/ nem agentic/projeto/ (quem chama mantém a isenção).
+agentic_e_teste() {
+  case $- in *f*) agentic_sf=1 ;; *) agentic_sf= ;; esac
+  set -f
+  for agentic_d in $DIRS_TESTE; do
+    case "$1" in "$agentic_d"*) [ -n "$agentic_sf" ] || set +f; return 0 ;; esac
+  done
+  [ -n "$agentic_sf" ] || set +f
+  agentic_executor "$1" >/dev/null
 }
 
 # agentic_principal_ref: a branch principal local ou, sem ela, a remota. Vazio se nenhuma existir.

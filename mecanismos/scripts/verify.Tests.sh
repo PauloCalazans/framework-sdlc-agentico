@@ -315,4 +315,19 @@ inicial=$(git -C "$r" rev-list --max-parents=0 HEAD)
 tl_espera 0 "mesma árvore com outra base" env AGENTIC_BASE="$inicial" sh -c "cd '$r' && sh '$dir/verify.sh'"
 tl_espera 0 "outra base: a stack rodou" contagem "$r" 2
 
+# A config fora da árvore (ignorada): só a assinatura distingue uma mudança nas chaves TESTE_<n>_*.
+# refaz <repo>: o completo passa e não responde pela prova guardada.
+refaz() { o=$(sh -c "cd '$1' && sh '$dir/verify.sh'") || { echo "$o"; return 1; }; ! printf '%s' "$o" | grep -q 'já provado nesta árvore'; }
+r=$(prova)
+printf 'agentic/.estado/\nagentic/config\n' > "$r/.gitignore"
+git -C "$r" rm -q --cached agentic/config; git -C "$r" add -A; git -C "$r" commit -q -m "config fora da árvore"
+tl_espera 0 "config ignorada: 1º completo" sh -c "cd '$r' && sh '$dir/verify.sh'"
+printf 'TESTE_1_PADROES="tests/a_*"\nTESTE_1_COMANDO="sh {}"\n' >> "$r/agentic/config"
+tl_espera 0 "prova do completo: ligar TESTE_1_* roda tudo de novo" refaz "$r"
+tl_espera 0 "prova do completo: mesma config TESTE_1_* reaproveita" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "já provado nesta árvore" "prova do completo: a assinatura com TESTE_1_* foi guardada"
+printf 'TESTE_1_COMANDO="sh -x {}"\n' >> "$r/agentic/config"
+tl_espera 0 "prova do completo: mudar TESTE_1_COMANDO roda tudo de novo" refaz "$r"
+tl_espera 0 "prova do completo: a stack rodou nas três mudanças" contagem "$r" 3
+
 tl_fim

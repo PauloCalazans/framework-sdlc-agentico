@@ -13,6 +13,26 @@ CMD_TESTE="{{CMD_TESTE}}"
 # arquivo de teste do RED falhava. Java/Maven (mvn -q test -Dtest={}) espera nome de classe, não caminho:
 # use um wrapper que converta caminho em classe, ou deixe vazio. Vazio = degradado (RED provado pela suíte).
 CMD_TESTE_ARQUIVO="{{CMD_TESTE_ARQUIVO}}"
+# Opcional: executores por caminho, para projeto com mais de um executor de testes (monorepo). Cada bloco
+# TESTE_<n>_* (n = 1, 2, …, sem buraco: a leitura para no primeiro n sem PADROES) diz que arquivos são dele e
+# como prová-los; o primeiro bloco cujo padrão casa com o arquivo é o executor dele. Arquivo sem executor cai no
+# CMD_TESTE_ARQUIVO e, sem ele, na suíte inteira (CMD_TESTE), uma vez por RED.
+#   TESTE_<n>_PADROES  padrões do case do sh, separados por espaço (o * cruza /). Também marcam o arquivo como
+#                      teste, o que cobre o teste colocalizado (*.spec.ts ao lado da produção).
+#   TESTE_<n>_PREPARO  opcional; roda uma vez no worktree do RED, só quando o RED toca arquivo desse executor.
+#   TESTE_<n>_COMANDO  roda na raiz do worktree; {} = caminho do arquivo, relativo à raiz do worktree (quem
+#                      entra num subdiretório tira o prefixo, como no exemplo); {classe} = nome JVM (package +
+#                      nome). Comando que espera entrada ou fica em modo watch prende a prova do RED.
+#   TESTE_<n>_RC_RED   opcional; vazio = qualquer código fora de 0, 126 e 127 é RED; preenchido, só esse código
+#                      é RED e outro código diferente de zero bloqueia. Com a ajuda red-junit.sh, use "1": ela lê
+#                      o JUnit XML e separa "um teste falhou" (1) de "nada rodou" (126: compilação, coleta, zero casos).
+# Exemplo — um executor de arquivo e um por módulo:
+#   TESTE_1_PADROES="frontend/src/*.spec.ts"
+#   TESTE_1_PREPARO="npm ci --ignore-scripts --prefix frontend"
+#   TESTE_1_COMANDO='cd frontend && npx ng test --watch=false --include="$(printf %s {} | sed s#^frontend/##)"'
+#   TESTE_2_PADROES="backend/bridge/src/test/*.kt"
+#   TESTE_2_COMANDO="sh agentic/mecanismos/scripts/red-junit.sh 'backend/bridge/build/test-results/test/*.xml' -- backend/gradlew -p backend :bridge:test --tests {classe}"
+#   TESTE_2_RC_RED="1"
 # Preparação necessária num worktree limpo antes de testar (ex.: npm ci). Vazio se não houver.
 CMD_PREPARAR_TESTE="{{CMD_PREPARAR_TESTE}}"
 # Diretórios de teste, separados por espaço, com barra final.

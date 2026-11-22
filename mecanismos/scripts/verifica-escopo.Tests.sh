@@ -104,4 +104,8 @@ mkdir -p "$r/src"; echo o > "$r/src/outro.py"; git -C "$r" add -A; git -C "$r" c
 git -C "$r" checkout -q pedidos/002
 tl_espera 0 "base posicional usa merge-base: arquivo que só a base mudou depois não conta" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' agentic/projeto/specs/pedidos/tasks/001-criar.md pedidos/001"
 
+r=$(prepara)
+mkdir -p "$r/agentic/.estado"; echo l > "$r/agentic/.estado/verifica-red.log"
+tl_espera 0 "ignora o log do verifica-red (agentic/.estado/verifica-red.log)" sh -c "cd '$r' && sh '$dir/verifica-escopo.sh' agentic/projeto/specs/pedidos/tasks/001-criar.md"
+
 tl_fim

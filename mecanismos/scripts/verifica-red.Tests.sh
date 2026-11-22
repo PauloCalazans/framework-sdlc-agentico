@@ -639,4 +639,166 @@ semred
 echo 'soma() { echo 6; }' > "$r/src/soma.sh"; git -C "$r" add -A; git -C "$r" commit -q -m "docs(task): ajuste"
 tl_espera 1 "sem RED: docs que toca produção conta como GREEN" vv "$r"
 
+# --- Teste colocalizado (TESTE_<n>_PADROES): arquivo de teste ao lado da produção.
+# spec_soma <repo>: grava src/soma.spec.sh, que falha enquanto soma devolve 0.
+spec_soma() {
+  { echo '. ./src/soma.sh'
+    echo 'assert_igual() { [ "$1" = "$2" ] || { echo "esperado $2, obtido $1"; exit 1; }; }'
+    echo 'assert_igual "$(soma 2 3)" 5'
+  } > "$1/src/soma.spec.sh"
+}
+colocalizado() { r=$(prepara); config_extra "$r" 'TESTE_1_PADROES="src/*.spec.sh"
+TESTE_1_COMANDO="sh {}"'; spec_soma "$r"; }
+colocalizado
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma colocalizada"; green_soma "$r"
+tl_espera 0 "colocalizado: RED com src/soma.spec.sh é aceito (não é produção)" vrc "$r"
+r=$(prepara); modo_arquivo "$r"; printf '# assert_igual x\n' >> "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): só produção"
+tl_espera 1 "ambiente: TESTE_<n>_* exportado não transforma produção em teste" env TESTE_1_PADROES='*' TESTE_1_COMANDO='exit 1' sh -c "cd '$r' && sh '$dir/verifica-red.sh'" </dev/null
+tl_contem "código de produção): src/soma.sh" "ambiente: segue recusando a produção"
+colocalizado; echo '# mexi' >> "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma colocalizada"
+tl_espera 1 "colocalizado: RED que também toca src/soma.sh é recusado" vrc "$r"
+tl_contem "src/soma.sh" "colocalizado: aponta a produção"
+semred; config_extra "$r" 'TESTE_1_PADROES="src/*.spec.sh"
+TESTE_1_COMANDO="sh {}"'
+spec_soma "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test: caracterização colocalizada"
+tl_espera 0 "colocalizado: commit test: só com src/soma.spec.sh não conta como GREEN sem RED" vv "$r"
+tl_contem "nenhum commit test(red):" "colocalizado: o test: só de teste passa sem bloqueio"
+r=$(prepara); config_extra "$r" 'DIRS_TESTE=""
+TESTE_1_PADROES="src/*.spec.sh"
+TESTE_1_COMANDO="sh {}"'; spec_soma "$r"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma colocalizada"
+tl_espera 0 "colocalizado: DIRS_TESTE vazio com executor não bloqueia" vrc "$r"
+
+# --- Prova pelo executor do caminho (TESTE_<n>_*).
+# prepara_exec: suíte que roda tests/[abt]_*.sh e dois executores que registram a chamada em $cont.
+prepara_exec() {
+  r=$(prepara_multi); cont=$(mktemp); : > "$cont"
+  echo 'for t in tests/[abt]_*.sh; do sh "$t" || exit 1; done' > "$r/tests/run.sh"
+  config_extra "$r" "TESTE_1_PADROES=\"tests/a_*\"
+TESTE_1_COMANDO=\"echo 1 >> '$cont'; sh {}\"
+TESTE_1_PREPARO=\"echo p1 >> '$cont'\"
+TESTE_2_PADROES=\"tests/b_*\"
+TESTE_2_COMANDO=\"echo 2 >> '$cont'; sh {}\"
+TESTE_2_PREPARO=\"echo p2 >> '$cont'\""
+}
+# soma_em <repo> <arquivo sob tests/>: teste de soma que falha enquanto soma devolve 0.
+soma_em() { teste_soma "$1"; mv "$1/tests/t_soma.sh" "$1/tests/$2"; }
+linhas() { [ "$(grep -cxF -- "$1" "$cont")" -eq "$2" ]; }
+
+prepara_exec; soma_em "$r" a_soma.sh; soma_em "$r" b_soma.sh
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a e b"
+tl_espera 0 "executor: cada arquivo pelo seu executor" vrc "$r"
+tl_espera 0 "executor: executor 1 rodou uma vez" linhas 1 1
+tl_espera 0 "executor: executor 2 rodou uma vez" linhas 2 1
+tl_espera 0 "executor: preparo p1 uma vez" linhas p1 1
+tl_espera 0 "executor: preparo p2 uma vez" linhas p2 1
+tl_espera 0 "executor: sem aviso de degradado" sh -c "! grep -q degradado '$TL_SAIDA'"
+prepara_exec; soma_em "$r" a_soma.sh
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 0 "executor: preparo só do executor tocado (sem p2)" sh -c "cd '$r' && sh '$dir/verifica-red.sh' </dev/null && ! grep -qx p2 '$cont' && grep -qx p1 '$cont'"
+prepara_exec; soma_em "$r" a_soma.sh; escreve_teste "$r" b_dobro dobro "5 10"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a e b"
+tl_espera 1 "executor: arquivo do executor 2 que já passava bloqueia" vrc "$r"
+tl_contem "tests/b_dobro.sh" "executor: aponta o arquivo que passava"
+
+prepara_exec; teste_soma "$r"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): t"
+tl_espera 0 "fallback: arquivo sem executor e sem CMD_TESTE_ARQUIVO cai na suíte" vrc "$r"
+tl_contem "degradado: tests/t_soma.sh sem executor — RED provado pela suíte inteira" "fallback: avisa por arquivo"
+tl_contem "falhava (suíte inteira)" "fallback: provado pela suíte"
+prepara_exec; config_extra "$r" "CMD_TESTE=\"echo s >> '$cont'; sh tests/run.sh\""
+teste_soma "$r"; escreve_teste "$r" t_tri dobro "1 3"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): t e tri"
+tl_espera 0 "fallback: dois arquivos sem executor rodam a suíte uma vez só" sh -c "cd '$r' && sh '$dir/verifica-red.sh' </dev/null && [ \$(grep -cx s '$cont') -eq 1 ]"
+prepara_exec; config_extra "$r" "CMD_TESTE_ARQUIVO=\"echo a >> '$cont'; sh {}\"
+CMD_PREPARAR_TESTE=\"echo pp >> '$cont'\""
+teste_soma "$r"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): t"
+tl_espera 0 "fallback: CMD_TESTE_ARQUIVO preenchido atende o arquivo sem executor" sh -c "cd '$r' && sh '$dir/verifica-red.sh' </dev/null && grep -qx a '$cont' && grep -qx pp '$cont'"
+tl_contem "falhava (tests/t_soma.sh)" "fallback: provado pelo CMD_TESTE_ARQUIVO"
+prepara_exec; config_extra "$r" "CMD_PREPARAR_TESTE=\"echo pp >> '$cont'\""
+soma_em "$r" a_soma.sh
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 0 "fallback: CMD_PREPARAR_TESTE só roda com prova por CMD_TESTE_ARQUIVO ou suíte" sh -c "cd '$r' && sh '$dir/verifica-red.sh' </dev/null && ! grep -qx pp '$cont'"
+
+prepara_exec; config_extra "$r" "TESTE_1_COMANDO=\"sh {} || exit 10\"
+TESTE_1_RC_RED=\"10\""
+soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 0 "rc_red: código igual ao RC_RED é RED" vrc "$r"
+prepara_exec; config_extra "$r" "TESTE_1_COMANDO=\"sh {} || exit 10\"
+TESTE_1_RC_RED=\"7\""
+soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 1 "rc_red: outro código não é evidência" vrc "$r"
+tl_contem "não é evidência no RED" "rc_red: explica"
+tl_contem "(código 10, esperado 7)" "rc_red: mostra os códigos"
+prepara_exec; config_extra "$r" 'TESTE_1_COMANDO=""'
+soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 1 "config: COMANDO vazio bloqueia" vrc "$r"
+tl_contem "TESTE_1_COMANDO vazio" "config: aponta a chave"
+prepara_exec; config_extra "$r" 'TESTE_1_RC_RED="um"'
+soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+tl_espera 1 "config: RC_RED não numérico bloqueia" vrc "$r"
+tl_contem "TESTE_1_RC_RED" "config: aponta a chave"
+
+prepara_exec; config_extra "$r" "TESTE_1_COMANDO=\"echo {classe} >> '$cont'; exit 1\""
+printf 'package com.x\n\nassert_igual\n' > "$r/tests/a_T.kt"
+printf 'assert_igual\n' > "$r/tests/a_U.kt"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): kotlin"
+tl_espera 0 "classe: RED com {classe} roda" vrc "$r"
+tl_espera 0 "classe: {classe} com package vira pacote.Nome" linhas com.x.a_T 1
+tl_espera 0 "classe: sem package vira só o nome" linhas a_U 1
+prepara_exec; soma_em "$r" "a_it's soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"; green_soma "$r"
+tl_espera 0 "executor: caminho com espaço e aspas simples intacto em {}" vrc "$r"
+tl_contem "falhava (tests/a_it's soma.sh)" "executor: provou o arquivo com aspas"
+
+# --- Assinatura por executor e migração das provas pela suíte.
+prepara_mig() {
+  prepara_exec; config_extra "$r" "TESTE_1_PADROES=\"\"
+CMD_TESTE=\"echo s >> '$cont'; sh tests/run.sh\""
+  soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"
+}
+prepara_mig
+tl_espera 0 "migração: RED provado no degradado" vrc "$r"
+tl_espera 0 "migração: a suíte rodou" linhas s 1
+config_extra "$r" "TESTE_1_PADROES=\"tests/a_*\"
+CMD_TESTE=\"echo S >> '$cont'; sh tests/run.sh\""
+tl_espera 0 "migração: prova *suite* de assinatura antiga vale depois de ligar executores" vrc "$r"
+tl_contem "provado antes pela suíte (assinatura anterior) (ok)" "migração: diz de onde veio a prova"
+tl_espera 0 "migração: nada rodou" sh -c "[ \$(wc -l < '$cont') -eq 1 ]"
+tl_espera 0 "migração: AGENTIC_RED_SEM_CACHE=1 refaz pelo executor" sh -c "cd '$r' && AGENTIC_RED_SEM_CACHE=1 sh '$dir/verifica-red.sh' </dev/null && grep -qx 1 '$cont'"
+r=$(prepara); cont=$(mktemp); : > "$cont"; config_extra "$r" "CMD_TESTE=\"echo s >> '$cont'; sh tests/run.sh\""
+teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+vrc "$r" >/dev/null
+config_extra "$r" "CMD_TESTE=\"echo S >> '$cont'; sh tests/run.sh\""
+tl_espera 0 "migração: sem executor, CMD_TESTE novo prova de novo" sh -c "cd '$r' && sh '$dir/verifica-red.sh' </dev/null && grep -qx S '$cont'"
+
+prepara_exec; soma_em "$r" a_soma.sh; soma_em "$r" b_soma.sh
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a e b"
+vrc "$r" >/dev/null
+config_extra "$r" "TESTE_2_COMANDO=\"echo 22 >> '$cont'; sh {}\""
+tl_espera 0 "assinatura: mudar o executor 2 não refaz a prova do executor 1" sh -c "cd '$r' && sh '$dir/verifica-red.sh' </dev/null && [ \$(grep -cx 1 '$cont') -eq 1 ] && grep -qx 22 '$cont'"
+tl_contem "já provado (tests/a_soma.sh) (ok)" "assinatura: o executor 1 veio do cache"
+config_extra "$r" "TESTE_1_COMANDO=\"echo 11 >> '$cont'; sh {}\""
+tl_espera 0 "assinatura: mudar o executor 1 refaz a prova dele" sh -c "cd '$r' && sh '$dir/verifica-red.sh' </dev/null && grep -qx 11 '$cont' && [ \$(grep -cx 22 '$cont') -eq 1 ]"
+
+# --- Log em agentic/.estado/verifica-red.log.
+r=$(prepara); teste_red "$r"; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 0 "log: RED provado" vrc "$r"
+tl_espera 0 "log: escrito com a seção do arquivo" grep -qF "== RED " "$r/agentic/.estado/verifica-red.log"
+tl_espera 0 "log: guarda a saída do teste" grep -qF "esperado 5, obtido 0" "$r/agentic/.estado/verifica-red.log"
+tl_espera 0 "log: cabeçalho com o executor" grep -qF "*suite* (CMD_TESTE)" "$r/agentic/.estado/verifica-red.log"
+tl_espera 0 "log: rodapé com código e duração" grep -qE "^-- 1 em [0-9]+ s$" "$r/agentic/.estado/verifica-red.log"
+tl_espera 0 "log: reescrito na execução seguinte (uma seção só)" sh -c "cd '$r' && AGENTIC_RED_SEM_CACHE=1 sh '$dir/verifica-red.sh' </dev/null && [ \$(grep -c '^== RED ' agentic/.estado/verifica-red.log) -eq 1 ]"
+r=$(prepara)
+echo 'soma() { echo $(($1 + $2)); }' > "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "feat: soma antes do teste"
+teste_red "$r"; echo 'echo saida-do-teste-que-passava' >> "$r/tests/run.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma"
+tl_espera 1 "log: RED que passava bloqueia e repete o trecho" vrc "$r"
+tl_contem "últimas 40 linhas" "log: anuncia o trecho repetido"
+tl_contem "saida-do-teste-que-passava" "log: repete a saída da execução"
+
 tl_fim

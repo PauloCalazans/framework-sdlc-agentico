@@ -119,9 +119,13 @@ arvore_suja() { git -c core.quotepath=off status --porcelain -- . ':(exclude)age
 if [ -n "$prova_arq" ]; then
   p_arvore=$(git rev-parse -q --verify 'HEAD^{tree}' 2>/dev/null)
   p_base=$(agentic_base); p_base=${p_base:--}
+  # Executores TESTE_<n>_* (os quatro campos de cada bloco); sem nenhum, a assinatura é a de antes deles.
+  p_exec=$(for p_n in $(agentic_executores 2>/dev/null); do
+    for p_k in PADROES PREPARO COMANDO RC_RED; do printf 'TESTE_%s_%s=%s\n' "$p_n" "$p_k" "$(agentic_executor_campo "$p_n" "$p_k")"; done
+  done)
   p_sig=$(printf '%s\n' "$CMD_PREPARAR_TESTE" "$CMD_TESTE" "$CMD_TESTE_ARQUIVO" "$CMD_VERIFY_STACK" \
     "$RELATORIO_TESTES" "$MARCADOR_DESABILITADO" "$MARCADOR_ASSERCAO" "$DIRS_TESTE" "$CAMINHOS_N3" \
-    "$BRANCH_PRINCIPAL" "$(git config core.hooksPath)" "$task" | git hash-object --stdin)
+    "$BRANCH_PRINCIPAL" "$(git config core.hooksPath)" "$task" ${p_exec:+"$p_exec"} | git hash-object --stdin)
   [ -n "$p_arvore" ] && [ -n "$p_sig" ] || prova_arq=""
 fi
 if [ -n "$prova_arq" ] && [ -n "$(arvore_suja)" ]; then
