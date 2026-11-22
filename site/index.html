@@ -157,8 +157,18 @@
     <header class="cabeca">
       <p class="eyebrow">04 · Por que o repositório é assim</p>
       <h2>Cada ajuste do kit nasceu de uma medição.</h2>
-      <p>A base vem da engenharia de software; o ajuste fino vem do uso. Medimos <strong class="num" data-e="e1">36</strong> execuções reais e, quando o dado mostrava um problema, o kit mudou. Cada cartão liga a decisão à evidência.</p>
+      <p>A base vem da engenharia de software; o ajuste fino vem do uso. Primeiro medimos <strong class="num" data-e="e1">36</strong> execuções reais; depois, as transcrições e os logs das instâncias. Quando o dado mostrava um problema, o kit mudou. Cada cartão liga a decisão à evidência.</p>
     </header>
+    <div class="sub"><h3>Ajustes recentes, de 19 a 22/11</h3><p>Os pontos que o uso das instâncias trouxe depois da primeira medição. O efeito deles ainda não foi medido nas instâncias.</p></div>
+    <div class="cartoes">
+      <article><p class="valor"><strong class="num" data-e="e12">10 de 22</strong></p><p>artefatos de planejamento passaram de 3 devoluções, sem registro da parada.</p><p class="decisao"><span>→ no kit</span>na 3ª devolução o orquestrador para e o humano escolhe a saída; o revisor recebe o delta pronto</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e12">evidências §12</a></article>
+      <article><p class="valor">~<strong class="num" data-e="e11">20%</strong></p><p>do texto da spec aprovada era questionário já respondido (mediana).</p><p class="decisao"><span>→ no kit</span>a resposta do humano vira N&lt;n&gt; no progress.md e vai no corpo do commit do Gate 1</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e11">evidências §11</a></article>
+      <article><p class="valor"><strong class="num" data-e="e14">378 mil</strong></p><p>tokens de contexto médio do orquestrador por requisição; ele pesa <strong class="num" data-e="e14">54%</strong> dos tokens do ciclo.</p><p class="decisao"><span>→ no kit</span>o orquestrador compacta aos 200 mil tokens e retoma pelo progress.md</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e14">evidências §14</a></article>
+      <article><p class="valor"><strong class="num" data-e="e15">21 de 61</strong></p><p>rodadas do verify completo no revisor repetiam o comando para reler a saída cortada.</p><p class="decisao"><span>→ no kit</span>saída inteira em verify.log; o completo já aprovado na mesma árvore não roda de novo</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e15">evidências §15</a></article>
+      <article><p class="valor"><strong class="num" data-e="e16">30 a 40 min</strong></p><p>por RED num monorepo com quatro executores, provado pela suíte inteira.</p><p class="decisao"><span>→ no kit</span>cada arquivo do RED é provado pelo executor do seu caminho (TESTE_&lt;n&gt;_*)</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e16">evidências §16</a></article>
+      <article><p class="valor"><strong class="num" data-e="e13">48,8 s</strong> → <strong class="num" data-e="e13">1,0 s</strong></p><p>do verifica-decisoes.sh, que roda em todo verify, inclusive no --rapido.</p><p class="decisao"><span>→ no kit</span>uma varredura para todos os arquivos; status-projeto.sh em lote</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e13">evidências §13</a></article>
+    </div>
+    <div class="sub"><h3>Primeira medição, até 15/11</h3></div>
     <div class="cartoes">
       <article><p class="valor"><strong class="num" data-e="e6">58%</strong></p><p>dos achados de design vinham de impacto não levantado; <strong class="num" data-e="e6">61%</strong> nasceram da correção anterior.</p><p class="decisao"><span>→ no kit</span>## Impacto no design e no brief; parecer sem prescrição</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e6">evidências §6</a></article>
       <article><p class="valor"><strong class="num" data-e="e7">−80%</strong></p><p>de cache lido quando o brief diz "leia só isto" e declara um teto (<strong class="num" data-e="e7">25,8M</strong> → <strong class="num" data-e="e7">5,3M</strong>).</p><p class="decisao"><span>→ no kit</span>brief estruturado, com teto e regras coladas</p><a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e7">evidências §7</a></article>
@@ -190,7 +200,7 @@
       <li><b><strong class="num" data-e="e2">57%</strong></b><div>das revisões acontecem antes do código: o design é o artefato mais revisado. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e2">evidências §2</a></div></li>
       <li><b>&lt; <strong class="num" data-e="e4">5%</strong></b><div>dos achados são de forma ou sem base no texto: autor e revisor estão alinhados. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e4">evidências §4</a></div></li>
       <li><b>1 gargalo</b><div>não serve para todos: em B é o revisor; em A, o papel testes. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#e3">evidências §3</a></div></li>
-      <li class="limite"><b>Limites</b><div>amostra pequena: B tem <strong class="num" data-e="e1">5</strong> execuções e a revisão que converge ainda não foi medida. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#limites">evidências · Limites</a></div></li>
+      <li class="limite"><b>Limites</b><div>amostra pequena: B tem <strong class="num" data-e="e1">5</strong> execuções; a revisão que converge e os ajustes de 19 a 22/11 ainda não foram medidos depois de entrar. <a class="fonte" href="https://github.com/PauloCalazans/framework-sdlc-agentico/blob/main/docs/evidencias.md#limites">evidências · Limites</a></div></li>
     </ul>
   </div>
   </div>
@@ -214,7 +224,7 @@
 
 <footer class="rodape envelope">
   <span>› sdlc-agêntico · Licença MIT · Paulo Ricardo Calazans</span>
-  <span>Dados até 2026-11-15 · <a href="https://github.com/PauloCalazans/framework-sdlc-agentico">github.com/PauloCalazans/framework-sdlc-agentico</a></span>
+  <span>Dados até 2026-11-22 · <a href="https://github.com/PauloCalazans/framework-sdlc-agentico">github.com/PauloCalazans/framework-sdlc-agentico</a></span>
 </footer>
 
 <script>

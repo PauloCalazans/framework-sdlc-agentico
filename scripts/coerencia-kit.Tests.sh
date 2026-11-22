@@ -325,7 +325,7 @@ tl_espera 0 "README cita as evidências" tem README.md 'docs/evidencias.md'
 s=site/index.html
 tl_espera 0 "site: página existe" tem $s '<html lang="pt-BR"'
 tl_espera 0 "site: og:image" tem $s 'property="og:image"'
-tl_espera 0 "site: data de corte" tem $s '2026-11-15'
+tl_espera 0 "site: data de corte" tem $s '2026-11-22'
 tl_espera 0 "site: licença no rodapé" tem $s 'MIT'
 tl_espera 0 "site sem nome de projeto de origem" sem_nomes_proibidos site
 sem_package() { ! [ -e "$raiz/package.json" ]; }

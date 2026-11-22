@@ -2,9 +2,9 @@
 
 Este documento resume as medições que justificam as decisões do kit. A página de divulgação cita cada número daqui, pela âncora da seção.
 
-- **Data de corte:** 2026-11-15.
+- **Data de corte:** 2026-11-15 nas seções 1 a 10; 2026-11-22 nas seções 11 a 16.
 - **Identificação dos projetos:** só por código (A, B, C, D), com descrição neutra.
-- **Fonte dos números:** os registros de execução das instâncias (`agentic/.estado/execucao/`: briefs, pareceres e relatórios dos papéis), extraídos por script, e as análises que o mantenedor fez sobre eles. Os registros brutos ficam nos repositórios das instâncias e não são públicos.
+- **Fonte dos números:** os registros de execução das instâncias (`agentic/.estado/execucao/`: briefs, pareceres e relatórios dos papéis), extraídos por script, e as análises que o mantenedor fez sobre eles. Das seções 11 a 16 em diante, também as transcrições locais das sessões e os logs do verify. Os registros brutos ficam nos repositórios e nas máquinas das instâncias e não são públicos.
 
 <a id="e1"></a>
 ## 1. Projetos e amostra
@@ -122,9 +122,69 @@ Numa série de 20 tasks com duas rodadas de revisão cada, o verify inteiro em t
 
 Leitura: o verify não é a causa raiz do custo, que está nas seções 4 e 6, mas é um multiplicador em stacks lentas. Daí vieram o cache da prova do RED por SHA, o `verify.sh --rapido` no laço do `dev` e a base única pelo merge-base.
 
+<a id="e11"></a>
+## 11. A fala do humano dentro da spec
+
+Em 18 specs de A, B e C, o Questionário já respondido ocupava de 7% a 38% do texto da spec aprovada, com mediana de **~20%**. A resposta ficava na spec, que devia descrever só o estado atual.
+
+Daí veio: cada resposta é gravada uma vez, como `N<n>` no `progress.md`, e o registro versionado é o corpo do commit do Gate 1. A spec cita a `N<n>` e não guarda a resposta.
+
+Fonte: `docs/plans/2026-11-19-artefatos-enxutos.md`, "Base de evidência"; PR #23.
+
+<a id="e12"></a>
+## 12. Rodadas que não paravam
+
+Em 22 artefatos de planejamento com pareceres locais, **10 de 22** passaram de 3 devoluções, e dois designs chegaram a 9 e 10. Nenhum `progress.md` registrava a parada da 3ª devolução, que o kit já pedia.
+
+Daí veio: na 3ª devolução o orquestrador para de verdade e o humano escolhe a saída (decidir o ponto, reduzir o escopo ou autorizar mais uma rodada). Nenhuma saída aceita artefato com Crítico ou Importante pendente. Na rodada 2 em diante, o revisor recebe o delta pronto.
+
+Fonte: `docs/plans/2026-11-19-artefatos-enxutos.md`, "Base de evidência"; PR #24.
+
+<a id="e13"></a>
+## 13. Scripts lentos em todo verify
+
+Medido em A, B e C, numa máquina Windows com Git Bash:
+
+| Script | A antes | A depois |
+|---|---|---|
+| `verifica-decisoes.sh`, que roda em todo verify, inclusive no `--rapido` | **48,8 s** | **1,0 s** |
+| `status-projeto.sh`, que roda em todo início de sessão | **32,3 s** | **3,1 s** |
+
+Daí veio: uma varredura só para todos os arquivos, no lugar de processos por arquivo e por referência. A saída é idêntica antes e depois.
+
+Fonte: PR #25.
+
+<a id="e14"></a>
+## 14. O contexto do orquestrador
+
+Nas transcrições de B, onde todos os papéis rodam como subagentes (1.861 requisições do orquestrador), o orquestrador tem **54%** do peso em tokens do ciclo. O contexto médio dele é de **378 mil** tokens por requisição, e a compactação só acontecia perto do limite de 1 milhão.
+
+Daí veio: a sessão do orquestrador compacta aos 200 mil tokens e retoma pelo `progress.md`, na mesma sessão. Na simulação com o mesmo crescimento, o contexto médio cai para **130 mil**. O ganho é simulado: ainda não foi medido numa instância.
+
+Fonte: PR #26.
+
+<a id="e15"></a>
+## 15. O verify completo rodado de novo
+
+Em B, o verify completo ocupa 34% do tempo do revisor `diff`, e **21 de 61** rodadas foram repetição na mesma execução, porque a saída cortada por `| grep` ou `| tail` escondia o motivo da falha. Em A e D, o orquestrador rodou o completo no mesmo commit que o revisor tinha acabado de aprovar, em **4 de 4** tasks conferidas.
+
+Daí veio: a saída inteira vai para `agentic/.estado/verify.log`, e um completo já aprovado na mesma árvore termina em "já provado nesta árvore", sem rodar de novo.
+
+Fonte: PR #28.
+
+<a id="e16"></a>
+## 16. RED pela suíte inteira (D)
+
+Em D, um monorepo com quatro executores de teste, cada RED novo levava de **30 a 40 min**, porque o kit só provava o RED pela suíte inteira. Provado pelo executor do arquivo, o RED real levou de **0,4 s** (node) a **254 s** (Kotlin).
+
+Daí veio: executores `TESTE_<n>_*` por padrão de caminho, só com configuração. Cada arquivo do RED é provado pelo executor do seu caminho.
+
+Fonte: `docs/specs/2026-11-21-red-por-caminho-design.md`, seção 2; PR #29.
+
 ## Limites
 
 - **Amostra pequena:** B tem 5 execuções, C ainda nenhuma, e de D só há a medição do verify.
 - A classificação das causas (seção 4) é uma primeira passada, com as fronteiras duvidosas marcadas na análise original.
 - Parte das devoluções pode ser efeito de medição (seção 3).
 - Nenhuma instância tinha a revisão que converge até a data de corte. O efeito dela ainda não foi medido.
+- Os ajustes das seções 11 a 16 entraram no kit entre 2026-11-19 e 2026-11-22. O efeito deles nas instâncias ainda não foi medido, e o ganho da seção 14 é simulado.
