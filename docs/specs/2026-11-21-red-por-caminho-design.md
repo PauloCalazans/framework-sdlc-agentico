@@ -75,11 +75,11 @@ TESTE_1_RC_RED=""
 # Executor 2: Angular, teste colocalizado
 TESTE_2_PADROES="frontend/src/*.spec.ts"
 TESTE_2_PREPARO="npm ci --ignore-scripts --prefix frontend"
-TESTE_2_COMANDO="cd frontend && npx ng test --include={}"
+TESTE_2_COMANDO='cd frontend && npx ng test --watch=false --include="$(printf %s {} | sed s#^frontend/##)"'
 ```
 
 - `TESTE_<n>_PADROES`: padrões separados por espaço, casados com `case` do sh (o `*` cruza `/`). Obrigatório para o bloco existir. A leitura para no primeiro `n` sem `PADROES`.
-- `TESTE_<n>_COMANDO`: roda na raiz do worktree do RED. `{}` é o caminho do arquivo e `{classe}` o nome qualificado JVM (linha `package` do arquivo + nome sem extensão; arquivo sem `package` dá só o nome), os dois entre aspas simples como hoje.
+- `TESTE_<n>_COMANDO`: roda na raiz do worktree do RED. `{}` é o caminho do arquivo e `{classe}` o nome qualificado JVM (linha `package` do arquivo + nome sem extensão; arquivo sem `package` dá só o nome), os dois entre aspas simples como hoje. `{}` é relativo à raiz do worktree: comando que entra num subdiretório tira o prefixo (exemplo do executor 2, corrigido na revisão final: com `cd frontend`, o `{}` inteiro não casaria nenhum spec, e o `ng test` sem `--watch=false` prenderia a prova).
 - `TESTE_<n>_PREPARO`: opcional, roda uma vez por worktree para cada preparo distinto entre os executores tocados.
 - `TESTE_<n>_RC_RED`: opcional. Vazio mantém a regra de hoje (qualquer código fora de 0, 126 e 127 conta como RED). Preenchido, só esse código é RED, e outro código diferente de zero bloqueia como "não é evidência".
 

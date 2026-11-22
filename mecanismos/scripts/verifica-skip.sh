@@ -1,8 +1,9 @@
 #!/bin/sh
 # verifica-skip.sh [base] — falha se a branch desabilita testes ou se o relatório real mostra skips novos.
 # Lê o relatório JUnit real (não confia no exit code). Sem configuração, declara-se degradado.
-# A varredura de marcador considera só arquivos de teste (agentic_e_teste: prefixo de DIRS_TESTE ou padrão de
-# TESTE_<n>_PADROES; docs/ e agentic/projeto/ isentos), porque documentação e scripts podem citar o padrão.
+# A varredura de marcador considera só arquivos de teste, porque documentação e scripts podem citar o padrão: sem
+# executor, os sob DIRS_TESTE (pathspec, como antes); com executores, os do agentic_e_teste (prefixo de DIRS_TESTE
+# ou padrão de TESTE_<n>_PADROES; docs/ e agentic/projeto/ isentos).
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 if [ -n "${1:-}" ]; then
@@ -16,36 +17,49 @@ if [ -n "$MARCADOR_DESABILITADO" ]; then
   [ -n "$base" ] || agentic_falha "marcador de teste desabilitado configurado, mas sem base de comparação (branch $BRANCH_PRINCIPAL ausente?)"
   git rev-parse --verify -q "$base^{commit}" >/dev/null || agentic_falha "base inválida: $base"
   agentic_executores >/dev/null # avisa bloco TESTE_<n> ignorado
-  [ -n "$(printf '%s' "$DIRS_TESTE" | tr -d '[:space:]')" ] || [ -n "$(agentic_executores 2>/dev/null)" ] || \
+  executores=$(agentic_executores 2>/dev/null)
+  [ -n "$(printf '%s' "$DIRS_TESTE" | tr -d '[:space:]')" ] || [ -n "$executores" ] || \
     agentic_falha "MARCADOR_DESABILITADO configurado, mas DIRS_TESTE vazio em agentic/config"
-  # Linhas adicionadas em arquivos de teste rastreados (commits + working tree), separadas por arquivo: o cabeçalho
-  # "+++ b/<arquivo>" só é lido entre "diff --git" e o primeiro "@@" (linha adicionada que começa com "++" não conta).
-  saida=$(git -c core.quotepath=off diff "$base" -U0 --no-color) || agentic_falha "git diff falhou contra a base $base"
-  tab=$(printf '\t')
-  n_diff=$(printf '%s\n' "$saida" | {
-      cab=0; conta=""
-      while IFS= read -r l; do
-        case "$l" in
-          "diff --git "*) cab=1; conta=""; continue ;;
-          "@@"*) cab=0; continue ;;
-        esac
-        if [ "$cab" -eq 1 ]; then
-          case "$l" in
-            "+++ b/"*)
-              f=${l#+++ b/}; f=${f%"$tab"}
-              case "$f" in docs/*|agentic/projeto/*) conta="" ;; *) agentic_e_teste "$f" && conta=1 ;; esac ;;
-          esac
-          continue
-        fi
-        case "$l" in "+"*) [ -n "$conta" ] && printf '%s\n' "$l" ;; esac
-      done; } | grep -cE -- "$MARCADOR_DESABILITADO")
-  # Conteúdo de arquivos de teste novos não rastreados.
-  novos=$(git -c core.quotepath=off ls-files --others --exclude-standard) || agentic_falha "falha ao listar arquivos não rastreados"
-  n_novos=$(printf '%s\n' "$novos" | while IFS= read -r f; do
+  if [ -z "$executores" ]; then
+    set -f # DIRS_TESTE é pathspec/prefixo, não glob contra o disco
+    # Linhas adicionadas em arquivos rastreados sob DIRS_TESTE (commits + working tree).
+    # shellcheck disable=SC2086
+    saida=$(git -c core.quotepath=off diff "$base" -U0 --no-color -- $DIRS_TESTE) || agentic_falha "git diff falhou contra a base $base"
+    n_diff=$(printf '%s\n' "$saida" | grep '^+' | grep -v '^+++' | grep -cE -- "$MARCADOR_DESABILITADO")
+    # Conteúdo de arquivos novos não rastreados sob DIRS_TESTE.
+    novos=$(git -c core.quotepath=off ls-files --others --exclude-standard) || agentic_falha "falha ao listar arquivos não rastreados"
+    n_novos=$(printf '%s\n' "$novos" | while IFS= read -r f; do
+        [ -n "$f" ] || continue
+        for d in $DIRS_TESTE; do
+          case "$f" in "$d"*) cat "$f"; break ;; esac
+        done
+      done | grep -cE -- "$MARCADOR_DESABILITADO")
+    set +f
+  else
+    # Com executores, a classificação é a do agentic_e_teste (prefixo de DIRS_TESTE ou padrão de TESTE_<n>_PADROES;
+    # docs/ e agentic/projeto/ isentos). Os nomes vêm com -z (sem aspas do git); o diff é pedido só para os arquivos
+    # de teste, com pathspec literal.
+    alterados=$(git -c core.quotepath=off diff --name-only -z "$base" | tr '\0' '\n') || agentic_falha "git diff falhou contra a base $base"
+    set --
+    while IFS= read -r f; do
       [ -n "$f" ] || continue
       case "$f" in docs/*|agentic/projeto/*) continue ;; esac
-      agentic_e_teste "$f" && cat "$f"
-    done | grep -cE -- "$MARCADOR_DESABILITADO")
+      agentic_e_teste "$f" && set -- "$@" ":(literal)$f"
+    done <<EOT
+$alterados
+EOT
+    n_diff=0
+    if [ $# -gt 0 ]; then
+      saida=$(git -c core.quotepath=off diff "$base" -U0 --no-color -- "$@") || agentic_falha "git diff falhou contra a base $base"
+      n_diff=$(printf '%s\n' "$saida" | grep '^+' | grep -v '^+++' | grep -cE -- "$MARCADOR_DESABILITADO")
+    fi
+    novos=$(git -c core.quotepath=off ls-files --others --exclude-standard -z | tr '\0' '\n') || agentic_falha "falha ao listar arquivos não rastreados"
+    n_novos=$(printf '%s\n' "$novos" | while IFS= read -r f; do
+        [ -n "$f" ] || continue
+        case "$f" in docs/*|agentic/projeto/*) continue ;; esac
+        agentic_e_teste "$f" && cat "$f"
+      done | grep -cE -- "$MARCADOR_DESABILITADO")
+  fi
   n=$((n_diff + n_novos))
   if [ "$n" -gt 0 ]; then
     echo "agentic: BLOQUEADO — $n linha(s) adicionada(s) marcam teste como desabilitado (padrão: $MARCADOR_DESABILITADO)."

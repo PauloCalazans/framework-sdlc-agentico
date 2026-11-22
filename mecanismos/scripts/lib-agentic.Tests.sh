@@ -34,6 +34,7 @@ tl_espera 0 "campo: lê o campo do bloco" lib '[ "$(agentic_executor_campo 1 PAD
 
 cfg 'DIRS_TESTE="tests/"'
 tl_espera 0 "executores: sem bloco, nada" lib '[ -z "$(agentic_executores)" ]'
+tl_espera 0 "ambiente: TESTE_<n>_* exportado não vira executor (só o agentic/config vale)" env TESTE_1_PADROES='*' TESTE_1_COMANDO='exit 1' TESTE_2_PREPARO=x sh -c "cd '$r' && . '$dir/lib-agentic.sh' && [ -z \"\$(agentic_executores)\" ] && [ -z \"\${TESTE_2_PREPARO:-}\" ] && ! agentic_e_teste src/prod.sh"
 tl_espera 1 "e_teste: sem bloco, só DIRS_TESTE" lib 'agentic_e_teste src/x.spec.ts'
 
 tl_fim

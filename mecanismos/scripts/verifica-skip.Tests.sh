@@ -103,6 +103,12 @@ tl_espera 1 "colocalizado: marcador em arquivo novo não rastreado bloqueia" sh 
 colocal 'DIRS_TESTE=""
 TESTE_1_PADROES="src/*.spec.py"'
 tl_espera 0 "colocalizado: DIRS_TESTE vazio com executor não bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+r=$(prepara); junit "$r" ""; echo 'DIRS_TESTE="test"' >> "$r/agentic/config"; git -C "$r" add -A; git -C "$r" commit -q -m "sem barra"
+mkdir -p "$r/testsuite"; printf '@unittest.skip("x")\n' > "$r/testsuite/x.py"; git -C "$r" add -A; git -C "$r" commit -q -m "fora de test/"
+tl_espera 0 "sem executor: DIRS_TESTE sem barra segue pathspec (testsuite/ não é test/)" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+colocal 'TESTE_1_PADROES="src/*.spec.py"'
+printf '@unittest.skip("x")\n' > "$r/tests/t.py"; git -C "$r" add -A; git -C "$r" commit -q -m "skip em DIRS_TESTE com executor"
+tl_espera 1 "com executor: marcador sob DIRS_TESTE segue bloqueando" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 r=$(prepara); junit "$r" ""
 printf '+++ falso\n@unittest.skip("x")\n' > "$r/tests/t.py"; git -C "$r" add -A; git -C "$r" commit -q -m "linha que parece cabeçalho"
 tl_espera 1 "linha adicionada que começa com ++ não vira cabeçalho" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"

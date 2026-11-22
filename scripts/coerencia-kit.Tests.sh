@@ -572,6 +572,9 @@ tl_espera 0 "entrevista: pergunta por executor" tem bootstrap/entrevista.md 'TES
 tl_espera 0 "README: verifica-red prova pelo executor do caminho" tem README.md 'TESTE_<n>_'
 tl_espera 0 "verifica-red: topo descreve executor, migração e log" sh -c "tr -d '\r' < '$raiz/mecanismos/scripts/verifica-red.sh' | head -n 40 | grep -qF 'TESTE_<n>_COMANDO' && tr -d '\r' < '$raiz/mecanismos/scripts/verifica-red.sh' | head -n 40 | grep -qF 'verifica-red.log'"
 tl_espera 0 "ciclo e verifica-red: mesma mensagem de migração" tem mecanismos/scripts/verifica-red.sh 'provado antes pela suíte (assinatura anterior)'
+tl_espera 0 "config.padrao: exemplo do ng test não fica em modo watch" tem bootstrap/config.padrao '--watch=false'
+tl_espera 0 "config.padrao: exemplo não junta cd com {} relativo à raiz" nenhum 'include=[{][}]' bootstrap/config.padrao docs/specs/2026-11-21-red-por-caminho-design.md
+tl_espera 0 "config.padrao: {} é relativo à raiz do worktree" tem bootstrap/config.padrao '{} = caminho do arquivo, relativo à raiz'
 tl_espera 0 "escopo ignora o log do verifica-red" tem mecanismos/scripts/verifica-escopo.sh 'agentic/.estado/verifica-red.log'
 
 tl_fim

@@ -652,6 +652,10 @@ TESTE_1_COMANDO="sh {}"'; spec_soma "$r"; }
 colocalizado
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma colocalizada"; green_soma "$r"
 tl_espera 0 "colocalizado: RED com src/soma.spec.sh é aceito (não é produção)" vrc "$r"
+r=$(prepara); modo_arquivo "$r"; printf '# assert_igual x\n' >> "$r/src/soma.sh"
+git -C "$r" add -A; git -C "$r" commit -q -m "test(red): só produção"
+tl_espera 1 "ambiente: TESTE_<n>_* exportado não transforma produção em teste" env TESTE_1_PADROES='*' TESTE_1_COMANDO='exit 1' sh -c "cd '$r' && sh '$dir/verifica-red.sh'" </dev/null
+tl_contem "código de produção): src/soma.sh" "ambiente: segue recusando a produção"
 colocalizado; echo '# mexi' >> "$r/src/soma.sh"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): soma colocalizada"
 tl_espera 1 "colocalizado: RED que também toca src/soma.sh é recusado" vrc "$r"

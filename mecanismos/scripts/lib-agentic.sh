@@ -19,6 +19,10 @@ CMD_VERIFY_RAPIDO=""
 CMD_VALIDA_CONTRATO=""
 CAMINHOS_N3=""
 GITLEAKS_BIN="gitleaks"
+# Executores TESTE_<n>_* só valem do agentic/config (superfície protegida): os herdados do ambiente são apagados.
+for agentic_v in $(set | sed -nE 's/^(TESTE_[0-9]+_(PADROES|PREPARO|COMANDO|RC_RED))=.*/\1/p'); do
+  unset "$agentic_v"
+done
 
 if [ -f "$agentic_raiz/agentic/config" ]; then
   . "$agentic_raiz/agentic/config"
