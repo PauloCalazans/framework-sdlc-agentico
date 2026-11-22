@@ -22,15 +22,19 @@
 
 ## Review Focus
 
-1. Bloco com `TESTE_<n>_PADROES` e `TESTE_<n>_COMANDO` vazio: hoje viraria `eval ""` (código 0, "PASSAVAM"); o esperado é bloquear como configuração inválida. Teste na Task 2.
-2. Numeração com buraco (`TESTE_1`, `TESTE_3`): a leitura para no 2 e o 3 sumiria em silêncio; o esperado é `aviso:` nomeando o bloco ignorado. Teste na Task 1.
-3. `TESTE_<n>_RC_RED` não numérico: o esperado é bloquear como configuração inválida, não comparar texto. Teste na Task 2.
-4. `{classe}` num arquivo sem linha `package`: o esperado é o nome do arquivo sem extensão. Teste na Task 2.
-5. Arquivo de teste com espaço ou aspas simples no caminho, roteado por executor: o esperado é o caminho intacto em `{}`, como já acontece com `CMD_TESTE_ARQUIVO`. Teste na Task 2.
+1. Bloco com `TESTE_<n>_PADROES` e `TESTE_<n>_COMANDO` vazio: hoje viraria `eval ""` (código 0, "PASSAVAM"); o esperado é bloquear como configuração inválida. Teste na Task 1, parte B.
+2. Numeração com buraco (`TESTE_1`, `TESTE_3`): a leitura para no 2 e o 3 sumiria em silêncio; o esperado é `aviso:` nomeando o bloco ignorado. Teste na Task 1, parte A.
+3. `TESTE_<n>_RC_RED` não numérico: o esperado é bloquear como configuração inválida, não comparar texto. Teste na Task 1, parte B.
+4. `{classe}` num arquivo sem linha `package`: o esperado é o nome do arquivo sem extensão. Teste na Task 1, parte B.
+5. Arquivo de teste com espaço ou aspas simples no caminho, roteado por executor: o esperado é o caminho intacto em `{}`, como já acontece com `CMD_TESTE_ARQUIVO`. Teste na Task 1, parte B.
 
 ---
 
-### Task 1: Classificação de arquivo de teste e leitura dos executores
+### Task 1: Mecanismos (partes A a E, uma rodada só)
+
+Uma rodada de RED e GREEN para tudo: escreva os testes de **todas** as partes (Step 1 de cada uma), rode e veja falhar; depois implemente as partes na ordem A → E (cada uma usa as funções da anterior) e rode cada suíte; no fim, rode tudo e faça **um commit só** ("Fechamento da Task 1"). As partes não têm commit próprio.
+
+#### Parte A — Classificação de arquivo de teste e leitura dos executores
 
 **Files:**
 - Modify: `mecanismos/scripts/lib-agentic.sh` (funções novas no fim)
@@ -95,20 +99,15 @@ No `verifica-skip.sh`: `git diff "$base" -U0 --no-color` sem pathspec, separado 
 
 - [ ] **Step 8: Rodar e ver passar** — `sh mecanismos/scripts/verifica-red.Tests.sh` e `sh mecanismos/scripts/verifica-skip.Tests.sh` → `0 falhas`, inclusive os casos antigos sem mudança.
 
-- [ ] **Step 9: Commit**
-```bash
-git add mecanismos/scripts/lib-agentic.sh mecanismos/scripts/lib-agentic.Tests.sh mecanismos/scripts/verifica-red.sh mecanismos/scripts/verifica-red.Tests.sh mecanismos/scripts/verifica-skip.sh mecanismos/scripts/verifica-skip.Tests.sh
-git commit -m "feat(verifica-red): arquivo de teste por padrão de executor (teste colocalizado)"
-```
 
-### Task 2: Prova pelo executor, preparo por executor e contrato do código
+#### Parte B — Prova pelo executor, preparo por executor e contrato do código
 
 **Files:**
 - Modify: `mecanismos/scripts/verifica-red.sh` (`comando_arquivo`, `avalia_rc`, montagem de `$pend` e o laço de execução, `:229-336`)
 - Test: `mecanismos/scripts/verifica-red.Tests.sh`
 
 **Interfaces:**
-- Consumes: `agentic_executores`, `agentic_executor`, `agentic_executor_campo` (Task 1).
+- Consumes: `agentic_executores`, `agentic_executor`, `agentic_executor_campo` (parte A).
 - Produces:
   - `$pend` passa a ter linhas `<n>\t<arquivo>` (executor), `a\t<arquivo>` (`CMD_TESTE_ARQUIVO`) ou `s\t*suite*` (no máximo uma por RED).
   - `comando_arquivo <modelo> <arquivo>` → modelo com `{}` trocado pelo caminho e `{classe}` pela classe, ambos entre aspas simples. A classe vem de `classe_jvm <arquivo>` (lida no worktree do RED): `package` + nome sem extensão, ou só o nome.
@@ -146,13 +145,8 @@ Antes do laço dos REDs: para cada `n` de `agentic_executores`, `COMANDO` vazio 
 
 - [ ] **Step 4: Rodar e ver passar** — `sh mecanismos/scripts/verifica-red.Tests.sh` → `0 falhas`.
 
-- [ ] **Step 5: Commit**
-```bash
-git add mecanismos/scripts/verifica-red.sh mecanismos/scripts/verifica-red.Tests.sh
-git commit -m "feat(verifica-red): prova pelo executor do caminho, preparo por executor e RC_RED"
-```
 
-### Task 3: Assinatura por executor, migração das provas e prova do completo
+#### Parte C — Assinatura por executor, migração das provas e prova do completo
 
 **Files:**
 - Modify: `mecanismos/scripts/verifica-red.sh` (`assinatura`, `red_provado`, `guarda_prova`, `:195-227`)
@@ -160,7 +154,7 @@ git commit -m "feat(verifica-red): prova pelo executor do caminho, preparo por e
 - Test: `mecanismos/scripts/verifica-red.Tests.sh`, `mecanismos/scripts/verify.Tests.sh`
 
 **Interfaces:**
-- Consumes: `agentic_executor_campo`, formato de `$pend` (Task 2).
+- Consumes: `agentic_executor_campo`, formato de `$pend` (parte B).
 - Produces:
   - `assinatura_de <tipo>`: `tipo` = `<n>` → hash de `PADROES\nPREPARO\nCOMANDO\nRC_RED` do bloco; `a` ou `s` → a assinatura de hoje (`CMD_PREPARAR_TESTE`, `CMD_TESTE_ARQUIVO`, `CMD_TESTE`).
   - `red_provado <sha> <arquivo> <assinatura>`; `guarda_prova <sha> <arquivo> <assinatura>`. Formato da linha do cache inalterado.
@@ -188,13 +182,8 @@ Ordem da consulta por arquivo: prova com a assinatura do tipo atual → `RED <cu
 
 - [ ] **Step 4: Rodar e ver passar** — as duas suítes → `0 falhas`; os casos antigos de cache (`cache: assinatura nova prova de novo`, em modo `CMD_TESTE_ARQUIVO`) seguem verdes.
 
-- [ ] **Step 5: Commit**
-```bash
-git add mecanismos/scripts/verifica-red.sh mecanismos/scripts/verifica-red.Tests.sh mecanismos/scripts/verify.sh mecanismos/scripts/verify.Tests.sh
-git commit -m "feat(verifica-red): assinatura por executor e prova pela suíte já guardada aceita na migração"
-```
 
-### Task 4: Log do verifica-red
+#### Parte D — Log do verifica-red
 
 **Files:**
 - Modify: `mecanismos/scripts/verifica-red.sh` (execuções do preparo e dos testes, hoje `>/dev/null 2>&1`)
@@ -220,13 +209,8 @@ Em `verifica-escopo.Tests.sh`: `verifica-red.log` presente não conta como fora 
 
 - [ ] **Step 4: Rodar e ver passar** — `verifica-red.Tests.sh` e `verifica-escopo.Tests.sh` → `0 falhas`.
 
-- [ ] **Step 5: Commit**
-```bash
-git add mecanismos/scripts/verifica-red.sh mecanismos/scripts/verifica-red.Tests.sh mecanismos/scripts/verifica-escopo.sh mecanismos/scripts/verifica-escopo.Tests.sh
-git commit -m "feat(verifica-red): saída do preparo e dos testes em agentic/.estado/verifica-red.log"
-```
 
-### Task 5: Ajuda `red-junit.sh`
+#### Parte E — Ajuda `red-junit.sh`
 
 **Files:**
 - Create: `mecanismos/scripts/red-junit.sh`
@@ -249,13 +233,23 @@ tl_contem "red-junit: casos 1 failure 1 error 0 -> 1" "junit: resumo na saída" 
 - [ ] **Step 2: Rodar e ver falhar** — `sh mecanismos/scripts/red-junit.Tests.sh`.
 - [ ] **Step 3: Implementar** — contagem com `grep -o '<testcase' | wc -l` (e `<failure`, `<error`) somada pelos arquivos, como o `verifica-skip.sh` já faz com `<skipped`.
 - [ ] **Step 4: Rodar e ver passar.**
-- [ ] **Step 5: Commit**
+
+#### Fechamento da Task 1
+
+- [ ] **Rodar tudo** — `sh scripts/verify.sh` → `verify: OK` (inclui os testes antigos de `verifica-red`, `verifica-skip`, `verifica-escopo` e `verify` sem alteração).
+- [ ] **Commit único**
 ```bash
-git add mecanismos/scripts/red-junit.sh mecanismos/scripts/red-junit.Tests.sh
-git commit -m "feat(red-junit): JUnit XML para o código de RED (failure, nada rodou, passou)"
+git add mecanismos/scripts/
+git commit -m "feat(verifica-red): prova do RED pelo executor do caminho
+
+Executores TESTE_<n>_* no agentic/config (padrões, preparo, comando, RC_RED),
+classificação única de arquivo de teste (teste colocalizado), preparo só dos
+executores tocados, assinatura por executor, prova pela suíte já guardada
+aceita na migração, log em agentic/.estado/verifica-red.log e a ajuda
+red-junit.sh."
 ```
 
-### Task 6: Documentação, instalação e coerência
+### Task 2: Documentação, instalação e coerência
 
 **Files:**
 - Modify: `mecanismos/scripts/verifica-red.sh:1-26` (comentário de topo: caminho de prova, migração, log)
@@ -267,7 +261,7 @@ git commit -m "feat(red-junit): JUnit XML para o código de RED (failure, nada r
 - Test: `scripts/coerencia-kit.Tests.sh`
 
 **Interfaces:**
-- Consumes: nomes das chaves e mensagens das Tasks 1–5, exatamente como lá.
+- Consumes: nomes das chaves e mensagens da Task 1, exatamente como lá.
 
 - [ ] **Step 1: Checagens de coerência (falham)** — no estilo `tem <arquivo> '<texto>'`:
 ```sh
