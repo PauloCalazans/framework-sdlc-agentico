@@ -23,8 +23,8 @@ Merge na branch principal e permissões do agente pertencem ao humano.
 **Verificado por:** `deny` de `gh pr merge` e de edição de `.claude/settings*.json`, `.claude/hooks/**`, `agentic/config`, `agentic/auto-mode`, `agentic/baseline-skips`, `agentic/mecanismos/githooks/**`, `agentic/mecanismos/scripts/**`, `.gitleaksignore`; `pre-push` e `pre-merge-commit` bloqueiam a branch protegida; `verify.sh` falha se os githooks estiverem desligados no clone (`core.hooksPath`).
 
 ## 6. Memória enxuta
-`AGENTS.md` e `CLAUDE.md` são mapa e regras. Narrativa de ciclo vai para documentos datados; decisões vão para `agentic/projeto/decisoes/`, um arquivo por decisão.
-**Verificado por:** revisão.
+`AGENTS.md` e `CLAUDE.md` são mapa e regras. Narrativa de ciclo vai para documentos datados; decisões vão para `agentic/projeto/decisoes/`, um arquivo por decisão. O arquivo de uma decisão nunca é apagado nem renomeado; revogar é trocar a linha por `**Status:** revogada em <AAAA-MM-DD>: <motivo>`, e as referências a ela continuam válidas.
+**Verificado por:** `verifica-decisoes.sh` (arquivo de decisão da base ausente em HEAD, inclusive por renomeação, e `**Status:**` fora de `vigente` ou `revogada em <AAAA-MM-DD>: <motivo>` bloqueiam); revisão para o resto.
 
 ## 7. Erros pequenos, visíveis e reversíveis
 Cada task ou mudança é executada num worktree isolado (antes do Gate 1 da trilha padrão, intent, spec, design, tasks, decisões novas e o esqueleto do contrato executável são escritos na árvore principal, sem commit); tasks têm escopo declarado; descartar uma execução ruim deve ser barato.

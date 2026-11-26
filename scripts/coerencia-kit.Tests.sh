@@ -585,5 +585,6 @@ tl_espera 0 "template de decisão com status" tem core/templates/decisao.md '**S
 tl_espera 0 "registro antigo congelado" tem core/templates/decisoes.md 'congelado'
 tl_espera 0 "sem delegação por D<n>" nenhum 'gate1: D<n>|Gate 1 delegado, D<n>|D<n> — Delegação do Gate 1' core
 tl_espera 0 "fonte da resposta delegada" tem core/processo/ciclo.md '`delegado N<n>`'
+tl_espera 0 "princípios: decisão por arquivo nunca apagada, revogada pelo Status" tem core/principios.md 'nunca é apagado nem renomeado; revogar é trocar a linha por `**Status:** revogada em <AAAA-MM-DD>: <motivo>`'
 
 tl_fim
