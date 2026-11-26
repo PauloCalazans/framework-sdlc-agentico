@@ -132,10 +132,11 @@ n3: nenhum
 
 ## 6. Migração
 
-- **Instalação nova:** `instalar.sh` cria `agentic/auto-mode` a partir do padrão só quando o arquivo não existe, acrescenta `agentic/auto-mode` ao `.gitignore` e cria `agentic/projeto/decisoes/`.
+- **Instalação nova:** `instalar.sh` copia o padrão para `agentic/processo/templates/auto-mode` (versionado, do kit, no manifesto), cria `agentic/auto-mode` a partir dele só quando o arquivo não existe (fora do manifesto: o arquivo é do dev), acrescenta `agentic/auto-mode` ao `.gitignore` e cria `agentic/projeto/decisoes/`.
+- **Outro dev no mesmo repositório:** o clone não traz `agentic/auto-mode`. Sem ele, o modo automático está desligado e o Gate 1 é humano. Para ligar, o dev copia `agentic/processo/templates/auto-mode` para `agentic/auto-mode` e edita.
 - **Instância existente:** o `instalar.sh` acrescenta a linha ao `.gitignore` e, se `agentic/auto-mode` estiver versionado, lista no resumo da instalação a ação humana `git rm --cached agentic/auto-mode` (o arquivo local fica). Ele não roda esse comando.
 - **Delegações antigas** (`D<n> — Delegação do Gate 1`): continuam no `decisoes.md` como histórico, e o humano as revoga quando quiser. O `gate1: D<n>` antigo no `auto-mode` local passa a bloquear com a mensagem de formato, apontando o formato novo.
-- **`checa-instancia.sh`:** deixa de exigir `agentic/projeto/decisoes.md` e passa a exigir `agentic/projeto/decisoes/` (ou o `decisoes.md`, em instância antiga). A busca por `{{` cobre os dois.
+- **`checa-instancia.sh`:** deixa de exigir `agentic/projeto/decisoes.md` e passa a exigir `agentic/projeto/decisoes/` (ou o `decisoes.md`, em instância antiga). A busca por `{{` cobre os dois. `agentic/auto-mode` ausente deixa de ser problema e vira aviso, com o comando de cópia do template.
 
 ## 7. O desconfortável, declarado
 
