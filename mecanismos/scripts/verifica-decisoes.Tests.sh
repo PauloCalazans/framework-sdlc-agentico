@@ -148,6 +148,11 @@ $P"; plano "$r"
 tl_espera 1 "item com espaço interno bloqueia" roda "$r"
 tl_contem "vazio, todas ou" "explica o formato de gate1"
 
+deleg false "" 'docs(spec): x aprovada (Gate 1 delegado pelo orquestrador)'
+tl_espera 1 "assunto fora do formato canônico não passa por si mesmo" roda "$r"
+deleg false "" 'docs(spec): x aprovada (Gate 1 delegado, D2x)'
+tl_espera 1 "sufixo D<n> malformado não passa por si mesmo" roda "$r"
+
 deleg false "" "$D"
 gate "$r" "docs(spec): x aprovada (Gate 1)"
 tl_espera 0 "Gate 1 humano da branch libera o delegado" roda "$r"

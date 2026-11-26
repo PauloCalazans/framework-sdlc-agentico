@@ -181,7 +181,7 @@ if [ -n "$base" ]; then
       [ -z "$nome" ] && nome=$(printf '%s\n' "$assunto" | sed -n 's/^docs(mudanca): \(.*\) aprovada (Gate 1 delegado\(, D[0-9]*\)\{0,1\})$/\1/p')
       if [ -n "$nome" ] && [ -n "$ligado" ] && [ -n "$formato_ok" ] && { [ "$gate1" = todas ] || printf '%s\n' "$nomes" | grep -qxF "$nome"; }; then continue; fi
       # Gate 1 humano do mesmo artefato registrado na mesma branch, em qualquer posição ("<tipo>: <nome> aprovada (Gate 1)") substitui o delegado.
-      humano=$(printf '%s\n' "$assunto" | sed 's/ (Gate 1 delegado\(, D[0-9]*\)\{0,1\})$/ (Gate 1)/')
+      humano="${assunto%% (Gate 1 delegado*} (Gate 1)"
       printf '%s\n' "$assuntos" | grep -qxF "$humano" && continue
       printf '  %s\n' "$c"
     done)
