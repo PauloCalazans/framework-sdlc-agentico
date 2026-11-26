@@ -294,7 +294,7 @@ tl_espera 0 "dev: dependência aprovada no Gate 1 não para" tem core/papeis/dev
 tl_espera 0 "dev: escopo ampliado pelo orquestrador" tem core/processo/ciclo.md 'Ampliar o escopo é decisão do orquestrador, nunca do papel'
 tl_espera 0 "divergência spec × código vai em Divergências" tem core/processo/ciclo.md 'registre em "Divergências" da spec'
 tl_espera 0 "empilhamento só com plataforma de PR" tem core/processo/ciclo.md '**Branches empilhadas:** só com plataforma de PR'
-tl_espera 0 "README: delegação com enabled: true" tem README.md 'grava `enabled: true` e `gate1: D<n>`'
+tl_espera 0 "README: delegação com enabled: true" tem README.md 'grava `enabled: true`, `gate1:` e `plano:`'
 tl_espera 0 "spec: delegado coberto pelo plano usa plano:" tem core/templates/spec.md 'Fonte plano:<arquivo>:<linha>'
 tl_espera 0 "/intent: dominio não conversa com o humano" tem adapters/claude-code/commands/intent.md 'o `dominio` nunca conversa direto com o humano'
 tl_espera 0 "/nova-task: primeira task usa a branch do Gate 1" tem adapters/claude-code/commands/nova-task.md 'crie-o sem `-b`'
@@ -583,8 +583,15 @@ tl_espera 0 "ciclo: referência D:<slug>" tem core/processo/ciclo.md '`D:<slug>`
 tl_espera 0 "ciclo: auto-mode local" tem core/processo/ciclo.md '`agentic/auto-mode` é local'
 tl_espera 0 "template de decisão com status" tem core/templates/decisao.md '**Status:** vigente'
 tl_espera 0 "registro antigo congelado" tem core/templates/decisoes.md 'congelado'
-tl_espera 0 "sem delegação por D<n>" nenhum 'gate1: D<n>|Gate 1 delegado, D<n>|D<n> — Delegação do Gate 1' core
+tl_espera 0 "sem delegação por D<n>" nenhum 'gate1: D<n>|Gate 1 delegado, D<n>|D<n> — Delegação do Gate 1' \
+  core adapters/claude-code/commands bootstrap README.md
 tl_espera 0 "fonte da resposta delegada" tem core/processo/ciclo.md '`delegado N<n>`'
 tl_espera 0 "princípios: decisão por arquivo nunca apagada, revogada pelo Status" tem core/principios.md 'nunca é apagado nem renomeado; revogar é trocar a linha por `**Status:** revogada em <AAAA-MM-DD>: <motivo>`'
+tl_espera 0 "arquiteto: decisões na pasta" tem core/papeis/arquiteto.md 'agentic/projeto/decisoes/'
+tl_espera 0 "bootstrap: decisões iniciais em arquivo" tem bootstrap/entrevista.md 'agentic/projeto/decisoes/<slug>.md'
+tl_espera 0 "bootstrap: auto-mode local a partir do template" tem bootstrap/entrevista.md 'cp agentic/processo/templates/auto-mode agentic/auto-mode'
+tl_espera 0 "composição do time com slug fixo (bootstrap)" tem bootstrap/entrevista.md 'agentic/projeto/decisoes/composicao-do-time.md'
+tl_espera 0 "composição do time com slug fixo (modelos)" tem core/processo/modelos.md 'agentic/projeto/decisoes/composicao-do-time.md'
+tl_espera 0 "composição do time com slug fixo (AGENTS)" tem core/templates/AGENTS.md 'D:composicao-do-time'
 
 tl_fim

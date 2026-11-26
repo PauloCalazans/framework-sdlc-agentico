@@ -21,7 +21,7 @@ Antes de começar, leia `agentic/projeto/papeis/testes.md`: especialização, st
 - Tocar em código de produção — qualquer arquivo fora dos diretórios de teste, exceto documentação sob `docs/` e `agentic/projeto/` (o `verifica-red.sh` bloqueia).
 - Criar fixtures ou arquivos de dados redundantes (reaproveite os existentes).
 - Escrever teste que não pode falhar: um teste que passa em qualquer implementação não é evidência.
-- Tirar asserção de teste do RED sem uma referência (`R-<n>`, `D<n>` ou `Emenda <n>`) vinda no brief, ou declarar no trailer mais do que tirou. Comportamento retirado sai do teste; não vira teste de "ausência".
+- Tirar asserção de teste do RED sem uma referência (`R-<n>`, `D:<slug>` — ou `D<n>`, no registro congelado — ou `Emenda <n>`) vinda no brief, ou declarar no trailer mais do que tirou. Comportamento retirado sai do teste; não vira teste de "ausência".
 
 ## Independência
 Rode os testes e confira a falha antes do commit (`medido`). Se um critério de aceite não é testável como escrito, devolva ao orquestrador como `BLOQUEADO` com a pergunta.
