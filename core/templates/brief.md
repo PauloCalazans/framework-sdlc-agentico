@@ -27,7 +27,7 @@ Worktree: <caminho absoluto> (branch <branch>; antes do Gate 1 da trilha padrão
 <até 5 linhas; cada uma, uma entrega verificável — a entrega, nunca a solução: valor, nome, caminho de implementação só se vier de "Já decidido". No `revisor`, antes das entregas, uma linha a mais: `Rodada <k> do <artefato>; parecer anterior: <caminho absoluto | não há>`>
 
 ## Já decidido
-<só o que tem origem citável, um por linha com a origem: resposta do humano (`N<n>`, data), R-n, D<n>, item N3 aprovado; ou: nenhum. O que já está na spec, no design ou na task entra só pelo ID e a origem (`R25 — humano:2026-11-19 N1`), sem reescrever o conteúdo; a resposta do humano que ainda não está em artefato entra com o texto da entrada `N<n>`. Ruling nova: o orquestrador a escreve em `## Rulings` da task no worktree e o brief do próximo papel manda incluir essa mudança no próximo commit dele (RED, GREEN ou correção); o revisor `diff` só é despachado com a Ruling já commitada>
+<só o que tem origem citável, um por linha com a origem: resposta do humano (`N<n>`, data), R-n, D:<slug> (ou D<n>, no registro congelado), item N3 aprovado; ou: nenhum. O que já está na spec, no design ou na task entra só pelo ID e a origem (`R25 — humano:2026-11-19 N1`), sem reescrever o conteúdo; a resposta do humano que ainda não está em artefato entra com o texto da entrada `N<n>`. Ruling nova: o orquestrador a escreve em `## Rulings` da task no worktree e o brief do próximo papel manda incluir essa mudança no próximo commit dele (RED, GREEN ou correção); o revisor `diff` só é despachado com a Ruling já commitada>
 
 ## Nunca faz
 <as linhas de "No brief" do contrato que valem nesta rodada, coladas; mais os itens de "Padrões" e "Nunca faz neste

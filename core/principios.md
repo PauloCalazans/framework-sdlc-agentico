@@ -12,7 +12,7 @@ Quando o mesmo erro acontece pela segunda vez, a correção é um controle mecâ
 
 ## 3. Estado é derivado, nunca escrito à mão
 O estado do projeto (o que está em andamento, o que foi aprovado) vem do git e dos campos `**Status:**` dos artefatos. É exibido no início de cada sessão por `agentic/mecanismos/scripts/status-projeto.sh`. Números (contagens, totais) são gerados por script.
-**Verificado por:** `status-projeto.sh` (hook de início de sessão); `verifica-decisoes.sh` (toda referência `D<n>` existe em `decisoes.md` e nenhuma decisão da base some).
+**Verificado por:** `status-projeto.sh` (hook de início de sessão); `verifica-decisoes.sh` (toda referência `D:<slug>` tem o arquivo em `agentic/projeto/decisoes/`, e toda `D<n>`, o `### D<n>` no registro congelado `decisoes.md`; nenhuma decisão da base some).
 
 ## 4. Afirmações técnicas são medidas ou inferidas
 Toda afirmação sobre comportamento do sistema é marcada `medido` (há saída/execução que comprova) ou `inferido` (dedução ainda não comprovada). Nada é declarado funcionando sem a saída vista.
@@ -23,7 +23,7 @@ Merge na branch principal e permissões do agente pertencem ao humano.
 **Verificado por:** `deny` de `gh pr merge` e de edição de `.claude/settings*.json`, `.claude/hooks/**`, `agentic/config`, `agentic/auto-mode`, `agentic/baseline-skips`, `agentic/mecanismos/githooks/**`, `agentic/mecanismos/scripts/**`, `.gitleaksignore`; `pre-push` e `pre-merge-commit` bloqueiam a branch protegida; `verify.sh` falha se os githooks estiverem desligados no clone (`core.hooksPath`).
 
 ## 6. Memória enxuta
-`AGENTS.md` e `CLAUDE.md` são mapa e regras. Narrativa de ciclo vai para documentos datados; decisões vão para `agentic/projeto/decisoes.md`.
+`AGENTS.md` e `CLAUDE.md` são mapa e regras. Narrativa de ciclo vai para documentos datados; decisões vão para `agentic/projeto/decisoes/`, um arquivo por decisão.
 **Verificado por:** revisão.
 
 ## 7. Erros pequenos, visíveis e reversíveis

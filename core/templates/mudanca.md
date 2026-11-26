@@ -13,7 +13,7 @@
 <!-- Regra que depende de pergunta do Questionário leva `Q<n>` como fonte até a resposta; no Gate 1 toda regra tem fonte definitiva (nenhuma hipótese). -->
 | # | Regra | Fonte |
 |---|---|---|
-| R1 | <regra> | humano:<AAAA-MM-DD> N<n> "<trecho>" \| oráculo:<arquivo>:<linha> \| plano:<arquivo>:<linha> \| decisão:D<n> \| Q<n> (antes da resposta) |
+| R1 | <regra> | humano:<AAAA-MM-DD> N<n> "<trecho>" \| oráculo:<arquivo>:<linha> \| plano:<arquivo>:<linha> \| decisão:D:<slug> (ou D<n>, no registro congelado) \| Q<n> (antes da resposta) |
 
 ## Critérios de aceite
 - CA1 (R1): dado <contexto>, quando <ação>, então <resultado observável>
@@ -47,8 +47,8 @@
 | N3-1 | <o que é acrescentado ao contrato público> | <…> | <aprovado em AAAA-MM-DD, ou recusado> |
 
 ## Decisões novas
-<!-- Decisão que vale além desta mudança: escrita também em agentic/projeto/decisoes.md no worktree (e no AGENTS.md, se mexe em gatilho N3), com os arquivos em ## Arquivos. O humano aprova cada uma no Gate 1. -->
-- D<n> — <título>: <decisão> — por quê: <…>
+<!-- Decisão que vale além desta mudança: escrita também em agentic/projeto/decisoes/<slug>.md no worktree (template agentic/processo/templates/decisao.md) (e no AGENTS.md, se mexe em gatilho N3), com os arquivos em ## Arquivos. O humano aprova cada uma no Gate 1. -->
+- D:<slug> — <título>: <decisão> — por quê: <…>
 <!-- ou: - Nenhuma. -->
 
 ## Fora de escopo

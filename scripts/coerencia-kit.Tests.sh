@@ -467,7 +467,7 @@ tl_espera 1 "README: hook PreToolUse não é mais só do Claude Code" tem README
 
 # --- Artefatos enxutos (docs/plans/2026-11-19-artefatos-enxutos.md)
 tl_espera 0 "fala do humano: formato N<n> no ciclo" tem core/processo/ciclo.md 'N<n> (humano:<AAAA-MM-DD>)'
-tl_espera 0 "fala do humano: delegado com N<n>" tem core/processo/ciclo.md 'N<n> (Gate 1 delegado, D<n>)'
+tl_espera 0 "fala do humano: delegado com N<n>" tem core/processo/ciclo.md 'N<n> (Gate 1 delegado)'
 tl_espera 0 "fala do humano: Fonte com ID e trecho" tem core/templates/spec.md 'humano:<AAAA-MM-DD> N<n>'
 tl_espera 0 "fala do humano: Fonte com ID e trecho (enxuta)" tem core/templates/mudanca.md 'humano:<AAAA-MM-DD> N<n>'
 tl_espera 0 "Gate 1: corpo do commit lista as N<n>" tem core/processo/ciclo.md 'é o registro versionado da fala do humano'
@@ -500,7 +500,7 @@ tl_espera 0 "brief: delta do revisor nos modos sem commit" tem core/templates/br
 tl_espera 0 "brief: delta do revisor no modo diff" tem core/templates/brief.md 'git diff <SHA final revisado no parecer anterior>..HEAD'
 tl_espera 0 "ciclo: cópia do artefato revisado" tem core/processo/ciclo.md 'copia todo arquivo revisado para `NN-revisado/<caminho relativo>`'
 tl_espera 0 "ciclo: cópia fora do que o hash confere" tem core/processo/ciclo.md 'a cópia não entra no que o hash confere'
-tl_espera 0 "3ª devolução: saída do humano também com o Gate 1 delegado" tem core/processo/ciclo.md 'a saída é sempre do humano (`humano:`), nunca da delegação (`D<n>`)'
+tl_espera 0 "3ª devolução: saída do humano também com o Gate 1 delegado" tem core/processo/ciclo.md 'a saída é sempre do humano (`humano:`), nunca da delegação'
 tl_espera 0 "modo automático para na 3ª devolução" tem core/processo/ciclo.md 'Para na 3ª devolução até o humano escolher a saída'
 tl_espera 0 "README: modo automático para na 3ª devolução" tem README.md 'para na 3ª devolução de um artefato até o humano escolher a saída'
 tl_espera 0 "enxuta: DEVOLVIDO com a parada da 3ª devolução" tem core/processo/ciclo.md '`DEVOLVIDO` volta ao `arquiteto`, salvo na parada da 3ª devolução'
@@ -576,5 +576,14 @@ tl_espera 0 "config.padrao: exemplo do ng test não fica em modo watch" tem boot
 tl_espera 0 "config.padrao: exemplo não junta cd com {} relativo à raiz" nenhum 'include=[{][}]' bootstrap/config.padrao docs/specs/2026-11-21-red-por-caminho-design.md
 tl_espera 0 "config.padrao: {} é relativo à raiz do worktree" tem bootstrap/config.padrao '{} = caminho do arquivo, relativo à raiz'
 tl_espera 0 "escopo ignora o log do verifica-red" tem mecanismos/scripts/verifica-escopo.sh 'agentic/.estado/verifica-red.log'
+
+# Decisões por arquivo e delegação local do Gate 1 (docs/specs/2026-11-25-decisoes-por-arquivo-design.md).
+tl_espera 0 "ciclo: decisão nova em arquivo" tem core/processo/ciclo.md 'agentic/projeto/decisoes/<slug>.md'
+tl_espera 0 "ciclo: referência D:<slug>" tem core/processo/ciclo.md '`D:<slug>`'
+tl_espera 0 "ciclo: auto-mode local" tem core/processo/ciclo.md '`agentic/auto-mode` é local'
+tl_espera 0 "template de decisão com status" tem core/templates/decisao.md '**Status:** vigente'
+tl_espera 0 "registro antigo congelado" tem core/templates/decisoes.md 'congelado'
+tl_espera 0 "sem delegação por D<n>" nenhum 'gate1: D<n>|Gate 1 delegado, D<n>|D<n> — Delegação do Gate 1' core
+tl_espera 0 "fonte da resposta delegada" tem core/processo/ciclo.md '`delegado N<n>`'
 
 tl_fim
