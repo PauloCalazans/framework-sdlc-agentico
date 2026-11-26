@@ -8,16 +8,16 @@ reg() { # reg <repo> <ids...>: escreve o registro com uma decisão "### D<n>" po
   mkdir -p "$r/agentic/projeto"
   { printf '# Registro de decisões\n\n## Vigentes\n\n'; for n in "$@"; do printf '### D%s — t\n- **Decisão:** x\n\n' "$n"; done; printf '## Decisões revogadas\n\n<nenhuma>\n'; } > "$r/agentic/projeto/decisoes.md"
 }
+dec() { # dec <repo> <slug> [status]: escreve agentic/projeto/decisoes/<slug>.md válido
+  mkdir -p "$1/agentic/projeto/decisoes"
+  printf '# %s\n\n**Status:** %s\n' "$2" "${3:-vigente}" > "$1/agentic/projeto/decisoes/$2.md"
+}
 confirma() { git -C "$1" add -A; git -C "$1" commit -q -m "$2"; }
 roda() { sh -c "cd '$1' && sh '$dir/verifica-decisoes.sh' $2"; }
 
 r=$(tl_repo)
 tl_espera 0 "sem registro de decisões: pulado" roda "$r"
 tl_contem "pulado" "declara que pulou"
-
-r=$(tl_repo); mkdir -p "$r/agentic"; printf 'enabled: true\ngate1: D1\n' > "$r/agentic/auto-mode"
-tl_espera 1 "Gate 1 delegado sem registro de decisões bloqueia" roda "$r"
-tl_contem "sem $(printf 'agentic/projeto/decisoes.md')" "explica que falta o registro"
 
 r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
 mkdir -p "$r/agentic/projeto/specs/x"; printf 'Conforme D1 e (D2); veja D1.\n' > "$r/agentic/projeto/specs/x/design.md"
@@ -28,16 +28,11 @@ tl_espera 1 "referência a decisão inexistente bloqueia" roda "$r"
 tl_contem "D7 (em agentic/projeto/specs/x/design.md)" "aponta a decisão e o arquivo"
 
 r=$(tl_repo); reg "$r" 1; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
-printf 'enabled: true\n# delegado (decisão D3)\n' > "$r/agentic/auto-mode"
-tl_espera 1 "referência órfã no auto-mode bloqueia" roda "$r"
-tl_contem "D3 (em agentic/auto-mode)" "aponta o auto-mode"
-
-r=$(tl_repo); reg "$r" 1; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
 printf 'ID1, AD7, D, D1a, XD9, D_8 e d5 não são referências.\n' > "$r/agentic/projeto/nota.md"
 tl_espera 0 "tokens parecidos com D<n> não são referências" roda "$r"
 
-r=$(tl_repo); reg "$r" 1; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
-printf 'Tratado em D1\n' > "$r/agentic/projeto/nota.md"; printf '\n### D9 — extensão\n' >> "$r/agentic/projeto/decisoes.md"
+r=$(tl_repo); reg "$r" 1; printf '\n### D9 — extensão\n' >> "$r/agentic/projeto/decisoes.md"; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
+printf 'Tratado em D1\n' > "$r/agentic/projeto/nota.md"
 sed -i.bak 's/D1$/D1, D9/' "$r/agentic/projeto/nota.md"; rm -f "$r/agentic/projeto/nota.md.bak"
 tl_espera 0 "título de decisão com sufixo (D9 — extensão) conta como definida" roda "$r"
 
@@ -68,10 +63,6 @@ r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b
 reg "$r" 1; confirma "$r" "perde a D2"
 tl_espera 1 "decisão da base ausente em HEAD bloqueia" roda "$r"
 tl_contem "D2" "nomeia a decisão perdida"
-
-r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
-reg "$r" 1 2 3; confirma "$r" "acrescenta a D3"
-tl_espera 0 "acrescentar decisão passa" roda "$r"
 
 # perda por merge: a principal ganha a D3 depois do fork; a branch faz merge e resolve descartando-a
 r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
@@ -159,5 +150,76 @@ gate1:'; confirma "$r" "revoga a delegação"
 tl_espera 1 "delegação revogada antes da integração bloqueia o Gate 1 delegado da branch" roda "$r"
 gate "$r" "docs(spec): x aprovada (Gate 1)"
 tl_espera 0 "depois da revogação, o Gate 1 humano registrado na branch libera" roda "$r"
+
+
+# Decisões por arquivo: agentic/projeto/decisoes/<slug>.md, citadas como D:<slug>
+novo() { r=$(tl_repo); dec "$r" "$@"; confirma "$r" "decisão"; git -C "$r" checkout -q -b feat/k; }
+spec() { mkdir -p "$r/agentic/projeto/specs/x"; printf '%s\n' "$1" > "$r/agentic/projeto/specs/x/design.md"; }
+
+novo cache-de-precos; spec 'Conforme D:cache-de-precos.'
+tl_espera 0 "só a pasta, sem decisoes.md: D:<slug> resolve" roda "$r"
+
+novo cache-de-precos; spec 'Conforme (D:cache-de-precos), D:cache-de-precos, e D:cache-de-precos'
+tl_espera 0 "D:<slug> seguido de pontuação resolve o slug inteiro" roda "$r"
+
+novo cache-de-precos; spec 'Conforme D:frete.'
+tl_espera 1 "referência D:<slug> órfã bloqueia" roda "$r"
+tl_contem "D:frete (em agentic/projeto/specs/x/design.md)" "aponta o slug e o arquivo"
+
+novo cache-de-precos; spec 'Veja (D:cache)'
+tl_espera 1 "prefixo de slug não resolve" roda "$r"
+tl_contem "D:cache (em" "aponta o prefixo como órfão"
+
+novo a; dec "$r" b; printf 'Veja D:zzz\n' >> "$r/agentic/projeto/decisoes/b.md"
+tl_espera 1 "decisão em arquivo que cita outra inexistente bloqueia" roda "$r"
+tl_contem "D:zzz (em agentic/projeto/decisoes/b.md)" "aponta o arquivo de decisão"
+
+novo a; spec 'Veja D3'
+tl_espera 1 "D<n> sem decisoes.md é órfã" roda "$r"
+tl_contem "D3 (em" "aponta a D3"
+
+# (2) arquivo da base que sumiu
+novo a; git -C "$r" rm -q agentic/projeto/decisoes/a.md; dec "$r" b; confirma "$r" "apaga a"
+tl_espera 1 "arquivo de decisão da base apagado bloqueia" roda "$r"
+tl_contem "revogue-a): a" "nomeia o slug perdido"
+
+novo a; git -C "$r" mv agentic/projeto/decisoes/a.md agentic/projeto/decisoes/a2.md; confirma "$r" "renomeia a"
+tl_espera 1 "arquivo de decisão da base renomeado bloqueia" roda "$r"
+tl_contem "revogue-a): a" "nomeia o slug antigo"
+
+# (3) registro congelado
+r=$(tl_repo); reg "$r" 1; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k; reg "$r" 1 2
+tl_espera 1 "### D<n> nova no registro congelado bloqueia" roda "$r"
+tl_contem "D2" "nomeia a decisão nova"
+tl_contem "decisoes/<slug>.md" "aponta o formato novo"
+
+r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
+tl_espera 0 "### D<n> que já estava na base passa" roda "$r"
+
+# (4) formato
+novo ok; mkdir -p "$r/agentic/projeto/decisoes"; printf '# x\n\n**Status:** vigente\n' > "$r/agentic/projeto/decisoes/Cache_Precos.md"
+tl_espera 1 "nome fora do slug bloqueia" roda "$r"
+tl_contem "Cache_Precos.md: nome não é slug" "nomeia o arquivo"
+
+novo ok; printf '**Status:** vigente\n' > "$r/agentic/projeto/decisoes/semtitulo.md"
+tl_espera 1 "arquivo sem título bloqueia" roda "$r"
+tl_contem "sem título" "explica a falta de título"
+
+novo ok; printf '# t\n\n**Status:** aprovado\n' > "$r/agentic/projeto/decisoes/aprov.md"
+tl_espera 1 "status inválido bloqueia" roda "$r"
+tl_contem "**Status:**" "explica o status"
+
+novo ok; dec "$r" a "revogada em 2026-11-25: trocada por b"
+tl_espera 0 "status revogada válido passa" roda "$r"
+
+novo ok; printf '# t\r\n\r\n**Status:** vigente\r\n' > "$r/agentic/projeto/decisoes/crlf.md"; spec 'Veja D:crlf.'
+tl_espera 0 "arquivo de decisão com CRLF passa" roda "$r"
+
+novo ok; mkdir -p "$r/agentic/projeto/decisoes/x"; : > "$r/agentic/projeto/decisoes/.gitkeep"; printf 'sem formato\n' > "$r/agentic/projeto/decisoes/x/y.md"
+tl_espera 0 ".gitkeep e subpasta são ignorados" roda "$r"
+
+r=$(tl_repo)
+tl_espera 0 "sem registro nem pasta: pulado" roda "$r"
+tl_contem "pulado" "declara que pulou"
 
 tl_fim
