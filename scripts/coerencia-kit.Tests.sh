@@ -593,5 +593,6 @@ tl_espera 0 "bootstrap: auto-mode local a partir do template" tem bootstrap/entr
 tl_espera 0 "composição do time com slug fixo (bootstrap)" tem bootstrap/entrevista.md 'agentic/projeto/decisoes/composicao-do-time.md'
 tl_espera 0 "composição do time com slug fixo (modelos)" tem core/processo/modelos.md 'agentic/projeto/decisoes/composicao-do-time.md'
 tl_espera 0 "composição do time com slug fixo (AGENTS)" tem core/templates/AGENTS.md 'D:composicao-do-time'
+tl_espera 0 "exemplos de brief: decisão lida pelo arquivo, não pelo registro congelado" nenhum 'agentic/projeto/decisoes\.md:' docs/exemplos-brief
 
 tl_fim
