@@ -293,6 +293,27 @@ commita "$r" "test: soma sem o caso 0+4 (R-9)" "Assercoes-removidas: tests/t_som
 tl_espera 1 "remoção: referência que não está registrada nos documentos não conta" vr "$r"
 tl_contem "R-9" "remoção: aponta a referência sem registro"
 
+# D:<slug>: a decisão é um arquivo agentic/projeto/decisoes/<slug>.md, registrado antes da remoção.
+r=$(prepara_rem)
+mkdir -p "$r/agentic/projeto/decisoes"; printf '# Remove x\n\n**Status:** vigente\n' > "$r/agentic/projeto/decisoes/remove-x.md"
+commita "$r" "docs(decisao): remove-x"
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (D:remove-x)" "Assercoes-removidas: tests/t_soma.sh 1 (D:remove-x)"
+tl_espera 0 "remoção: trailer com D:<slug> registrado antes da remoção dá crédito" vr "$r"
+tl_contem "1 removidas autorizadas por trailer" "remoção: D:<slug> informa o total autorizado"
+
+r=$(prepara_rem)
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (D:remove-x)" "Assercoes-removidas: tests/t_soma.sh 1 (D:remove-x)"
+tl_espera 1 "remoção: trailer com D:<slug> sem arquivo é ignorado" vr "$r"
+tl_contem "D:remove-x não foi registrada sob agentic/projeto/ antes da remoção" "remoção: aponta o D:<slug> sem registro"
+
+r=$(prepara_rem)
+grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
+commita "$r" "test: soma sem o caso 0+4 (D:Remove_X)" "Assercoes-removidas: tests/t_soma.sh 1 (D:Remove_X)"
+tl_espera 1 "remoção: D: com slug inválido é ignorado" vr "$r"
+tl_contem "referência não é R-n, D<n>, D:<slug> nem Emenda n" "remoção: slug inválido tem mensagem própria"
+
 r=$(prepara_rem); ruling "$r" R-12
 grava_t "$r" t_soma.sh "soma 2 3|5" "soma 1 1|2"
 commita "$r" "test: soma sem o caso 0+4 (R-1)" "Assercoes-removidas: tests/t_soma.sh 1 (R-1)"
@@ -753,6 +774,17 @@ prepara_exec; soma_em "$r" "a_it's soma.sh"
 git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"; green_soma "$r"
 tl_espera 0 "executor: caminho com espaço e aspas simples intacto em {}" vrc "$r"
 tl_contem "falhava (tests/a_it's soma.sh)" "executor: provou o arquivo com aspas"
+
+# RED sem red-junit.sh no commit (anterior à atualização do kit): {kit}/red-junit.sh e caminho relativo funcionam.
+prepara_exec; config_extra "$r" "TESTE_1_COMANDO=\"sh {kit}/red-junit.sh 'out/*.xml' -- sh -c 'mkdir -p out && printf \\\"<testsuite><testcase><failure/></testcase></testsuite>\\\" > out/r.xml'\"
+TESTE_1_RC_RED=\"1\""
+soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): red-junit via {kit}"
+tl_espera 0 "red-junit: {kit}/red-junit.sh funciona em RED sem red-junit.sh no commit" vrc "$r"
+
+prepara_exec; config_extra "$r" "TESTE_1_COMANDO=\"sh agentic/mecanismos/scripts/red-junit.sh 'out/*.xml' -- sh -c 'mkdir -p out && printf \\\"<testsuite><testcase><failure/></testcase></testsuite>\\\" > out/r.xml'\"
+TESTE_1_RC_RED=\"1\""
+soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): red-junit relativo"
+tl_espera 0 "red-junit: caminho relativo funciona em RED sem red-junit.sh no commit" vrc "$r"
 
 # --- Assinatura por executor e migração das provas pela suíte.
 prepara_mig() {
