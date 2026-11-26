@@ -32,6 +32,7 @@
 #   (6) log: a saída do preparo e de cada execução fica em agentic/.estado/verifica-red.log (reescrito a cada
 #       execução); no bloqueio, as últimas 40 linhas daquela execução são repetidas.
 . "$(dirname "$0")/lib-agentic.sh"
+agentic_scripts=$(cd "$(dirname "$0")" && pwd)
 cd "$agentic_raiz" || exit 1
 if [ -n "${1:-}" ]; then
   base=$(git merge-base HEAD "$1") || agentic_falha "base inválida: $1"
@@ -288,13 +289,15 @@ classe_jvm() {
   printf '%s\n' "${cj_pac:+$cj_pac.}$cj_nome"
 }
 
-# comando_arquivo <modelo> <arquivo> [worktree]: o modelo com cada {} trocado pelo caminho entre aspas simples; com
-# o worktree (executor), também cada {classe} pela classe JVM do arquivo, entre aspas simples.
+# comando_arquivo <modelo> <arquivo> [worktree]: o modelo com cada {} trocado pelo caminho entre aspas simples,
+# {kit} pelo diretório dos scripts do kit na árvore atual (também entre aspas simples) e, com o worktree
+# (executor), cada {classe} pela classe JVM do arquivo, entre aspas simples.
 comando_arquivo() {
   cf_saida=$1
   if [ -n "${3:-}" ]; then
     case "$cf_saida" in *"{classe}"*) cf_saida=$(troca "$cf_saida" '{classe}' "$(aspas "$(classe_jvm "$3/$2" "$2")")") ;; esac
   fi
+  case "$cf_saida" in *"{kit}"*) cf_saida=$(troca "$cf_saida" '{kit}' "$(aspas "$agentic_scripts")") ;; esac
   troca "$cf_saida" '{}' "$(aspas "$2")"
 }
 
@@ -414,6 +417,10 @@ EOT
     wt=$(mktemp -d)
     rmdir "$wt"
     git worktree add -q --detach "$wt" "$c" || { rm -f "$lista" "$pend" "$saida_ex"; agentic_falha "não foi possível criar worktree para $curto"; }
+    if [ ! -f "$wt/agentic/mecanismos/scripts/red-junit.sh" ] && [ -f "$agentic_scripts/red-junit.sh" ]; then
+      mkdir -p "$wt/agentic/mecanismos/scripts" 2>/dev/null \
+        && cp "$agentic_scripts/red-junit.sh" "$wt/agentic/mecanismos/scripts/red-junit.sh" 2>/dev/null || true
+    fi
     # Entre worktree add e remove não há saída via agentic_falha: o worktree é sempre removido.
     # Preparo: o TESTE_<n>_PREPARO de cada executor usado (distintos, na ordem de n) e o CMD_PREPARAR_TESTE quando há
     # prova por CMD_TESTE_ARQUIVO ou pela suíte. Qualquer falha bloqueia o RED sem rodar os testes.
