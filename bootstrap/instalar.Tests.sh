@@ -66,6 +66,7 @@ sh "$dir/instalar.sh" "$r2" >/dev/null
 git -C "$r2" add -f agentic/auto-mode && git -C "$r2" -c core.hooksPath=/dev/null commit -q -m "auto-mode versionado"
 tl_espera 0 "reinstala com auto-mode versionado" sh "$dir/instalar.sh" "$r2"
 tl_contem "git rm --cached agentic/auto-mode" "auto-mode versionado pede ação humana"
+tl_contem "cp agentic/processo/templates/auto-mode agentic/auto-mode" "auto-mode versionado: os outros devs recriam o seu do template"
 
 r=$(tl_repo); echo "meu claude" > "$r/CLAUDE.md"
 tl_espera 0 "instala com arquivo pré-existente" sh "$dir/instalar.sh" "$r"

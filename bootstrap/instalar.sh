@@ -189,7 +189,7 @@ if [ -s "$atualizados" ]; then
 fi
 rm -f "$conflitos" "$atualizados"
 if git -C "$alvo" ls-files --error-unmatch agentic/auto-mode >/dev/null 2>&1; then
-  echo "Ação humana: agentic/auto-mode agora é local, por dev; tire-o do git com git rm --cached agentic/auto-mode (o arquivo fica)."
+  echo "Ação humana: agentic/auto-mode agora é local, por dev; tire-o do git com git rm --cached agentic/auto-mode (o arquivo fica). Depois do pull que o tira do git, cada outro dev recria o seu com cp agentic/processo/templates/auto-mode agentic/auto-mode."
 fi
 echo "Kit instalado em $alvo."
 echo "Próximo passo: abra o Claude Code (ou o Antigravity) no projeto e rode /bootstrap; no Codex, \$bootstrap."
