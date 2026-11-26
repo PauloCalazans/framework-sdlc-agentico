@@ -74,15 +74,15 @@ Regras completas: `core/processo/ciclo.md`.
 
 Com `enabled: true` em `agentic/auto-mode`, o orquestrador encadeia as tasks e publica os PRs sem pedir confirmação, e para na 3ª devolução de um artefato até o humano escolher a saída. Com plataforma de PR, quando a task anterior ainda não foi integrada, a seguinte sai da branch dela: a task declara `**Base:** <branch anterior>` e o `verify.sh` compara com essa branch até ela entrar na principal.
 
-O humano também pode delegar o Gate 1, por exemplo depois de escrever um plano longo. O orquestrador passa a aprovar intent, spec e design com base no plano e nos pareceres do `revisor`, e só chama o humano para o que a delegação não cobre. A delegação é uma decisão registrada e vale até ser revogada:
+O humano também pode delegar o Gate 1, por exemplo depois de escrever um plano longo. O orquestrador passa a aprovar intent, spec e design com base no plano e nos pareceres do `revisor`, e só chama o humano para o que a delegação não cobre. A delegação é local, do dev que a grava, e vale até ele esvaziar `gate1:`:
 
-1. o humano decide, e a decisão `D<n> — Delegação do Gate 1` é registrada em `agentic/projeto/decisoes.md` (por ele ou pelo `/bootstrap`, que transcreve a resposta dele): plano, specs cobertas e itens N3 que o orquestrador pode aprovar;
-2. o humano grava `enabled: true` e `gate1: D<n>` em `agentic/auto-mode` (arquivo que o agente não edita);
-3. cada aprovação vira o commit `docs(spec): <nome> aprovada (Gate 1 delegado, D<n>)` (trilha enxuta: `docs(mudanca): …`).
+1. o humano escreve o plano em `agentic/projeto/planos/` (versionado: é material do time); sem `agentic/auto-mode` no clone, copia o template (`cp agentic/processo/templates/auto-mode agentic/auto-mode`);
+2. o humano grava `enabled: true`, `gate1:` e `plano:` em `agentic/auto-mode` (local, fora do git, e que o agente não edita): em `gate1:`, `todas` ou as specs e mudanças cobertas (`<nome>, <nome>`); em `plano:`, o plano; em `n3:`, os itens N3 que o orquestrador pode aprovar (ou `nenhum`);
+3. cada aprovação vira o commit `docs(spec): <nome> aprovada (Gate 1 delegado)` (trilha enxuta: `docs(mudanca): …`), com as linhas `gate1:`, `plano:` e `n3:` copiadas no corpo: é o registro versionado da delegação, que o humano confere no Gate 2.
 
-Toda decisão que o orquestrador toma fora da spec e do design é uma **Ruling**: fica na seção `## Rulings` da task (versionada na branch; a tomada depois do último commit de papel fica só no PR ou, sem plataforma de PR, no aviso ao humano), aparece no PR em "Decisões do orquestrador", é conferida pelo `revisor` (a tomada depois do último commit de papel, só pelo humano, no Gate 2) e é listada ao humano ao publicar. A que vale além da task vira `D<n>` em `decisoes.md`.
+Toda decisão que o orquestrador toma fora da spec e do design é uma **Ruling**: fica na seção `## Rulings` da task (versionada na branch; a tomada depois do último commit de papel fica só no PR ou, sem plataforma de PR, no aviso ao humano), aparece no PR em "Decisões do orquestrador", é conferida pelo `revisor` (a tomada depois do último commit de papel, só pelo humano, no Gate 2) e é listada ao humano ao publicar. A que vale além da task vira decisão em `agentic/projeto/decisoes/<slug>.md`, citada como `D:<slug>`.
 
-O `verifica-decisoes.sh` bloqueia `gate1:` apontando para decisão revogada ou inexistente, e commit de Gate 1 delegado sem delegação vigente. O Gate 2 nunca é delegado: o merge continua com o humano.
+Decisão é um arquivo por decisão em `agentic/projeto/decisoes/`, citado como `D:<slug>`; o arquivo nunca é apagado nem renomeado, e revogar é trocar o `**Status:**`. Em instância antiga, as `D<n>` do `agentic/projeto/decisoes.md` continuam valendo, mas o registro está congelado: nenhuma `### D<n>` nova. O `verifica-decisoes.sh` bloqueia referência `D:<slug>` ou `D<n>` sem a decisão, arquivo de decisão da base ausente ou com `**Status:**` fora do formato, `### D<n>` nova e commit de Gate 1 delegado fora da regra: em todo clone, também na CI, o commit exige no corpo `gate1:` cobrindo o `<nome>` e `plano:` com arquivo existente em HEAD (o formato antigo, com `D<n>` no assunto, não exige o corpo). O `agentic/auto-mode` é lido da árvore principal do repositório, também quando o verify roda num worktree; presente, o script bloqueia `gate1:` fora do formato ou sem `plano:` com arquivo existente em HEAD e commit de Gate 1 delegado que o `gate1:` dele não cobre; sem o arquivo (clone de outro dev, CI), declara `delegação não verificável neste clone` e não bloqueia por isso. O Gate 2 nunca é delegado: o merge continua com o humano.
 
 ## Exemplo real: serviço de preços em Node.js
 
@@ -176,7 +176,7 @@ Cada papel tem duas camadas:
 Sem perfil preenchido, o papel é genérico e erra o que um especialista da sua stack acertaria. Regras:
 
 - **Especialização concreta:** linguagem, versão, frameworks e o que o projeto faz.
-- **Fatos conferidos no código:** caminhos, entidades, papéis de segurança, comandos e decisões (`D<n>`). Fato errado é pior que fato ausente; o `checa-instancia.sh` acusa caminho citado que não existe.
+- **Fatos conferidos no código:** caminhos, entidades, papéis de segurança, comandos e decisões (`D:<slug>`; `D<n>`, no registro congelado). Fato errado é pior que fato ausente; o `checa-instancia.sh` acusa caminho citado que não existe.
 - **Proibições do projeto:** só acréscimos ao "Nunca faz" do contrato.
 - **Curto:** 30 a 40 linhas; texto longo vai para um documento do projeto, citado em "Leia sob demanda".
 - **Erro repetido vira checagem** no `CMD_VERIFY_STACK` (princípio 2).
@@ -214,13 +214,14 @@ de cálculo de preços usado pelo time comercial.
 - Exportação nomeada: `module.exports = { precoFinal }`.
 
 ## Nunca faz neste projeto
-- Alterar `legado/calculo-antigo.js` (D3). Dúvida sobre o legado vai ao
+- Alterar `legado/calculo-antigo.js` (D:legado-protegido). Dúvida sobre o legado vai ao
   oráculo `legado-precos`.
 - Mudar faixa ou percentual de desconto sem item N3 aprovado no Gate 1.
 - Acrescentar pacote ao `package.json` (dependência nova é N3).
 
 ## Leia sob demanda
-- `agentic/projeto/decisoes.md`: D1 (comandos de verificação), D3 (legado protegido).
+- `agentic/projeto/decisoes/stack-e-verificacao.md` (comandos de verificação) e
+  `agentic/projeto/decisoes/legado-protegido.md` (legado protegido).
 ```
 
 Atualize o perfil quando uma decisão nova mudar o trabalho do papel. Padrão de stack que o revisor devolveu duas vezes pelo mesmo motivo sai do perfil e vira checagem no `CMD_VERIFY_STACK` de `agentic/config` (princípio 2).
@@ -235,14 +236,15 @@ CLAUDE.md              ponte mínima para o Claude Code
 .claude/               agentes, comandos, hooks e settings.json (proteções)
 .codex/, .agents/      só com --codex / --antigravity: agentes, skills, regras e hooks
 agentic/
-  config, auto-mode    política da instância (só o humano edita)
+  config               política da instância (só o humano edita)
+  auto-mode            modo automático e Gate 1 delegado: local, por dev, fora do git (só o humano edita)
   processo/            do kit: princípios, ciclo, entrevista, contratos dos papéis, templates, .kit-manifesto
   mecanismos/          do kit: githooks/ (core.hooksPath) e scripts/
-  projeto/             do projeto: papeis/ (perfis), bootstrap.md, decisoes.md, intent/, specs/
+  projeto/             do projeto: papeis/ (perfis), bootstrap.md, decisoes/ (uma por arquivo), intent/, specs/
   .estado/             efêmero, ignorado pelo git: execução, worktrees, conflitos
 ```
 
-Mais uma linha em `.gitignore` (`agentic/.estado/`) e em `.gitattributes` (LF nos scripts).
+Mais linhas em `.gitignore` (`agentic/.estado/` e `agentic/auto-mode`) e em `.gitattributes` (LF nos scripts).
 
 ## O que muda ao atualizar o kit
 
@@ -262,6 +264,7 @@ Instâncias antigas continuam funcionando: as variáveis novas de `agentic/confi
 - `verify.sh` interrompido por INT ou TERM termina a etapa em curso, imprime `VERIFY: INTERROMPIDO` e sai com 130 ou 143, sem rodar as etapas seguintes; o lock só é solto na saída.
 - O `VERIFY: OK` do completo numa árvore limpa fica em `<git-common-dir>/agentic/verify-provados`: o completo seguinte na mesma árvore, base e config (o do orquestrador antes do PR, depois do revisor `diff`) termina em `VERIFY: OK (já provado nesta árvore)` sem rodar a stack (`AGENTIC_VERIFY_SEM_CACHE=1` refaz). Cada etapa fecha com a duração em segundos, a saída inteira fica em `agentic/.estado/verify.log` (rápido: `verify-rapido.log`), e o fim da etapa que falhou aparece logo antes da linha `VERIFY:`.
 - No Claude Code, o `settings.json` do kit traz `"autoCompactWindow": 200000`: a sessão do orquestrador é compactada ao chegar a 200 mil tokens, em vez de perto do limite da janela do modelo, e retoma pelo `progress.md` e pelo status reinjetado; o `CLAUDE.md` ganha `# Compact instructions`. Instância que já tem `.claude/settings.json` recebe a chave pelo merge manual do `ativar-protecoes.sh` (ação humana). Sem mexer em arquivo, `/autocompact 200k` na sessão vale para o modelo em uso e fica gravado nas configurações do usuário, para todos os projetos dele. No Codex, o mesmo limite vem em `.codex/config.toml` (`model_auto_compact_token_limit = 200000`), instalado pelo `ativar-protecoes.sh`. Antigravity e Copilot não documentam limite configurável: lá o humano roda `/compact` ao fim de cada task. Em todas, o `AGENTS.md` manda reler o `progress.md` depois que a conversa é compactada.
+- Decisão nova vai em `agentic/projeto/decisoes/<slug>.md` e é citada como `D:<slug>`; o `decisoes.md` existente fica congelado, com as `D<n>` dele valendo. A delegação do Gate 1 sai do registro: fica em `gate1:`, `plano:` e `n3:` do `agentic/auto-mode`, agora local e no `.gitignore`; se ele estava versionado, o instalador pede a ação humana `git rm --cached agentic/auto-mode` (o arquivo fica), e um `gate1:` antigo, com uma `D<n>`, passa a bloquear com a mensagem de formato. O commit de registro de uma branch aberta antes, no formato antigo, continua aceito. Branch aberta antes que já criou uma `### D<n>` no `decisoes.md` passa a bloquear (registro congelado) depois de integrar a principal: converta a decisão num arquivo `agentic/projeto/decisoes/<slug>.md` e troque `D<n>` por `D:<slug>` nos artefatos da branch.
 - Para medir: `grep` da coluna Causa nos pareceres de `agentic/.estado/execucao/` e das linhas "Rodadas" nos PRs.
 
 ## Estrutura do framework

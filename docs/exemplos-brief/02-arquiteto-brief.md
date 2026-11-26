@@ -24,7 +24,7 @@ Task: /home/dev/loja/agentic/projeto/specs/pedidos/spec.md — fase 2 (design)
 
 ## Leia só isto
 - agentic/projeto/specs/pedidos/spec.md:1-90 — regras e critérios de aceite.
-- agentic/projeto/decisoes.md:1-40 — decisões vigentes.
+- agentic/projeto/decisoes/stack-e-verificacao.md — D:stack-e-verificacao, a decisão que importa ao desenho.
 - agentic/projeto/specs/cupons/spec.md:10-20 — R3, do `## Impacto`.
 
 ## Impacto

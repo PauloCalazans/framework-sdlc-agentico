@@ -294,7 +294,7 @@ tl_espera 0 "dev: dependência aprovada no Gate 1 não para" tem core/papeis/dev
 tl_espera 0 "dev: escopo ampliado pelo orquestrador" tem core/processo/ciclo.md 'Ampliar o escopo é decisão do orquestrador, nunca do papel'
 tl_espera 0 "divergência spec × código vai em Divergências" tem core/processo/ciclo.md 'registre em "Divergências" da spec'
 tl_espera 0 "empilhamento só com plataforma de PR" tem core/processo/ciclo.md '**Branches empilhadas:** só com plataforma de PR'
-tl_espera 0 "README: delegação com enabled: true" tem README.md 'grava `enabled: true` e `gate1: D<n>`'
+tl_espera 0 "README: delegação com enabled: true" tem README.md 'grava `enabled: true`, `gate1:` e `plano:`'
 tl_espera 0 "spec: delegado coberto pelo plano usa plano:" tem core/templates/spec.md 'Fonte plano:<arquivo>:<linha>'
 tl_espera 0 "/intent: dominio não conversa com o humano" tem adapters/claude-code/commands/intent.md 'o `dominio` nunca conversa direto com o humano'
 tl_espera 0 "/nova-task: primeira task usa a branch do Gate 1" tem adapters/claude-code/commands/nova-task.md 'crie-o sem `-b`'
@@ -467,7 +467,7 @@ tl_espera 1 "README: hook PreToolUse não é mais só do Claude Code" tem README
 
 # --- Artefatos enxutos (docs/plans/2026-11-19-artefatos-enxutos.md)
 tl_espera 0 "fala do humano: formato N<n> no ciclo" tem core/processo/ciclo.md 'N<n> (humano:<AAAA-MM-DD>)'
-tl_espera 0 "fala do humano: delegado com N<n>" tem core/processo/ciclo.md 'N<n> (Gate 1 delegado, D<n>)'
+tl_espera 0 "fala do humano: delegado com N<n>" tem core/processo/ciclo.md 'N<n> (Gate 1 delegado)'
 tl_espera 0 "fala do humano: Fonte com ID e trecho" tem core/templates/spec.md 'humano:<AAAA-MM-DD> N<n>'
 tl_espera 0 "fala do humano: Fonte com ID e trecho (enxuta)" tem core/templates/mudanca.md 'humano:<AAAA-MM-DD> N<n>'
 tl_espera 0 "Gate 1: corpo do commit lista as N<n>" tem core/processo/ciclo.md 'é o registro versionado da fala do humano'
@@ -500,7 +500,7 @@ tl_espera 0 "brief: delta do revisor nos modos sem commit" tem core/templates/br
 tl_espera 0 "brief: delta do revisor no modo diff" tem core/templates/brief.md 'git diff <SHA final revisado no parecer anterior>..HEAD'
 tl_espera 0 "ciclo: cópia do artefato revisado" tem core/processo/ciclo.md 'copia todo arquivo revisado para `NN-revisado/<caminho relativo>`'
 tl_espera 0 "ciclo: cópia fora do que o hash confere" tem core/processo/ciclo.md 'a cópia não entra no que o hash confere'
-tl_espera 0 "3ª devolução: saída do humano também com o Gate 1 delegado" tem core/processo/ciclo.md 'a saída é sempre do humano (`humano:`), nunca da delegação (`D<n>`)'
+tl_espera 0 "3ª devolução: saída do humano também com o Gate 1 delegado" tem core/processo/ciclo.md 'a saída é sempre do humano (`humano:`), nunca da delegação (`delegado N<n>`)'
 tl_espera 0 "modo automático para na 3ª devolução" tem core/processo/ciclo.md 'Para na 3ª devolução até o humano escolher a saída'
 tl_espera 0 "README: modo automático para na 3ª devolução" tem README.md 'para na 3ª devolução de um artefato até o humano escolher a saída'
 tl_espera 0 "enxuta: DEVOLVIDO com a parada da 3ª devolução" tem core/processo/ciclo.md '`DEVOLVIDO` volta ao `arquiteto`, salvo na parada da 3ª devolução'
@@ -576,5 +576,40 @@ tl_espera 0 "config.padrao: exemplo do ng test não fica em modo watch" tem boot
 tl_espera 0 "config.padrao: exemplo não junta cd com {} relativo à raiz" nenhum 'include=[{][}]' bootstrap/config.padrao docs/specs/2026-11-21-red-por-caminho-design.md
 tl_espera 0 "config.padrao: {} é relativo à raiz do worktree" tem bootstrap/config.padrao '{} = caminho do arquivo, relativo à raiz'
 tl_espera 0 "escopo ignora o log do verifica-red" tem mecanismos/scripts/verifica-escopo.sh 'agentic/.estado/verifica-red.log'
+
+# Decisões por arquivo e delegação local do Gate 1 (docs/specs/2026-11-25-decisoes-por-arquivo-design.md).
+tl_espera 0 "ciclo: decisão nova em arquivo" tem core/processo/ciclo.md 'agentic/projeto/decisoes/<slug>.md'
+tl_espera 0 "ciclo: referência D:<slug>" tem core/processo/ciclo.md '`D:<slug>`'
+tl_espera 0 "ciclo: auto-mode local" tem core/processo/ciclo.md '`agentic/auto-mode` é local'
+tl_espera 0 "template de decisão com status" tem core/templates/decisao.md '**Status:** vigente'
+tl_espera 0 "registro antigo congelado" tem core/templates/decisoes.md 'congelado'
+tl_espera 0 "sem delegação por D<n>" nenhum 'gate1: D<n>|Gate 1 delegado, D<n>|D<n> — Delegação do Gate 1' \
+  core adapters/claude-code/commands bootstrap README.md
+tl_espera 0 "fonte da resposta delegada" tem core/processo/ciclo.md '`delegado N<n>`'
+tl_espera 0 "princípios: decisão por arquivo nunca apagada, revogada pelo Status" tem core/principios.md 'nunca é apagado nem renomeado; revogar é trocar a linha por `**Status:** revogada em <AAAA-MM-DD>: <motivo>`'
+tl_espera 0 "arquiteto: decisões na pasta" tem core/papeis/arquiteto.md 'agentic/projeto/decisoes/'
+tl_espera 0 "bootstrap: decisões iniciais em arquivo" tem bootstrap/entrevista.md 'agentic/projeto/decisoes/<slug>.md'
+tl_espera 0 "bootstrap: auto-mode local a partir do template" tem bootstrap/entrevista.md 'cp agentic/processo/templates/auto-mode agentic/auto-mode'
+tl_espera 0 "composição do time com slug fixo (bootstrap)" tem bootstrap/entrevista.md 'agentic/projeto/decisoes/composicao-do-time.md'
+tl_espera 0 "composição do time com slug fixo (modelos)" tem core/processo/modelos.md 'agentic/projeto/decisoes/composicao-do-time.md'
+tl_espera 0 "composição do time com slug fixo (AGENTS)" tem core/templates/AGENTS.md 'D:composicao-do-time'
+tl_espera 0 "exemplos de brief: decisão lida pelo arquivo, não pelo registro congelado" nenhum 'agentic/projeto/decisoes\.md:' docs/exemplos-brief
+# Revisão final: auto-mode lido da árvore principal; corpo do commit delegado; limite do deny; Fonte delegado.
+for f in core/processo/ciclo.md README.md; do
+  tl_espera 0 "$f: auto-mode lido da árvore principal, também num worktree" tem $f 'lido da árvore principal do repositório, também quando o verify roda num worktree'
+  tl_espera 0 "$f: commit delegado exige gate1:/plano: no corpo" tem $f 'exige no corpo `gate1:` cobrindo o `<nome>` e `plano:` com arquivo existente em HEAD'
+  tl_espera 0 "$f: plano do auto-mode conferido em HEAD" tem $f '`plano:` com arquivo existente em HEAD'
+done
+tl_espera 0 "verifica-decisoes: mesma exigência do corpo que o ciclo" tem mecanismos/scripts/verifica-decisoes.sh 'sem gate1:/plano: no corpo (copie-os do agentic/auto-mode)'
+tl_espera 0 "verifica-decisoes: auto-mode da árvore principal" tem mecanismos/scripts/verifica-decisoes.sh 'lido da árvore principal do'
+tl_espera 0 "ciclo: commit delegado no formato antigo não exige o corpo" tem core/processo/ciclo.md 'o formato antigo, com `D<n>` no assunto, não exige o corpo'
+for f in core/principios.md docs/specs/2026-11-25-decisoes-por-arquivo-design.md; do
+  tl_espera 0 "$f: limite do deny declarado" tem $f 'escrita por shell no `agentic/auto-mode` não deixa rastro no git'
+done
+tl_espera 0 "spec: Fonte delegado N<n>" tem core/templates/spec.md '\| delegado N<n>'
+tl_espera 0 "mudanca: Fonte delegado N<n>" tem core/templates/mudanca.md '\| delegado N<n>'
+tl_espera 0 "promoção de Ruling não cita delegação" nenhum 'citando a delegação' core README.md
+tl_espera 0 "ciclo: promoção com Gate 1 delegado leva o gate1:/plano: no corpo" tem core/processo/ciclo.md 'traz no corpo o `gate1:` e o `plano:` do Gate 1 delegado'
+tl_espera 0 "README: branch antiga com ### D<n> nova converte para arquivo" tem README.md 'troque `D<n>` por `D:<slug>` nos artefatos da branch'
 
 tl_fim

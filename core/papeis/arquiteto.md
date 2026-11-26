@@ -8,7 +8,7 @@ Antes de começar, leia `agentic/projeto/papeis/arquiteto.md`: especialização,
 
 ## Consome
 - `spec.md` revisada.
-- `agentic/projeto/decisoes.md` (decisões vigentes; nunca contradiga uma sem registrar a revogação).
+- As decisões: `ls agentic/projeto/decisoes/` (o nome do arquivo é o índice) e só o arquivo da decisão que importa ao desenho; também o registro congelado `agentic/projeto/decisoes.md`, quando existe. Nunca contradiga decisão vigente sem registrar a revogação.
 - `agentic/processo/templates/design.md` e `agentic/processo/templates/task.md`.
 - O `## Impacto` do brief: as buscas que o orquestrador rodou (quem usa o que muda, os testes que o exercitam, as specs aprovadas que citam a regra), com os trechos em "Leia só isto". Leia esses trechos antes de desenhar; o que você afirma sobre o código e as specs é medido neles. Falta uma busca além dos comandos do brief: peça pelo canal de dúvida.
 
@@ -21,19 +21,19 @@ Antes de começar, leia `agentic/projeto/papeis/arquiteto.md`: especialização,
   - Invariante e regra vão documentadas (comentário de assinatura e critério da task), não implementadas.
   - Rode a validação e registre a saída no design (`medido`).
   - Todo arquivo do esqueleto entra em `## Arquivos` da primeira task: o esqueleto inteiro é commitado na branch dela (`chore: contrato executável`, logo depois do registro do Gate 1), e o `verifica-escopo.sh` compara com essa lista.
-  - Com decisão nova, `agentic/projeto/decisoes.md` (e `AGENTS.md`, quando ela mexe em gatilho N3) entram no registro do Gate 1 e em `## Arquivos` da primeira task.
+  - Com decisão nova, o arquivo dela em `agentic/projeto/decisoes/` (e `AGENTS.md`, quando ela mexe em gatilho N3) entram no registro do Gate 1 e em `## Arquivos` da primeira task.
 - **Declaração de corpos:** no design (seção "Contrato executável"), a lista de todo corpo do contrato que não é stub, com o porquê. Esperado: vazia ou só acessos triviais.
 - `## Impacto` no design: cada símbolo, rota, schema ou regra alterada; quem usa hoje (`arquivo:linha`, das buscas do `## Impacto` do brief, conferido no trecho, `medido`); em que task está; que teste existente quebra; que regra de outra spec aprovada muda — com a emenda, que vira item do Gate 1.
 - `agentic/projeto/specs/<nome>/tasks/NNN-<nome>.md`: cada task com `**Branch:**`, `## Arquivos` (escopo exato, globs permitidos), interfaces produzidas/consumidas, "N3 aprovados no Gate 1" (quais itens N3 do design ela usa, ou `- Nenhum.`) e critérios de pronto.
-- Novas entradas em `agentic/projeto/decisoes.md` quando uma decisão vale além desta spec.
+- Decisão que vale além desta spec: um arquivo novo `agentic/projeto/decisoes/<slug>.md`, pelo template `agentic/processo/templates/decisao.md`, com slug que descreve a decisão (`cache-de-precos`), citado como `D:<slug>`. Decisão nova nunca entra no registro congelado `decisoes.md`.
 
 ## Modo enxuto
 Na trilha enxuta (`agentic/processo/ciclo.md`, "Trilha enxuta") você escreve **um único documento**, `agentic/projeto/specs/<nome>/tasks/001-<nome>.md`, a partir de `agentic/processo/templates/mudanca.md` e da descrição do humano, **no worktree que o brief indica**, nunca na árvore principal. Nada é commitado antes do Gate 1.
-- Regra dita pelo humano entra com `Fonte: humano:<AAAA-MM-DD> N<n> "<trecho>"`, pela `N<n>` que o brief traz; regra vinda de oráculo ou decisão cita `oráculo:arquivo:linha` ou `decisão:Dn`.
+- Regra dita pelo humano entra com `Fonte: humano:<AAAA-MM-DD> N<n> "<trecho>"`, pela `N<n>` que o brief traz; regra vinda de oráculo ou decisão cita `oráculo:arquivo:linha` ou `decisão:D:<slug>` (`decisão:D<n>`, no registro congelado).
 - O `dominio` não roda aqui: o que faltar vira pergunta no "Questionário" (opções e recomendação), e a regra que depende dela leva `Fonte: Q<n>`. Você formula; não responde nem fecha pergunta. A resposta vem do humano, pelo orquestrador.
 - Acréscimo a contrato público (constante, campo opcional, rota, símbolo novo) é N3: liste em "Itens N3 (aprovação no Gate 1)" com o porquê de ser só acréscimo. Qualquer outro gatilho N3, ou mudança que não cabe numa única task: recuse a trilha enxuta e diga por quê; a mudança segue pela trilha padrão.
 - Contrato executável, quando houver interface nova ou alterada: esqueleto no worktree (mesma definição de "Produz": corpos são o stub da stack, com a declaração de corpos), só em arquivos de `## Arquivos`, validado com o comando da stack, saída na seção "Contrato executável" (`medido`). Nenhum outro arquivo de produção antes do Gate 1.
-- Decisão nova: proponha em "Decisões novas" e escreva em `agentic/projeto/decisoes.md` no worktree (com o arquivo em `## Arquivos`); ela só vale depois de aprovada no Gate 1.
+- Decisão nova: proponha em "Decisões novas" e escreva em `agentic/projeto/decisoes/<slug>.md` no worktree, pelo template `agentic/processo/templates/decisao.md` (com o arquivo em `## Arquivos`); ela só vale depois de aprovada no Gate 1.
 - `## Impacto` no documento único, depois de `## Arquivos`: a mesma tabela do design (símbolo alterado, quem usa hoje `medido` pelas buscas do `## Impacto` do brief, task, teste afetado, regra de outra spec → emenda).
 - Não escreva respostas do questionário, a coluna "Decisão do humano", "Questões em aberto" nem "Rulings", e nunca escreva que algo foi aprovado: essas partes são do orquestrador, e o Gate 1 é o commit de registro.
 - Grave no arquivo de relatório que o brief indica: caminho do documento, perguntas abertas (quantas), itens N3 (quantos), contrato executável (`medido` e declaração de corpos, ou "não há"), decisões novas propostas. O próximo passo é o `revisor` em modo `mudanca`, depois o Gate 1.

@@ -8,10 +8,15 @@ problemas=0
 problema() { echo "PROBLEMA: $*"; problemas=$((problemas + 1)); }
 aviso() { echo "AVISO: $*"; }
 
-for f in AGENTS.md CLAUDE.md agentic/processo/ciclo.md agentic/processo/principios.md agentic/projeto/bootstrap.md agentic/projeto/decisoes.md \
-         agentic/config agentic/auto-mode .claude/settings.json agentic/mecanismos/scripts/verify.sh agentic/mecanismos/githooks/pre-commit; do
+for f in AGENTS.md CLAUDE.md agentic/processo/ciclo.md agentic/processo/principios.md agentic/projeto/bootstrap.md \
+         agentic/config .claude/settings.json agentic/mecanismos/scripts/verify.sh agentic/mecanismos/githooks/pre-commit; do
   [ -f "$f" ] || problema "arquivo obrigatório ausente: $f (se for .claude/settings.json: rode sh agentic/mecanismos/scripts/ativar-protecoes.sh)"
 done
+# Decisões: pasta decisoes/ (formato novo) ou decisoes.md (instâncias antigas).
+[ -d agentic/projeto/decisoes ] || [ -f agentic/projeto/decisoes.md ] || \
+  problema "decisões ausentes: crie agentic/projeto/decisoes/ (um arquivo <slug>.md por decisão) ou mantenha agentic/projeto/decisoes.md (instância antiga)"
+# auto-mode é local, por dev (fora do git): ausente só desliga o modo automático.
+[ -f agentic/auto-mode ] || aviso "agentic/auto-mode ausente (local, por dev; modo automático desligado): cp agentic/processo/templates/auto-mode agentic/auto-mode"
 
 for p in dominio arquiteto testes dev revisor; do
   [ -f "agentic/processo/papeis/$p.md" ] && [ -f ".claude/agents/$p.md" ] || problema "papel incompleto: $p"
@@ -21,7 +26,7 @@ for p in dominio arquiteto testes dev revisor; do
   [ -f "agentic/projeto/papeis/$p.md" ] || problema "perfil ausente: agentic/projeto/papeis/$p.md (copie agentic/processo/templates/perfil-papel.md e preencha)"
 done
 
-restantes=$(grep -rl '{{' AGENTS.md CLAUDE.md agentic/processo/papeis agentic/projeto/papeis .claude/agents agentic/config agentic/projeto/bootstrap.md agentic/projeto/decisoes.md 2>/dev/null \
+restantes=$(grep -rl '{{' AGENTS.md CLAUDE.md agentic/processo/papeis agentic/projeto/papeis .claude/agents agentic/config agentic/projeto/bootstrap.md agentic/projeto/decisoes agentic/projeto/decisoes.md 2>/dev/null \
   | grep -v 'papeis/_oraculo.md$') # o contrato-base do oráculo é template; o agente-template fica em agentic/processo/templates
 [ -z "$restantes" ] || problema "placeholders {{...}} não preenchidos em: $(echo $restantes)"
 

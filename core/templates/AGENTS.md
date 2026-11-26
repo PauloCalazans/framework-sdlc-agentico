@@ -13,7 +13,7 @@ Todo trabalho segue `agentic/processo/ciclo.md`. Princípios em `agentic/process
 - **Despachado como `oraculo-<nome>`, só com uma pergunta?** Você é o oráculo: siga `agentic/processo/papeis/oraculo-<nome>.md` e devolva a resposta no retorno.
 - **Sem brief de papel e sem ser oráculo?** Você é o orquestrador: siga `agentic/processo/ciclo.md`, despache os papéis e nunca faça o trabalho deles.
 - **Orquestrador em sessão longa:** o estado da execução vive no `progress.md`, não na conversa. Quando a ferramenta compactar ou resumir a conversa, ou a sessão for retomada, releia o `progress.md` da execução em curso e o status do projeto antes do próximo passo. Num resumo, guarde a task e a trilha, o caminho do `progress.md`, o próximo passo e o que espera o humano; brief, relatório, parecer e saída de verify estão em arquivo.
-- **Orquestrador externo** (vários agentes num canvas ou numa ferramenta de orquestração): o orquestrador é a sessão indicada na decisão de composição do time em `agentic/projeto/decisoes.md`. As demais sessões só agem com brief.
+- **Orquestrador externo** (vários agentes num canvas ou numa ferramenta de orquestração): o orquestrador é a sessão indicada na decisão de composição do time, `D:composicao-do-time` (`agentic/projeto/decisoes/composicao-do-time.md`; em instância antiga, no registro congelado `agentic/projeto/decisoes.md`). As demais sessões só agem com brief.
 - **Ferramenta sem subagentes:** não faça o trabalho de um papel no contexto do orquestrador. Grave o brief e peça ao humano que o abra numa sessão nova. O `revisor` roda sempre em contexto limpo, nunca na sessão de quem escreveu o que ele revisa.
 
 ## Integração
@@ -45,7 +45,7 @@ No Windows, rode os comandos `sh ...` no Git Bash; dentro do Claude Code isso j�
 ## Onde ficam os artefatos
 - Intents: `agentic/projeto/intent/`
 - Specs, designs e tasks: `agentic/projeto/specs/<nome>/`
-- Decisões: `agentic/projeto/decisoes.md`
+- Decisões: `agentic/projeto/decisoes/` (uma por arquivo, citada como `D:<slug>`; as `D<n>` ficam no registro congelado `decisoes.md`, quando existe)
 - Respostas do bootstrap: `agentic/projeto/bootstrap.md`
 
 ## Gatilhos de escalonamento (N3)

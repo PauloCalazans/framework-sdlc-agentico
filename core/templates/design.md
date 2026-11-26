@@ -4,7 +4,7 @@
 **Status:** draft
 
 ## Decisões
-<!-- numere 1, 2, 3… sem o prefixo `D`: o prefixo é das decisões do projeto (agentic/projeto/decisoes.md) -->
+<!-- numere 1, 2, 3… sem o prefixo `D`: o prefixo é das decisões do projeto (D:<slug> em agentic/projeto/decisoes/; D<n> no registro congelado decisoes.md) -->
 1. <decisão> — **Por quê:** <…> — **Verificado por:** <mecanismo | por revisão>
 
 ## Contrato executável

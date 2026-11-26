@@ -15,7 +15,7 @@
 #       removido em HEAD conta zero). Arquivos não tocados pelo RED não entram na comparação.
 #       Exceção: remoção autorizada, quando uma Ruling, decisão ou emenda de spec tirou o comportamento que as
 #       asserções provavam. Um commit da branch declara, num trailer,
-#         Assercoes-removidas: <arquivo> <n> [em <sha>] (<R-n | D<n> | Emenda n>)
+#         Assercoes-removidas: <arquivo> <n> [em <sha>] (<R-n | D<n> | D:<slug> | Emenda n>)
 #       as n asserções removidas no commit X (<sha>, ou o próprio commit do trailer). O trailer só conta se:
 #       X vem depois do RED e não depois do commit do trailer; a referência foi acrescentada sob agentic/projeto/
 #       entre a base e o pai de X (registrada antes da remoção). O crédito de X é no máximo a queda de asserções
@@ -59,6 +59,14 @@ else
 fi
 # ref_registrada <rev> <ref>: a referência aparece numa linha acrescentada sob agentic/projeto/ entre a base e <rev>.
 ref_registrada() {
+  case "$2" in
+    D:*) # arquivo de decisão acrescentado entre a base e <rev>, ou a referência numa linha acrescentada
+      rr_slug=${2#D:}
+      [ -n "$(git -c core.quotepath=off diff --name-only --diff-filter=A "$base" "$1" -- "agentic/projeto/decisoes/$rr_slug.md" 2>/dev/null)" ] && return 0
+      git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
+        | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]-]|$)"
+      return ;;
+  esac
   git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
     | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]]|$)"
 }
@@ -185,9 +193,10 @@ removidas_autorizadas() {
       R-[0-9]*) ra_num=${ra_ref#R-} ;;
       D[0-9]*) ra_num=${ra_ref#D} ;;
       "Emenda "[0-9]*) ra_num=${ra_ref#Emenda } ;;
+      D:*) if printf '%s' "${ra_ref#D:}" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*$'; then ra_num=0; else ra_num=x; fi ;;
       *) ra_num=x ;;
     esac
-    case "$ra_num" in *[!0-9]*) ignora_trailer "$ra_portador" "referência não é R-n, D<n> nem Emenda n" "$ra_l"; continue ;; esac
+    case "$ra_num" in *[!0-9]*) ignora_trailer "$ra_portador" "referência não é R-n, D<n>, D:<slug> nem Emenda n" "$ra_l"; continue ;; esac
     if ! ra_xc=$(git rev-parse --verify -q "$ra_x^{commit}"); then
       ignora_trailer "$ra_portador" "commit $ra_x inexistente" "$ra_l"; continue
     fi
