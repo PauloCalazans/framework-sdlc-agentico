@@ -55,9 +55,11 @@ tl_espera 0 "manifesto lista o template do auto-mode" grep -q "  agentic/process
 tl_espera 1 "manifesto não lista o auto-mode local" grep -q "  agentic/auto-mode$" "$r/agentic/processo/.kit-manifesto"
 tl_espera 0 "cria a pasta de decisões" test -d "$r/agentic/projeto/decisoes"
 printf 'enabled: true\n' > "$r/agentic/auto-mode"
+printf '\n# edição do dev\n' >> "$r/agentic/processo/ciclo.md" # conflito real, para a lista existir
 tl_espera 0 "reinstala sobre auto-mode editado" sh "$dir/instalar.sh" "$r"
 tl_espera 0 "reinstalação não toca no auto-mode do dev" sh -c "[ \"\$(cat '$r/agentic/auto-mode')\" = 'enabled: true' ]"
-tl_espera 0 "reinstalação não cita o auto-mode em conflitos" sh -c "! grep -qs agentic/auto-mode '/agentic/.estado/conflitos-instalacao.txt'"
+tl_espera 0 "lista de conflitos existe e cita o arquivo do kit editado" grep -qx "agentic/processo/ciclo.md" "$r/agentic/.estado/conflitos-instalacao.txt"
+tl_espera 1 "reinstalação não cita o auto-mode em conflitos" grep -q "agentic/auto-mode" "$r/agentic/.estado/conflitos-instalacao.txt"
 
 r2=$(tl_repo)
 sh "$dir/instalar.sh" "$r2" >/dev/null
