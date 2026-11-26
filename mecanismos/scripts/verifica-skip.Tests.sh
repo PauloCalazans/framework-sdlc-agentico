@@ -116,4 +116,32 @@ r=$(prepara); junit "$r" ""
 printf '@unittest.skip("x")\n' > "$r/tests/com espaço.py"; git -C "$r" add -A; git -C "$r" commit -q -m "nome com espaço"
 tl_espera 1 "marcador em arquivo commitado com espaço no nome bloqueia" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
 
+# Volume: 2.000 XML sintéticos + centenas de arquivos alterados/novos com executores dentro de um teto de tempo folgado.
+colocal 'TESTE_1_PADROES="src/*.spec.py"'
+awk -v r="$r" 'BEGIN {
+  for (i = 1; i <= 2000; i++) {
+    f = sprintf("%s/relatorio/t_%04d.xml", r, i)
+    print (i == 1337 ? "<testsuite><testcase name=\"x\"><skipped/></testcase></testsuite>" : "<testsuite><testcase name=\"x\"/></testsuite>") > f
+    close(f)
+  }
+  for (i = 1; i <= 300; i++) {
+    f = sprintf("%s/src/p_%03d.py", r, i)
+    print "x = 1" > f; close(f)
+  }
+}'
+git -C "$r" add -A; git -C "$r" commit -q -m "volume"
+awk -v r="$r" 'BEGIN {
+  for (i = 1; i <= 300; i++) {
+    f = sprintf("%s/src/p_%03d.py", r, i)
+    print "x = 2" > f; close(f)
+    u = sprintf("%s/src/u_%03d.py", r, i)
+    print "y = 1" > u; close(u)
+  }
+}'
+t0=$(date +%s)
+tl_espera 1 "volume: 2.000 XML e 600 arquivos alterados/novos detectam o skip" sh -c "cd '$r' && sh '$dir/verifica-skip.sh'"
+dt=$(( $(date +%s) - t0 ))
+tl_contem "1 teste(s) pulado(s)" "volume: contou o skip no meio dos 2.000 XML"
+tl_espera 0 "volume: terminou em até 20 s (levou ${dt}s)" test "$dt" -le 20
+
 tl_fim

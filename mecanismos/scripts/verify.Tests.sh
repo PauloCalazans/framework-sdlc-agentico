@@ -255,6 +255,18 @@ tl_espera 0 "o motivo da falha aparece nas últimas linhas da saída" sh -c "tai
 tl_espera 0 "a linha VERIFY continua a última" sh -c "tail -n 1 '$copia' | grep -qx 'VERIFY: FALHOU em: stack'"
 tl_espera 0 "o fim repete só o trecho final da etapa" sh -c "[ \$(grep -c '^linha 10\$' '$copia') -eq 1 ]"
 
+# TMPDIR com espaço e duas etapas falhando: os dois trechos aparecem no fim e o TMPDIR fica vazio.
+r_tmp=$(prepara)
+mkdir -p "$r_tmp/tmp com espaco"
+echo "- tmp com espaco/" >> "$r_tmp/.gitignore"
+echo z > "$r_tmp/fora.txt"
+printf 'echo FALHA_DA_STACK\nexit 1\n' > "$r_tmp/tests/stack.sh"
+tl_espera 1 "TMPDIR com espaço e duas etapas falhando" env TMPDIR="$r_tmp/tmp com espaco" sh -c "cd '$r_tmp' && sh '$dir/verify.sh'"
+tl_contem "== escopo (falhou; últimas 40 linhas da etapa)" "TMPDIR com espaço: repete trecho de escopo"
+tl_contem "== stack (falhou; últimas 40 linhas da etapa)" "TMPDIR com espaço: repete trecho de stack"
+tl_contem "FALHA_DA_STACK" "TMPDIR com espaço: conteúdo do trecho da stack"
+tl_espera 0 "TMPDIR com espaço: diretório temporário fica vazio" sh -c "[ -z \"\$(ls -A '$r_tmp/tmp com espaco')\" ]"
+
 # --- Prova do completo: OK numa árvore limpa fica guardada em <git-common-dir>/agentic/verify-provados;
 # o completo seguinte na mesma árvore, base e config não roda de novo.
 unset AGENTIC_VERIFY_SEM_CACHE

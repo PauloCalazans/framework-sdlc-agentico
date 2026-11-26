@@ -54,7 +54,7 @@ interrompido() {
 trap 'interrompido INT 130' INT
 trap 'interrompido TERM 143' TERM
 
-falhas=""; trechos=""
+falhas=""; trecho_n=0
 # etapa <nome> <comando...>: roda o comando com a saída no terminal e no log, e fecha com o resultado e a duração.
 # A saída de cada etapa que falha fica guardada para o fim (trechos).
 etapa() {
@@ -70,7 +70,9 @@ etapa() {
     diz "-- $nome: OK ($e_dt s)"
   else
     diz "-- $nome: FALHOU ($e_dt s)"; falhas="$falhas $nome"
-    e_trecho=$(mktemp); tail -n 40 "$etapa_saida" > "$e_trecho"; trechos="$trechos $nome:$e_trecho"
+    trecho_n=$((trecho_n + 1))
+    mkdir -p "$lock/trechos"
+    tail -n 40 "$etapa_saida" > "$lock/trechos/$(printf '%02d' "$trecho_n")-$nome"
   fi
 }
 
@@ -179,9 +181,11 @@ if [ -z "$falhas" ] && [ -n "$prova_arq" ]; then
   fi
 fi
 
-for t in $trechos; do
-  diz ""; diz "== ${t%%:*} (falhou; últimas 40 linhas da etapa)"
-  cat "${t#*:}" | tee -a "$log"; rm -f "${t#*:}"
+for t in "$lock/trechos/"*; do
+  [ -f "$t" ] || continue
+  e_nome=${t##*/}; e_nome=${e_nome#*-}
+  diz ""; diz "== $e_nome (falhou; últimas 40 linhas da etapa)"
+  cat "$t" | tee -a "$log"; rm -f "$t"
 done
 diz ""
 diz "log: $log"

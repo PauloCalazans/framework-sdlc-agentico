@@ -754,6 +754,17 @@ git -C "$r" add -A; git -C "$r" commit -q -m "test(red): a"; green_soma "$r"
 tl_espera 0 "executor: caminho com espaço e aspas simples intacto em {}" vrc "$r"
 tl_contem "falhava (tests/a_it's soma.sh)" "executor: provou o arquivo com aspas"
 
+# RED sem red-junit.sh no commit (anterior à atualização do kit): {kit}/red-junit.sh e caminho relativo funcionam.
+prepara_exec; config_extra "$r" "TESTE_1_COMANDO=\"sh {kit}/red-junit.sh 'out/*.xml' -- sh -c 'mkdir -p out && printf \\\"<testsuite><testcase><failure/></testcase></testsuite>\\\" > out/r.xml'\"
+TESTE_1_RC_RED=\"1\""
+soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): red-junit via {kit}"
+tl_espera 0 "red-junit: {kit}/red-junit.sh funciona em RED sem red-junit.sh no commit" vrc "$r"
+
+prepara_exec; config_extra "$r" "TESTE_1_COMANDO=\"sh agentic/mecanismos/scripts/red-junit.sh 'out/*.xml' -- sh -c 'mkdir -p out && printf \\\"<testsuite><testcase><failure/></testcase></testsuite>\\\" > out/r.xml'\"
+TESTE_1_RC_RED=\"1\""
+soma_em "$r" a_soma.sh; git -C "$r" add -A; git -C "$r" commit -q -m "test(red): red-junit relativo"
+tl_espera 0 "red-junit: caminho relativo funciona em RED sem red-junit.sh no commit" vrc "$r"
+
 # --- Assinatura por executor e migração das provas pela suíte.
 prepara_mig() {
   prepara_exec; config_extra "$r" "TESTE_1_PADROES=\"\"
