@@ -500,7 +500,7 @@ tl_espera 0 "brief: delta do revisor nos modos sem commit" tem core/templates/br
 tl_espera 0 "brief: delta do revisor no modo diff" tem core/templates/brief.md 'git diff <SHA final revisado no parecer anterior>..HEAD'
 tl_espera 0 "ciclo: cópia do artefato revisado" tem core/processo/ciclo.md 'copia todo arquivo revisado para `NN-revisado/<caminho relativo>`'
 tl_espera 0 "ciclo: cópia fora do que o hash confere" tem core/processo/ciclo.md 'a cópia não entra no que o hash confere'
-tl_espera 0 "3ª devolução: saída do humano também com o Gate 1 delegado" tem core/processo/ciclo.md 'a saída é sempre do humano (`humano:`), nunca da delegação'
+tl_espera 0 "3ª devolução: saída do humano também com o Gate 1 delegado" tem core/processo/ciclo.md 'a saída é sempre do humano (`humano:`), nunca da delegação (`delegado N<n>`)'
 tl_espera 0 "modo automático para na 3ª devolução" tem core/processo/ciclo.md 'Para na 3ª devolução até o humano escolher a saída'
 tl_espera 0 "README: modo automático para na 3ª devolução" tem README.md 'para na 3ª devolução de um artefato até o humano escolher a saída'
 tl_espera 0 "enxuta: DEVOLVIDO com a parada da 3ª devolução" tem core/processo/ciclo.md '`DEVOLVIDO` volta ao `arquiteto`, salvo na parada da 3ª devolução'
@@ -594,5 +594,22 @@ tl_espera 0 "composição do time com slug fixo (bootstrap)" tem bootstrap/entre
 tl_espera 0 "composição do time com slug fixo (modelos)" tem core/processo/modelos.md 'agentic/projeto/decisoes/composicao-do-time.md'
 tl_espera 0 "composição do time com slug fixo (AGENTS)" tem core/templates/AGENTS.md 'D:composicao-do-time'
 tl_espera 0 "exemplos de brief: decisão lida pelo arquivo, não pelo registro congelado" nenhum 'agentic/projeto/decisoes\.md:' docs/exemplos-brief
+# Revisão final: auto-mode lido da árvore principal; corpo do commit delegado; limite do deny; Fonte delegado.
+for f in core/processo/ciclo.md README.md; do
+  tl_espera 0 "$f: auto-mode lido da árvore principal, também num worktree" tem $f 'lido da árvore principal do repositório, também quando o verify roda num worktree'
+  tl_espera 0 "$f: commit delegado exige gate1:/plano: no corpo" tem $f 'exige no corpo `gate1:` cobrindo o `<nome>` e `plano:` com arquivo existente em HEAD'
+  tl_espera 0 "$f: plano do auto-mode conferido em HEAD" tem $f '`plano:` com arquivo existente em HEAD'
+done
+tl_espera 0 "verifica-decisoes: mesma exigência do corpo que o ciclo" tem mecanismos/scripts/verifica-decisoes.sh 'sem gate1:/plano: no corpo (copie-os do agentic/auto-mode)'
+tl_espera 0 "verifica-decisoes: auto-mode da árvore principal" tem mecanismos/scripts/verifica-decisoes.sh 'lido da árvore principal do'
+tl_espera 0 "ciclo: commit delegado no formato antigo não exige o corpo" tem core/processo/ciclo.md 'o formato antigo, com `D<n>` no assunto, não exige o corpo'
+for f in core/principios.md docs/specs/2026-11-25-decisoes-por-arquivo-design.md; do
+  tl_espera 0 "$f: limite do deny declarado" tem $f 'escrita por shell no `agentic/auto-mode` não deixa rastro no git'
+done
+tl_espera 0 "spec: Fonte delegado N<n>" tem core/templates/spec.md '\| delegado N<n>'
+tl_espera 0 "mudanca: Fonte delegado N<n>" tem core/templates/mudanca.md '\| delegado N<n>'
+tl_espera 0 "promoção de Ruling não cita delegação" nenhum 'citando a delegação' core README.md
+tl_espera 0 "ciclo: promoção com Gate 1 delegado leva o gate1:/plano: no corpo" tem core/processo/ciclo.md 'traz no corpo o `gate1:` e o `plano:` do Gate 1 delegado'
+tl_espera 0 "README: branch antiga com ### D<n> nova converte para arquivo" tem README.md 'troque `D<n>` por `D:<slug>` nos artefatos da branch'
 
 tl_fim

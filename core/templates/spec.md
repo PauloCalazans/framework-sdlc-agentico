@@ -6,7 +6,7 @@
 ## Regras
 | # | Regra | Fonte | Estado |
 |---|---|---|---|
-| R1 | <regra de negócio> | <humano:<AAAA-MM-DD> N<n> "<trecho>" \| oráculo:arquivo:linha \| plano:arquivo:linha \| decisão:D:<slug> (ou D<n>, no registro congelado)> | <confirmada \| hipótese> |
+| R1 | <regra de negócio> | <humano:<AAAA-MM-DD> N<n> "<trecho>" \| oráculo:arquivo:linha \| plano:arquivo:linha \| delegado N<n> \| decisão:D:<slug> (ou D<n>, no registro congelado)> | <confirmada \| hipótese> |
 
 ## Critérios de aceite
 - CA1 (R1): <dado … quando … então …>

@@ -143,7 +143,8 @@ n3: nenhum
 - **Duas fontes de decisão por muito tempo** nas instâncias existentes: o `decisoes.md` congelado e a pasta. O `arquiteto` tem de olhar as duas.
 - **Dois formatos de referência para sempre:** `D7` e `D:cache-de-precos`.
 - **A delegação deixa de ser vista pelo time antes de valer.** Hoje ela é uma decisão versionada; agora só aparece no commit de registro, depois de usada. O Gate 2 é o ponto de conferência.
-- **Fora do clone de quem delegou, o commit "Gate 1 delegado" não é verificado** contra a delegação, só declarado não verificável.
+- **Fora do clone de quem delegou, o commit "Gate 1 delegado" não é verificado** contra a delegação, só declarado não verificável. O que todo clone confere é o corpo do commit: `gate1:` cobrindo o `<nome>` e `plano:` com arquivo existente em HEAD (a revisão final acrescentou essa exigência; o formato antigo, com `D<n>` no assunto, não a tem). O `agentic/auto-mode` é lido da árvore principal do repositório, também quando o verify roda num worktree.
+- **O `deny` cobre só a edição pelo agente:** escrita por shell no `agentic/auto-mode` não deixa rastro no git, porque o arquivo é local. Antes, versionado, um `printf >` ou `rm` aparecia no `git status` e no PR; agora o rastro conferido é o corpo do commit de registro, que o humano vê no Gate 2.
 - **Slug escolhido por agente pode ser ruim** (genérico demais, ou parecido com outro). A revisão do design e do documento enxuto confere.
 
 ## 8. Arquivos afetados

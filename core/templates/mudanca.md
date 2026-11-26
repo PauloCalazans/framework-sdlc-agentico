@@ -13,7 +13,7 @@
 <!-- Regra que depende de pergunta do Questionário leva `Q<n>` como fonte até a resposta; no Gate 1 toda regra tem fonte definitiva (nenhuma hipótese). -->
 | # | Regra | Fonte |
 |---|---|---|
-| R1 | <regra> | humano:<AAAA-MM-DD> N<n> "<trecho>" \| oráculo:<arquivo>:<linha> \| plano:<arquivo>:<linha> \| decisão:D:<slug> (ou D<n>, no registro congelado) \| Q<n> (antes da resposta) |
+| R1 | <regra> | humano:<AAAA-MM-DD> N<n> "<trecho>" \| oráculo:<arquivo>:<linha> \| plano:<arquivo>:<linha> \| delegado N<n> \| decisão:D:<slug> (ou D<n>, no registro congelado) \| Q<n> (antes da resposta) |
 
 ## Critérios de aceite
 - CA1 (R1): dado <contexto>, quando <ação>, então <resultado observável>
