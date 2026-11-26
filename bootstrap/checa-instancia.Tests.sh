@@ -34,6 +34,21 @@ git -C "$r" add -A
 git -C "$r" add --chmod=+x agentic/mecanismos/githooks/pre-commit agentic/mecanismos/githooks/pre-merge-commit agentic/mecanismos/githooks/pre-push
 tl_espera 0 "instância completa passa" sh "$dir/checa-instancia.sh" "$r"
 
+# Decisões: a pasta decisoes/ substitui o decisoes.md (instâncias antigas ainda o têm); auto-mode ausente só avisa.
+mkdir -p "$r/agentic/projeto/decisoes"
+mv "$r/agentic/projeto/decisoes.md" "$r/.decisoes.md"
+tl_espera 0 "pasta de decisões sem decisoes.md é aceita" sh "$dir/checa-instancia.sh" "$r"
+tl_espera 1 "pasta de decisões aceita não gera problema de decisões" grep -q "PROBLEMA.*decisoes" "$TL_SAIDA"
+rmdir "$r/agentic/projeto/decisoes"
+tl_espera 1 "sem pasta e sem decisoes.md é problema" sh "$dir/checa-instancia.sh" "$r"
+tl_contem "agentic/projeto/decisoes/" "aponta a pasta de decisões ausente"
+mv "$r/.decisoes.md" "$r/agentic/projeto/decisoes.md"
+mv "$r/agentic/auto-mode" "$r/.auto-mode"
+tl_espera 0 "auto-mode ausente não é problema" sh "$dir/checa-instancia.sh" "$r"
+tl_contem "AVISO" "auto-mode ausente é aviso"
+tl_contem "cp agentic/processo/templates/auto-mode agentic/auto-mode" "aviso traz o comando de restauração"
+mv "$r/.auto-mode" "$r/agentic/auto-mode"
+
 # Perfis dos papéis: obrigatórios, sem placeholder, e todo caminho citado entre crases existe.
 mv "$r/agentic/projeto/papeis/testes.md" "$r/.testes.md"
 tl_espera 1 "detecta perfil ausente" sh "$dir/checa-instancia.sh" "$r"

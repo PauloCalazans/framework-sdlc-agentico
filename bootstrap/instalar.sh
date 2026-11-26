@@ -95,7 +95,13 @@ copia "$fw/adapters/claude-code/CLAUDE.md" CLAUDE.md
 copia "$fw/adapters/claude-code/agente-oraculo.tmpl.md" agentic/processo/templates/agente-oraculo.md
 copia "$fw/adapters/claude-code/settings.json.tmpl" agentic/.estado/settings.pendente.json
 copia "$fw/bootstrap/config.padrao" agentic/config
-copia "$fw/bootstrap/auto-mode.padrao" agentic/auto-mode
+copia "$fw/bootstrap/auto-mode.padrao" agentic/processo/templates/auto-mode
+# agentic/auto-mode é local, por dev: fora do copia (sem manifesto, sem conflito), criado só se ausente.
+if [ ! -e "$alvo/agentic/auto-mode" ]; then
+  mkdir -p "$alvo/agentic"
+  cp "$fw/bootstrap/auto-mode.padrao" "$alvo/agentic/auto-mode"
+fi
+mkdir -p "$alvo/agentic/projeto/decisoes"
 if [ -n "$copilot" ]; then
   copia "$fw/adapters/copilot/copilot-instructions.md" .github/copilot-instructions.md
   copia_dir "$fw/adapters/copilot/agents" .github/agents
@@ -160,6 +166,7 @@ rm -f "$manifesto_novo"
 rm -f "$pend_novo"
 
 acrescenta .gitignore "agentic/.estado/"
+acrescenta .gitignore "agentic/auto-mode"
 acrescenta .gitattributes "*.sh text eol=lf"
 acrescenta .gitattributes "agentic/mecanismos/githooks/* text eol=lf"
 
@@ -181,6 +188,9 @@ if [ -s "$atualizados" ]; then
   sed 's/^/  /' "$atualizados"
 fi
 rm -f "$conflitos" "$atualizados"
+if git -C "$alvo" ls-files --error-unmatch agentic/auto-mode >/dev/null 2>&1; then
+  echo "Ação humana: agentic/auto-mode agora é local, por dev; tire-o do git com git rm --cached agentic/auto-mode (o arquivo fica)."
+fi
 echo "Kit instalado em $alvo."
 echo "Próximo passo: abra o Claude Code (ou o Antigravity) no projeto e rode /bootstrap; no Codex, \$bootstrap."
 if [ -n "$codex" ] || [ -n "$antigravity" ]; then

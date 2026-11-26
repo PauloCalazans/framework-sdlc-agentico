@@ -47,6 +47,24 @@ tl_espera 0 "reinstalar é idempotente" sh "$dir/instalar.sh" "$r"
 tl_espera 1 "sem conflitos na reinstalação" test -f "$r/agentic/.estado/conflitos-instalacao.txt"
 tl_espera 0 ".gitignore sem linhas duplicadas" sh -c "[ \$(grep -cxF 'agentic/.estado/' '$r/.gitignore') -eq 1 ]"
 
+# auto-mode: o template é do kit; agentic/auto-mode é local, por dev, fora do manifesto e do git.
+tl_espera 0 "instalação cria o template do auto-mode" test -f "$r/agentic/processo/templates/auto-mode"
+tl_espera 0 "instalação cria o auto-mode local" test -f "$r/agentic/auto-mode"
+tl_espera 0 ".gitignore ignora agentic/auto-mode" grep -qxF "agentic/auto-mode" "$r/.gitignore"
+tl_espera 0 "manifesto lista o template do auto-mode" grep -q "  agentic/processo/templates/auto-mode$" "$r/agentic/processo/.kit-manifesto"
+tl_espera 1 "manifesto não lista o auto-mode local" grep -q "  agentic/auto-mode$" "$r/agentic/processo/.kit-manifesto"
+tl_espera 0 "cria a pasta de decisões" test -d "$r/agentic/projeto/decisoes"
+printf 'enabled: true\n' > "$r/agentic/auto-mode"
+tl_espera 0 "reinstala sobre auto-mode editado" sh "$dir/instalar.sh" "$r"
+tl_espera 0 "reinstalação não toca no auto-mode do dev" sh -c "[ \"\$(cat '$r/agentic/auto-mode')\" = 'enabled: true' ]"
+tl_espera 0 "reinstalação não cita o auto-mode em conflitos" sh -c "! grep -qs agentic/auto-mode '/agentic/.estado/conflitos-instalacao.txt'"
+
+r2=$(tl_repo)
+sh "$dir/instalar.sh" "$r2" >/dev/null
+git -C "$r2" add -f agentic/auto-mode && git -C "$r2" -c core.hooksPath=/dev/null commit -q -m "auto-mode versionado"
+tl_espera 0 "reinstala com auto-mode versionado" sh "$dir/instalar.sh" "$r2"
+tl_contem "git rm --cached agentic/auto-mode" "auto-mode versionado pede ação humana"
+
 r=$(tl_repo); echo "meu claude" > "$r/CLAUDE.md"
 tl_espera 0 "instala com arquivo pré-existente" sh "$dir/instalar.sh" "$r"
 tl_espera 0 "preserva o CLAUDE.md existente" grep -qx "meu claude" "$r/CLAUDE.md"
@@ -59,7 +77,7 @@ tl_espera 0 ".gitignore: nova linha isolada" grep -qxF "agentic/.estado/" "$r/.g
 tl_espera 0 ".gitattributes preserva linha original" grep -qxF "*.png binary" "$r/.gitattributes"
 tl_espera 0 ".gitattributes: nova linha isolada" grep -qxF "*.sh text eol=lf" "$r/.gitattributes"
 sh "$dir/instalar.sh" "$r" >/dev/null
-tl_espera 0 "reinstalação sem duplicar" sh -c "[ \$(wc -l < '$r/.gitignore') -eq 2 ] && [ \$(wc -l < '$r/.gitattributes') -eq 3 ]"
+tl_espera 0 "reinstalação sem duplicar" sh -c "[ \$(wc -l < '$r/.gitignore') -eq 3 ] && [ \$(wc -l < '$r/.gitattributes') -eq 3 ]"
 
 r=$(tl_repo); mkdir -p "$r/agentic/.estado"; echo "velho" > "$r/agentic/.estado/conflitos-instalacao.txt"
 tl_espera 0 "instala com conflitos-instalacao.txt obsoleto" sh "$dir/instalar.sh" "$r"
