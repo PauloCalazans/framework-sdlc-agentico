@@ -58,7 +58,6 @@ else
 fi
 # ref_registrada <rev> <ref>: a referência aparece numa linha acrescentada sob agentic/projeto/ entre a base e <rev>.
 ref_registrada() {
-  git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
   case "$2" in
     D:*) # arquivo de decisão acrescentado entre a base e <rev>, ou a referência numa linha acrescentada
       rr_slug=${2#D:}
@@ -67,6 +66,7 @@ ref_registrada() {
         | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]-]|$)"
       return ;;
   esac
+  git -c core.quotepath=off diff "$base" "$1" -- agentic/projeto/ 2>/dev/null | sed -n 's/^+//p' | grep -v '^++ ' \
     | grep -qE "(^|[^[:alnum:]])$2([^[:alnum:]]|$)"
 }
 
@@ -192,8 +192,8 @@ removidas_autorizadas() {
       R-[0-9]*) ra_num=${ra_ref#R-} ;;
       D[0-9]*) ra_num=${ra_ref#D} ;;
       "Emenda "[0-9]*) ra_num=${ra_ref#Emenda } ;;
-      *) ra_num=x ;;
       D:*) if printf '%s' "${ra_ref#D:}" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*$'; then ra_num=0; else ra_num=x; fi ;;
+      *) ra_num=x ;;
     esac
     case "$ra_num" in *[!0-9]*) ignora_trailer "$ra_portador" "referência não é R-n, D<n>, D:<slug> nem Emenda n" "$ra_l"; continue ;; esac
     if ! ra_xc=$(git rev-parse --verify -q "$ra_x^{commit}"); then
