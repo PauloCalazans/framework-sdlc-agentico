@@ -33,10 +33,10 @@ tl_espera 0 "não quebra sem a branch principal e sem commits" sh -c "cd '$r2' &
 tl_contem "Modo automático: desligado" "auto-mode ausente = desligado"
 tl_contem "Gate 1: humano" "auto-mode ausente = Gate 1 humano"
 
-printf 'enabled: true\ngate1: D4\n' > "$r/agentic/auto-mode"
+printf 'enabled: true\ngate1: todas\n' > "$r/agentic/auto-mode"
 tl_espera 0 "status com Gate 1 delegado sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
-tl_contem "Gate 1: delegado ao orquestrador (D4)" "mostra a decisão que delega o Gate 1"
-printf 'enabled: false\ngate1: D4\n' > "$r/agentic/auto-mode"
+tl_contem "Gate 1: delegado ao orquestrador (todas)" "mostra a decisão que delega o Gate 1"
+printf 'enabled: false\ngate1: todas\n' > "$r/agentic/auto-mode"
 tl_espera 0 "status com modo automático desligado sai com 0" sh -c "cd '$r' && sh '$dir/status-projeto.sh'"
 tl_contem "Gate 1: humano" "delegação só vale com o modo automático ligado"
 

@@ -10,20 +10,18 @@
 #   (3) "### D<n>" presente em HEAD e ausente na base bloqueia: o registro está congelado;
 #   (4) todo .md do primeiro nível de decisoes/ tem slug válido, título "# " e "**Status:**" vigente ou
 #       "revogada em <AAAA-MM-DD>: <motivo>" (.gitkeep e subpastas são ignorados);
-#   (5) delegação do Gate 1 (até a Task 2 a regra é a antiga): "gate1: D<n>" em agentic/auto-mode aponta uma
-#       decisão vigente, e todo commit da branch que registra "Gate 1 delegado, D<n>" tem delegação vigente
-#       (auto-mode com "enabled: true" e "gate1: D<n>", D<n> vigente) — ou um Gate 1 humano registrado na
-#       branch para o mesmo artefato ("<tipo>: <nome> aprovada (Gate 1)").
+#   (5) delegação do Gate 1 pelo agentic/auto-mode local (enabled, gate1, plano): gate1 vazio, "todas" ou
+#       "<nome>, <nome>"; preenchido exige plano: com arquivo existente; todo commit da branch com "Gate 1
+#       delegado" exige enabled: true e gate1 cobrindo o nome, ou um Gate 1 humano do mesmo artefato na branch.
+#       Sem auto-mode (outro clone, CI): declara "não verificável", não bloqueia. Roda mesmo sem registro.
 # Tudo em lote: uma varredura, um git ls-tree, um awk por conjunto; nenhum processo por decisão ou referência.
-# Sem registro e sem pasta de decisões: pulado.
+# Sem registro e sem pasta de decisões: (1) a (4) são puladas; (5) roda sempre.
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 reg=agentic/projeto/decisoes.md
 dir=agentic/projeto/decisoes
-if [ ! -f "$reg" ] && [ ! -d "$dir" ]; then
-  echo "verifica-decisoes: sem registro de decisões — pulado"
-  exit 0
-fi
+sem_reg=""
+[ ! -f "$reg" ] && [ ! -d "$dir" ] && sem_reg=1
 
 # ids <arquivo>: números das decisões definidas ("### D<n>"), um por linha, sem repetição.
 ids() { sed -n 's/^### D\([0-9][0-9]*\)\([^0-9].*\)\{0,1\}$/\1/p' | sort -u; }
@@ -43,6 +41,19 @@ ausentes() {
     BEGIN { n = split(ENVIRON["CONJUNTO"], d, "\n"); for (i = 1; i <= n; i++) def[d[i] ""] = 1 }
     $1 != "" && !(($1 "") in def) { printf formato "\n", $1, $2 }'
 }
+
+# base de comparação: usada por (2), (3) e pelos commits de (5)
+if [ -n "${1:-}" ]; then
+  base=$(git merge-base HEAD "$1") || agentic_falha "base inválida: $1"
+else
+  base=$(agentic_base)
+fi
+if [ -n "$base" ] && ! git rev-parse --verify -q "$base^{commit}" >/dev/null; then
+  agentic_falha "base inválida: $base"
+fi
+
+if [ -z "$sem_reg" ]; then
+
 
 # (1) referências órfãs — uma varredura para todos os arquivos; o /dev/null faz o grep imprimir o nome do arquivo.
 padrao='(^|[^A-Za-z0-9_])(D[0-9]+([^A-Za-z0-9_]|$)|D:[a-z0-9]+(-[a-z0-9]+)*([^A-Za-z0-9_-]|$))'
@@ -71,15 +82,8 @@ if [ -n "$orfas" ]; then
 fi
 
 # (2) e (3): comparação com a base
-if [ -n "${1:-}" ]; then
-  base=$(git merge-base HEAD "$1") || agentic_falha "base inválida: $1"
-else
-  base=$(agentic_base)
-fi
 if [ -z "$base" ]; then
   echo "degradado: sem base de comparação — perda de decisões não verificada"
-elif ! git rev-parse --verify -q "$base^{commit}" >/dev/null; then
-  agentic_falha "base inválida: $base"
 else
   if git cat-file -e "$base:$reg" 2>/dev/null; then
     perdidas=$(git show "$base:$reg" | ids | ausentes 'D%s' "$definidas")
@@ -133,41 +137,63 @@ if [ -n "$formato" ]; then
   status=1
 fi
 
-# (5) delegação do Gate 1
-vigentes=""
-[ -f "$reg" ] && vigentes=$(sed -n '/^## Vigentes/,/^## /p' "$reg" | ids)
-gate1=""; ligado=""
-if [ -f agentic/auto-mode ]; then
-  gate1=$(sed -n 's/^gate1:[[:space:]]*//p' agentic/auto-mode | head -n 1 | tr -d '\r' | sed 's/[[:space:]]*$//')
-  grep -q '^enabled:[[:space:]]*true' agentic/auto-mode && ligado=1
-fi
-delegada=""
-if [ -n "$gate1" ]; then
-  n=${gate1#D}
-  case "$gate1:$n" in
-    D*:""|D*:*[!0-9]*|[!D]*) echo "agentic: BLOQUEADO — gate1: em agentic/auto-mode precisa ser D<n> ou vazio (encontrado: $gate1)"; status=1 ;;
-    *) if printf '%s\n' "$vigentes" | grep -qx "$n"; then delegada=$n
-       else echo "agentic: BLOQUEADO — agentic/auto-mode delega o Gate 1 pela D$n, que não está vigente em $reg"; status=1; fi ;;
-  esac
 fi
 
-# (5) commits de registro do Gate 1 delegado
+# (5) delegação do Gate 1 — agentic/auto-mode local: enabled, gate1 (vazio | todas | <nome>, <nome>) e plano.
+# Roda também sem registro de decisões.
+auto=agentic/auto-mode
+chave() { sed -n "s/^$1:[[:space:]]*//p" "$auto" | head -n 1 | tr -d '\r' | sed 's/[[:space:]]*$//'; }
+gate1=""; ligado=""; plano=""; formato_ok=1
+if [ -f "$auto" ]; then
+  gate1=$(chave gate1)
+  plano=$(chave plano)
+  grep -q '^enabled:[[:space:]]*true' "$auto" && ligado=1
+  if printf '%s\n' "$gate1" | grep -q '^D[0-9][0-9]*$'; then
+    echo "agentic: BLOQUEADO — gate1: $gate1 em agentic/auto-mode é do formato antigo (a delegação não é mais uma decisão): use todas ou a lista de specs e mudanças"
+    status=1; formato_ok=""
+  elif [ -n "$gate1" ] && [ "$gate1" != todas ]; then
+    # lista: itens separados por vírgula, espaço aparado; item com espaço interno ou vazio é formato inválido
+    if printf '%s\n' "$gate1" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -q '^$\|[[:space:]]'; then
+      echo "agentic: BLOQUEADO — gate1: em agentic/auto-mode precisa ser vazio, todas ou <nome>, <nome> (encontrado: $gate1)"
+      status=1; formato_ok=""
+    fi
+  fi
+  if [ -n "$gate1" ] && [ -n "$formato_ok" ] && { [ -z "$plano" ] || [ ! -f "$plano" ]; }; then
+    echo "agentic: BLOQUEADO — gate1: preenchido em agentic/auto-mode exige plano: com um arquivo existente (encontrado: ${plano:-vazio})"
+    status=1
+  fi
+  # lista normalizada, um nome por linha
+  nomes=$(printf '%s\n' "$gate1" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+fi
+
+# commits de registro do Gate 1 delegado
 if [ -n "$base" ]; then
   assuntos=$(git log --format='%s' "$base..HEAD")
-  invalidos=$(git log --format='%h %s' "$base..HEAD" | grep -F 'Gate 1 delegado' | while IFS= read -r c; do
-    n=$(printf '%s\n' "$c" | sed -n 's/.*Gate 1 delegado, D\([0-9][0-9]*\)).*/\1/p')
-    { [ -n "$n" ] && [ -n "$ligado" ] && [ "$n" = "$delegada" ]; } && continue
-    # Gate 1 humano do mesmo artefato registrado na mesma branch, em qualquer posição ("<tipo>: <nome> aprovada (Gate 1)") substitui o delegado.
-    assunto=${c#* }
-    printf '%s\n' "$assuntos" | grep -qxF "${assunto%% (Gate 1 delegado*} (Gate 1)" && continue
-    printf '  %s\n' "$c"
-  done)
-  if [ -n "$invalidos" ]; then
-    echo "agentic: BLOQUEADO — commit registra Gate 1 delegado sem delegação vigente (agentic/auto-mode com enabled: true e gate1: D<n>, D<n> vigente):"
-    printf '%s\n' "$invalidos"
-    status=1
+  delegados=$(git log --format='%h %s' "$base..HEAD" | grep -F 'Gate 1 delegado')
+  if [ -n "$delegados" ] && [ ! -f "$auto" ]; then
+    echo "verifica-decisoes: delegação não verificável neste clone (sem agentic/auto-mode):"
+    printf '%s\n' "$delegados" | sed 's/^/  /'
+  elif [ -n "$delegados" ]; then
+    invalidos=$(printf '%s\n' "$delegados" | while IFS= read -r c; do
+      assunto=${c#* }
+      # nome do artefato: "docs(spec|mudanca): <nome> aprovada (Gate 1 delegado[, D<n>])"
+      nome=$(printf '%s\n' "$assunto" | sed -n 's/^docs(spec): \(.*\) aprovada (Gate 1 delegado\(, D[0-9]*\)\{0,1\})$/\1/p')
+      [ -z "$nome" ] && nome=$(printf '%s\n' "$assunto" | sed -n 's/^docs(mudanca): \(.*\) aprovada (Gate 1 delegado\(, D[0-9]*\)\{0,1\})$/\1/p')
+      if [ -n "$nome" ] && [ -n "$ligado" ] && [ -n "$formato_ok" ] && { [ "$gate1" = todas ] || printf '%s\n' "$nomes" | grep -qxF "$nome"; }; then continue; fi
+      # Gate 1 humano do mesmo artefato registrado na mesma branch, em qualquer posição ("<tipo>: <nome> aprovada (Gate 1)") substitui o delegado.
+      humano=$(printf '%s\n' "$assunto" | sed 's/ (Gate 1 delegado\(, D[0-9]*\)\{0,1\})$/ (Gate 1)/')
+      printf '%s\n' "$assuntos" | grep -qxF "$humano" && continue
+      printf '  %s\n' "$c"
+    done)
+    if [ -n "$invalidos" ]; then
+      echo "agentic: BLOQUEADO — commit registra Gate 1 delegado sem delegação vigente (agentic/auto-mode com enabled: true e gate1: cobrindo o artefato):"
+      printf '%s\n' "$invalidos"
+      status=1
+    fi
   fi
 fi
 
-[ "$status" -eq 0 ] && echo "verifica-decisoes: OK"
+if [ "$status" -eq 0 ]; then
+  if [ -n "$sem_reg" ]; then echo "verifica-decisoes: sem registro de decisões — pulado"; else echo "verifica-decisoes: OK"; fi
+fi
 exit $status

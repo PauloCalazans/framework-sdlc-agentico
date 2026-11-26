@@ -1,6 +1,10 @@
 # Modo automático: com enabled: true o orquestrador encadeia tasks e publica PRs sem confirmação.
-# Nunca faz merge. Alterar este arquivo é decisão humana.
+# Nunca faz merge. Arquivo local, fora do git; alterar é decisão humana.
 enabled: false
-# Gate 1 delegado ao orquestrador: D<n> da decisão vigente que o delega (agentic/projeto/decisoes.md).
-# Vale só com enabled: true. Vazio = Gate 1 humano. Regras: agentic/processo/ciclo.md, "Gate 1 delegado".
+# Gate 1 delegado ao orquestrador (vale só com enabled: true; vazio = Gate 1 humano):
+#   todas | <spec ou mudança>, <spec ou mudança>
 gate1:
+# Plano que orienta as respostas do orquestrador (versionado em agentic/projeto/planos/):
+plano:
+# Itens N3 que o orquestrador aprova: nenhum | <item>, <item>
+n3: nenhum
