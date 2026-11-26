@@ -120,6 +120,13 @@ formato=$(find "$dir" -maxdepth 1 -type f -name '*.md' -exec awk '
   !visto && $0 != "" { visto = 1; if ($0 ~ /^# /) titulo = 1 }
   $0 ~ /^\*\*Status:\*\* (vigente|revogada em [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]: .+)$/ { st = 1 }
   END { fecha() }' {} + 2>/dev/null | sort)
+# arquivo vazio não tem registro para o awk acima: uma segunda busca em lote cobre os de 0 byte
+vazios=$(find "$dir" -maxdepth 1 -type f -name '*.md' -size 0 2>/dev/null | awk '
+  { arq = $0; nome = arq; sub(/^.*\//, "", nome); sub(/\.md$/, "", nome)
+    if (nome !~ /^[a-z0-9]+(-[a-z0-9]+)*$/) print "  " arq ": nome não é slug"
+    print "  " arq ": sem título \"# \""
+    print "  " arq ": sem **Status:** vigente | revogada em <AAAA-MM-DD>: <motivo>" }')
+[ -n "$vazios" ] && formato=$(printf '%s\n%s\n' "$formato" "$vazios" | sed '/^$/d' | sort)
 if [ -n "$formato" ]; then
   echo "agentic: BLOQUEADO — decisão fora do formato em $dir/:"
   printf '%s\n' "$formato"

@@ -222,4 +222,14 @@ r=$(tl_repo)
 tl_espera 0 "sem registro nem pasta: pulado" roda "$r"
 tl_contem "pulado" "declara que pulou"
 
+
+novo ok; : > "$r/agentic/projeto/decisoes/vazia.md"; spec 'Veja D:vazia.'
+tl_espera 1 "arquivo de decisão vazio bloqueia" roda "$r"
+tl_contem 'vazia.md: sem título' "vazio: sem título"
+tl_contem 'vazia.md: sem **Status:**' "vazio: sem status"
+
+novo ok; : > "$r/agentic/projeto/decisoes/Ruim.md"
+tl_espera 1 "arquivo de decisão vazio com nome fora do slug bloqueia" roda "$r"
+tl_contem 'Ruim.md: nome não é slug' "vazio: nome fora do slug"
+
 tl_fim
