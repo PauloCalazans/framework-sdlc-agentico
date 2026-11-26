@@ -10,18 +10,21 @@
 #   (3) "### D<n>" presente em HEAD e ausente na base bloqueia: o registro está congelado;
 #   (4) todo .md do primeiro nível de decisoes/ tem slug válido, título "# " e "**Status:**" vigente ou
 #       "revogada em <AAAA-MM-DD>: <motivo>" (.gitkeep e subpastas são ignorados);
-#   (5) delegação do Gate 1 pelo agentic/auto-mode local (enabled, gate1, plano): gate1 vazio, "todas" ou
-#       "<nome>, <nome>"; preenchido exige plano: com arquivo existente; todo commit da branch com "Gate 1
-#       delegado" exige enabled: true e gate1 cobrindo o nome, ou um Gate 1 humano do mesmo artefato na branch.
-#       Sem auto-mode (outro clone, CI): declara "não verificável", não bloqueia. Roda mesmo sem registro.
-# Tudo em lote: uma varredura, um git ls-tree, um awk por conjunto; nenhum processo por decisão ou referência.
-# Sem registro e sem pasta de decisões: (1) a (4) são puladas; (5) roda sempre.
+#   (5) delegação do Gate 1 pelo agentic/auto-mode local (enabled, gate1, plano), lido da árvore principal do
+#       repositório também quando o script roda num worktree (o do worktree é ignorado): gate1 vazio, "todas"
+#       ou "<nome>, <nome>"; preenchido exige plano: com arquivo existente em HEAD. Todo commit da branch
+#       "<tipo>: <nome> aprovada (Gate 1 delegado)" exige no corpo gate1: cobrindo o nome e plano: existente
+#       em HEAD (em todo clone); com o auto-mode presente, exige também enabled: true e gate1 cobrindo o nome.
+#       Formato antigo "(Gate 1 delegado, D<n>)": só a regra do auto-mode, sem corpo. Um Gate 1 humano do
+#       mesmo artefato na branch libera o delegado. Sem auto-mode (outro clone, CI): o que depende dele é
+#       declarado "não verificável". Roda mesmo sem registro; sem base, declara a checagem degradada.
+# Tudo em lote: uma varredura, um git ls-tree, um awk por conjunto; nenhum processo por decisão ou referência
+# (os commits de Gate 1 delegado são conferidos um a um).
+# Sem registro e sem pasta de decisões, em HEAD e na base: (1) a (4) são puladas; (5) roda sempre.
 . "$(dirname "$0")/lib-agentic.sh"
 cd "$agentic_raiz" || exit 1
 reg=agentic/projeto/decisoes.md
 dir=agentic/projeto/decisoes
-sem_reg=""
-[ ! -f "$reg" ] && [ ! -d "$dir" ] && sem_reg=1
 
 # ids <arquivo>: números das decisões definidas ("### D<n>"), um por linha, sem repetição.
 ids() { sed -n 's/^### D\([0-9][0-9]*\)\([^0-9].*\)\{0,1\}$/\1/p' | sort -u; }
@@ -50,6 +53,15 @@ else
 fi
 if [ -n "$base" ] && ! git rev-parse --verify -q "$base^{commit}" >/dev/null; then
   agentic_falha "base inválida: $base"
+fi
+
+# pula (1) a (4) só quando nem HEAD nem a base têm o registro ou a pasta: apagá-los inteiros não pula nada
+sem_reg=""
+if [ ! -f "$reg" ] && [ ! -d "$dir" ]; then
+  sem_reg=1
+  if [ -n "$base" ] && { git cat-file -e "$base:$reg" 2>/dev/null || [ -n "$(git ls-tree --name-only "$base" -- "$dir/")" ]; }; then
+    sem_reg=""
+  fi
 fi
 
 if [ -z "$sem_reg" ]; then
@@ -140,56 +152,87 @@ fi
 fi
 
 # (5) delegação do Gate 1 — agentic/auto-mode local: enabled, gate1 (vazio | todas | <nome>, <nome>) e plano.
-# Roda também sem registro de decisões.
-auto=agentic/auto-mode
+# Roda também sem registro de decisões. O arquivo é local e fora do git: é lido da árvore principal do
+# repositório (pai do diretório git comum), também quando o verify roda num worktree, onde ele não existe;
+# um agentic/auto-mode criado dentro de um worktree é ignorado.
+principal=$(cd "$(git rev-parse --git-common-dir)/.." 2>/dev/null && pwd) || principal=$agentic_raiz
+auto=$principal/agentic/auto-mode
 chave() { sed -n "s/^$1:[[:space:]]*//p" "$auto" | head -n 1 | tr -d '\r' | sed 's/[[:space:]]*$//'; }
+# itens <gate1>: a lista normalizada, um nome por linha
+itens() { printf '%s\n' "$1" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//'; }
+# cobre <gate1> <nome>: o gate1 ("todas" ou a lista) cobre o nome
+cobre() { [ -n "$2" ] && { [ "$1" = todas ] || itens "$1" | grep -qxF -- "$2"; }; }
 gate1=""; ligado=""; plano=""; formato_ok=1
 if [ -f "$auto" ]; then
   gate1=$(chave gate1)
   plano=$(chave plano)
-  grep -q '^enabled:[[:space:]]*true' "$auto" && ligado=1
+  [ "$(chave enabled)" = true ] && ligado=1
   if printf '%s\n' "$gate1" | grep -q '^D[0-9][0-9]*$'; then
     echo "agentic: BLOQUEADO — gate1: $gate1 em agentic/auto-mode é do formato antigo (a delegação não é mais uma decisão): use todas ou a lista de specs e mudanças"
     status=1; formato_ok=""
   elif [ -n "$gate1" ] && [ "$gate1" != todas ]; then
     # lista: itens separados por vírgula, espaço aparado; item com espaço interno ou vazio é formato inválido
-    if printf '%s\n' "$gate1" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -q '^$\|[[:space:]]'; then
+    if itens "$gate1" | grep -q -e '^$' -e '[[:space:]]'; then
       echo "agentic: BLOQUEADO — gate1: em agentic/auto-mode precisa ser vazio, todas ou <nome>, <nome> (encontrado: $gate1)"
       status=1; formato_ok=""
     fi
   fi
-  if [ -n "$gate1" ] && [ -n "$formato_ok" ] && { [ -z "$plano" ] || [ ! -f "$plano" ]; }; then
-    echo "agentic: BLOQUEADO — gate1: preenchido em agentic/auto-mode exige plano: com um arquivo existente (encontrado: ${plano:-vazio})"
+  # o plano é versionado: conferido em HEAD, não na árvore de trabalho
+  if [ -n "$gate1" ] && [ -n "$formato_ok" ] && { [ -z "$plano" ] || ! git cat-file -e "HEAD:$plano" 2>/dev/null; }; then
+    echo "agentic: BLOQUEADO — gate1: preenchido em agentic/auto-mode exige plano: com um arquivo existente em HEAD (encontrado: ${plano:-vazio})"
     status=1
   fi
-  # lista normalizada, um nome por linha
-  nomes=$(printf '%s\n' "$gate1" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
 fi
 
 # commits de registro do Gate 1 delegado
-if [ -n "$base" ]; then
+if [ -z "$base" ]; then
+  echo "degradado: sem base de comparação — commits de Gate 1 delegado não verificados"
+else
   assuntos=$(git log --format='%s' "$base..HEAD")
-  delegados=$(git log --format='%h %s' "$base..HEAD" | grep -F 'Gate 1 delegado')
-  if [ -n "$delegados" ] && [ ! -f "$auto" ]; then
-    echo "verifica-decisoes: delegação não verificável neste clone (sem agentic/auto-mode):"
-    printf '%s\n' "$delegados" | sed 's/^/  /'
-  elif [ -n "$delegados" ]; then
-    invalidos=$(printf '%s\n' "$delegados" | while IFS= read -r c; do
+  # um registro por commit com "Gate 1 delegado" no assunto: gate1:<US>plano:<US><hash> <assunto>, com o
+  # gate1: e o plano: da primeira linha de cada um no corpo (US, não espaço, separa: campo vazio fica vazio)
+  us=$(printf '\037')
+  delegados=$(git log --format='%x1e%h %s%n%b' "$base..HEAD" | tr -d '\r' | awk -v us="$us" '
+    BEGIN { RS = "\036" }
+    {
+      n = split($0, l, "\n"); c = l[1]; g = ""; p = ""; tg = 0; tp = 0
+      if (index(c, "Gate 1 delegado") == 0) next
+      for (i = 2; i <= n; i++) {
+        if (!tg && l[i] ~ /^gate1:/) { tg = 1; g = l[i]; sub(/^gate1:[ \t]*/, "", g); sub(/[ \t]*$/, "", g) }
+        if (!tp && l[i] ~ /^plano:/) { tp = 1; p = l[i]; sub(/^plano:[ \t]*/, "", p); sub(/[ \t]*$/, "", p) }
+      }
+      print g us p us c
+    }')
+  if [ -n "$delegados" ]; then
+    # cada linha sai com a categoria: S (corpo sem gate1:/plano:), C (corpo que não cobre), N (não verificável
+    # sem o auto-mode), F (o auto-mode não cobre)
+    achados=$(printf '%s\n' "$delegados" | while IFS=$us read -r g1 pl c; do
       assunto=${c#* }
-      # nome do artefato: "docs(spec|mudanca): <nome> aprovada (Gate 1 delegado[, D<n>])"
-      nome=$(printf '%s\n' "$assunto" | sed -n 's/^docs(spec): \(.*\) aprovada (Gate 1 delegado\(, D[0-9]*\)\{0,1\})$/\1/p')
-      [ -z "$nome" ] && nome=$(printf '%s\n' "$assunto" | sed -n 's/^docs(mudanca): \(.*\) aprovada (Gate 1 delegado\(, D[0-9]*\)\{0,1\})$/\1/p')
-      if [ -n "$nome" ] && [ -n "$ligado" ] && [ -n "$formato_ok" ] && { [ "$gate1" = todas ] || printf '%s\n' "$nomes" | grep -qxF "$nome"; }; then continue; fi
       # Gate 1 humano do mesmo artefato registrado na mesma branch, em qualquer posição ("<tipo>: <nome> aprovada (Gate 1)") substitui o delegado.
       humano="${assunto%% (Gate 1 delegado*} (Gate 1)"
-      printf '%s\n' "$assuntos" | grep -qxF "$humano" && continue
-      printf '  %s\n' "$c"
+      printf '%s\n' "$assuntos" | grep -qxF -- "$humano" && continue
+      # nome do artefato: "docs(spec|mudanca): <nome> aprovada (Gate 1 delegado)"; o formato antigo traz ", D<n>"
+      nome=$(printf '%s\n' "$assunto" | sed -n -e 's/^docs(spec): \(.*\) aprovada (Gate 1 delegado)$/\1/p' -e 's/^docs(mudanca): \(.*\) aprovada (Gate 1 delegado)$/\1/p')
+      if [ -n "$nome" ]; then
+        if [ -z "$g1" ] || [ -z "$pl" ]; then echo "S $c"; continue; fi
+        if ! cobre "$g1" "$nome" || ! git cat-file -e "HEAD:$pl" 2>/dev/null; then echo "C $c"; continue; fi
+      else
+        nome=$(printf '%s\n' "$assunto" | sed -n -e 's/^docs(spec): \(.*\) aprovada (Gate 1 delegado, D[0-9][0-9]*)$/\1/p' -e 's/^docs(mudanca): \(.*\) aprovada (Gate 1 delegado, D[0-9][0-9]*)$/\1/p')
+      fi
+      if [ ! -f "$auto" ]; then echo "N $c"; continue; fi
+      if [ -n "$ligado" ] && [ -n "$formato_ok" ] && cobre "$gate1" "$nome"; then continue; fi
+      echo "F $c"
     done)
-    if [ -n "$invalidos" ]; then
-      echo "agentic: BLOQUEADO — commit registra Gate 1 delegado sem delegação vigente (agentic/auto-mode com enabled: true e gate1: cobrindo o artefato):"
-      printf '%s\n' "$invalidos"
-      status=1
-    fi
+    # grupo <categoria> <mensagem>: imprime a mensagem e os commits da categoria; devolve 0 se havia algum
+    grupo() {
+      linhas=$(printf '%s\n' "$achados" | sed -n "s/^$1 /  /p")
+      [ -n "$linhas" ] || return 1
+      echo "$2"; printf '%s\n' "$linhas"
+    }
+    grupo S "agentic: BLOQUEADO — commit registra Gate 1 delegado sem gate1:/plano: no corpo (copie-os do agentic/auto-mode):" && status=1
+    grupo C "agentic: BLOQUEADO — commit registra Gate 1 delegado com gate1:/plano: do corpo que não cobrem o artefato ou plano sem arquivo em HEAD:" && status=1
+    grupo F "agentic: BLOQUEADO — commit registra Gate 1 delegado sem delegação vigente (agentic/auto-mode com enabled: true e gate1: cobrindo o artefato):" && status=1
+    grupo N "verifica-decisoes: delegação não verificável neste clone (sem agentic/auto-mode na árvore principal):"
   fi
 fi
 

@@ -87,18 +87,27 @@ r=$(tl_repo); reg "$r" 1; confirma "$r" "registro"; git -C "$r" branch -m main t
 tl_espera 0 "sem principal: degradado, não falha" roda "$r"
 tl_contem "degradado" "declara a verificação degradada"
 
-# Gate 1 delegado: agentic/auto-mode local (enabled, gate1, plano); sem D<n>
+# Gate 1 delegado: agentic/auto-mode local (enabled, gate1, plano), lido da árvore principal; sem D<n>.
+# O commit de registro novo traz no corpo gate1: e plano: (conferidos em todo clone).
 modo() { mkdir -p "$1/agentic"; printf '%s\n' "$2" > "$1/agentic/auto-mode"; }
 plano() { mkdir -p "$1/agentic/projeto/planos"; printf '# plano\n' > "$1/agentic/projeto/planos/p.md"; }
-gate() { mkdir -p "$1/agentic/projeto/specs/x"; printf '%s\n' "$2" >> "$1/agentic/projeto/specs/x/spec.md"; confirma "$1" "$2"; }
+# gate <repo> <assunto> [corpo]: commit na branch com o assunto (e o corpo, se dado)
+gate() {
+  mkdir -p "$1/agentic/projeto/specs/x"; printf '%s\n' "$2" >> "$1/agentic/projeto/specs/x/spec.md"
+  git -C "$1" add -A
+  if [ -n "${3:-}" ]; then git -C "$1" commit -q -m "$2" -m "$3"; else git -C "$1" commit -q -m "$2"; fi
+}
 P='plano: agentic/projeto/planos/p.md'
-# deleg <gate1> <enabled> <assunto...>: repo com plano, auto-mode e os commits dados na branch
-deleg() { # deleg <enabled> <gate1-literal> [assunto...]
-  r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k
-  modo "$r" "enabled: $1
-gate1: $2
+C="gate1: todas
 $P"
-  shift 2; for a in "$@"; do gate "$r" "$a"; done
+# deleg <enabled> <gate1-literal> [assunto...]: repo com plano versionado, commits com corpo completo e o
+# auto-mode (escrito depois dos commits: fica fora deles, como o arquivo local real)
+deleg() {
+  r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k
+  tl_e=$1; tl_g=$2; shift 2; for a in "$@"; do gate "$r" "$a" "$C"; done
+  modo "$r" "enabled: $tl_e
+gate1: $tl_g
+$P"
 }
 D='docs(spec): x aprovada (Gate 1 delegado)'
 
@@ -115,16 +124,33 @@ tl_espera 0 "lista com espaço extra e CRLF é lida por nome" roda "$r"
 deleg false x "$D"
 tl_espera 1 "modo desligado bloqueia" roda "$r"
 tl_contem "sem delegação vigente" "explica o modo desligado"
+deleg trueX x "$D"
+tl_espera 1 "enabled: trueX não liga o modo" roda "$r"
+tl_contem "sem delegação vigente" "explica o modo desligado (trueX)"
+deleg "false
+enabled: true" x "$D"
+tl_espera 1 "vale a primeira linha enabled: (false antes de true não liga)" roda "$r"
+tl_contem "sem delegação vigente" "explica o modo desligado (primeira linha)"
 
-r=$(tl_repo); confirma "$r" "base"; git -C "$r" checkout -q -b feat/k; modo "$r" 'enabled: true
+r=$(tl_repo); confirma "$r" "base"; git -C "$r" checkout -q -b feat/k
+gate "$r" "docs(mudanca): x aprovada (Gate 1 delegado)" "$C"
+modo "$r" 'enabled: true
 gate1:'
-gate "$r" "docs(mudanca): x aprovada (Gate 1 delegado)"
 tl_espera 1 "gate1 vazio bloqueia o commit delegado" roda "$r"
 
-deleg true x 'docs(spec): x aprovada (Gate 1 delegado, D2)'
+# formato antigo (branch aberta antes da atualização): aceito pelo nome, sem exigir o corpo novo
+r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k
+gate "$r" 'docs(spec): x aprovada (Gate 1 delegado, D2)'; modo "$r" "enabled: true
+gate1: x
+$P"
 tl_espera 0 "formato antigo é aceito pelo nome" roda "$r"
-deleg true y 'docs(spec): x aprovada (Gate 1 delegado, D2)'
+modo "$r" "enabled: true
+gate1: y
+$P"
 tl_espera 1 "formato antigo com nome fora da lista bloqueia" roda "$r"
+rm "$r/agentic/auto-mode"
+tl_espera 0 "formato antigo sem corpo e sem auto-mode: não verificável, não bloqueia" roda "$r"
+tl_contem "delegação não verificável neste clone" "declara não verificável (formato antigo)"
 
 r=$(tl_repo); confirma "$r" "base"; git -C "$r" checkout -q -b feat/k; modo "$r" "enabled: true
 gate1: D2
@@ -141,25 +167,96 @@ gate1: x
 plano: agentic/projeto/planos/nao.md'
 tl_espera 1 "plano: inexistente bloqueia" roda "$r"
 tl_contem "plano:" "cita plano:"
-
-r=$(tl_repo); confirma "$r" "base"; git -C "$r" checkout -q -b feat/k; modo "$r" "enabled: true
-gate1: a b
+modo "$r" "enabled: true
+gate1: x
 $P"; plano "$r"
+tl_espera 1 "plano: só na árvore, fora de HEAD, bloqueia (o plano é versionado)" roda "$r"
+tl_contem "em HEAD" "explica que o plano é conferido em HEAD"
+
+r=$(tl_repo); confirma "$r" "base"; git -C "$r" checkout -q -b feat/k; plano "$r"; confirma "$r" "plano"; modo "$r" "enabled: true
+gate1: a b
+$P"
 tl_espera 1 "item com espaço interno bloqueia" roda "$r"
 tl_contem "vazio, todas ou" "explica o formato de gate1"
+modo "$r" "enabled: true
+gate1: a,,b
+$P"
+tl_espera 1 "item vazio na lista bloqueia" roda "$r"
+tl_contem "vazio, todas ou" "explica o formato de gate1 (item vazio)"
 
 deleg false "" 'docs(spec): x aprovada (Gate 1 delegado pelo orquestrador)'
 tl_espera 1 "assunto fora do formato canônico não passa por si mesmo" roda "$r"
 deleg false "" 'docs(spec): x aprovada (Gate 1 delegado, D2x)'
 tl_espera 1 "sufixo D<n> malformado não passa por si mesmo" roda "$r"
 
-deleg false "" "$D"
-gate "$r" "docs(spec): x aprovada (Gate 1)"
-tl_espera 0 "Gate 1 humano da branch libera o delegado" roda "$r"
-
 r=$(tl_repo); confirma "$r" "base"; git -C "$r" checkout -q -b feat/k; gate "$r" "$D"
-tl_espera 0 "sem auto-mode: não verificável, não bloqueia" roda "$r"
+gate "$r" "docs(spec): x aprovada (Gate 1)"; modo "$r" 'enabled: false'
+tl_espera 0 "Gate 1 humano da branch libera o delegado (também sem corpo)" roda "$r"
+
+# corpo do commit de registro: conferido em todo clone, também sem o auto-mode
+r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k; gate "$r" "$D" "$C"
+tl_espera 0 "corpo completo sem auto-mode: não verificável quanto ao arquivo, não bloqueia" roda "$r"
 tl_contem "delegação não verificável neste clone" "declara não verificável"
+
+r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k; gate "$r" "$D"
+tl_espera 1 "commit delegado sem corpo bloqueia, também sem auto-mode" roda "$r"
+tl_contem "sem gate1:/plano: no corpo (copie-os do agentic/auto-mode):" "explica a falta do corpo"
+tl_contem "  $(git -C "$r" log -1 --format='%h %s')" "lista o commit sem corpo"
+
+r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k; gate "$r" "$D" "$P"
+tl_espera 1 "corpo sem gate1: bloqueia" roda "$r"
+tl_contem "sem gate1:/plano: no corpo" "explica a falta do gate1:"
+
+r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k; gate "$r" "$D" "gate1: todas"
+tl_espera 1 "corpo sem plano: bloqueia" roda "$r"
+tl_contem "sem gate1:/plano: no corpo" "explica a falta do plano:"
+
+r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k; gate "$r" "$D" "gate1: y, z
+$P"
+tl_espera 1 "corpo com gate1: que não cobre o artefato bloqueia" roda "$r"
+tl_contem "gate1:/plano: do corpo" "explica o corpo que não cobre"
+
+r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k; gate "$r" "$D" "gate1: x, y
+$P"
+tl_espera 0 "corpo com gate1: listando o nome passa" roda "$r"
+
+r=$(tl_repo); plano "$r"; confirma "$r" "plano"; git -C "$r" checkout -q -b feat/k; gate "$r" "$D" "gate1: x
+plano: agentic/projeto/planos/nao.md"
+tl_espera 1 "plano: do corpo inexistente em HEAD bloqueia" roda "$r"
+tl_contem "gate1:/plano: do corpo" "explica o plano do corpo"
+
+# o auto-mode é lido da árvore principal, também quando o verify roda num worktree
+wt() { # wt <gate1 da árvore principal | -> : repo com plano, worktree em feat/k com o commit delegado
+  r=$(tl_repo); plano "$r"; confirma "$r" "plano"
+  w="$r-wt"; git -C "$r" worktree add -q -b feat/k "$w" 2>/dev/null
+  gate "$w" "$D" "gate1: x
+$P"
+  [ "$1" = - ] || modo "$r" "enabled: true
+gate1: $1
+$P"
+}
+wt x
+tl_espera 0 "worktree: auto-mode da árvore principal cobre → passa" roda "$w"
+copia=$(mktemp); cp "$TL_SAIDA" "$copia"
+tl_espera 1 "worktree: delegação conferida, não declarada não verificável" grep -q "não verificável" "$copia"
+rm -f "$copia"
+wt outra
+tl_espera 1 "worktree: auto-mode da árvore principal não cobre → bloqueia" roda "$w"
+tl_contem "sem delegação vigente" "worktree: explica o bloqueio"
+wt -; modo "$w" "enabled: true
+gate1: x
+$P"
+tl_espera 0 "worktree: auto-mode só no worktree é ignorado (não verificável)" roda "$w"
+tl_contem "delegação não verificável neste clone" "worktree: declara não verificável"
+wt outra; modo "$w" "enabled: true
+gate1: x
+$P"
+tl_espera 1 "worktree: auto-mode do worktree não autoriza o que a árvore principal não cobre" roda "$w"
+
+# sem base: a checagem 5 declara a degradação
+r=$(tl_repo); gate "$r" "$D" "$C"; git -C "$r" branch -m main trunk
+tl_espera 0 "sem base: Gate 1 delegado degradado, não falha" roda "$r"
+tl_contem "degradado: sem base de comparação" "declara a checagem 5 degradada"
 
 
 # Decisões por arquivo: agentic/projeto/decisoes/<slug>.md, citadas como D:<slug>
@@ -196,6 +293,16 @@ tl_contem "revogue-a): a" "nomeia o slug perdido"
 novo a; git -C "$r" mv agentic/projeto/decisoes/a.md agentic/projeto/decisoes/a2.md; confirma "$r" "renomeia a"
 tl_espera 1 "arquivo de decisão da base renomeado bloqueia" roda "$r"
 tl_contem "revogue-a): a" "nomeia o slug antigo"
+
+# apagar a pasta inteira (ou o registro inteiro) não pula as checagens: a base ainda os tem
+novo a; git -C "$r" rm -q -r agentic/projeto/decisoes; confirma "$r" "apaga a pasta"
+tl_espera 1 "pasta de decisões da base apagada inteira bloqueia" roda "$r"
+tl_contem "revogue-a): a" "nomeia o slug da pasta apagada"
+
+r=$(tl_repo); reg "$r" 1 2; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k
+git -C "$r" rm -q agentic/projeto/decisoes.md; confirma "$r" "apaga o registro"
+tl_espera 1 "registro da base apagado inteiro bloqueia" roda "$r"
+tl_contem "revogue-a): D1 D2" "nomeia as decisões do registro apagado"
 
 # (3) registro congelado
 r=$(tl_repo); reg "$r" 1; confirma "$r" "registro"; git -C "$r" checkout -q -b feat/k; reg "$r" 1 2
