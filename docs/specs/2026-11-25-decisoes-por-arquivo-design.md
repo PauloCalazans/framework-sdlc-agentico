@@ -126,8 +126,9 @@ n3: nenhum
 ### 5.3 Verificação (`verifica-decisoes.sh`, item 5)
 
 - `gate1:` vazio, `todas` ou uma lista de nomes separados por vírgula; outro formato bloqueia. Com `gate1:` preenchido, `plano:` aponta um arquivo existente.
-- Com `agentic/auto-mode` presente, todo commit da branch com "Gate 1 delegado" exige `enabled: true` e `gate1:` cobrindo o `<nome>` do commit (`todas` ou o nome na lista), ou um Gate 1 humano do mesmo artefato registrado na branch, em qualquer posição (como hoje). Isso fecha a cobertura do escopo, que hoje só a revisão confere.
-- Sem `agentic/auto-mode` (o clone de outro dev, a CI): o script declara `delegação não verificável neste clone` e não bloqueia. O agente roda no clone de quem delegou, onde o arquivo existe.
+- **Corpo do commit, em qualquer clone (também na CI):** todo commit da branch com "Gate 1 delegado" no formato novo exige no corpo uma linha `gate1:` cobrindo o `<nome>` do commit (`todas` ou o nome na lista) e uma linha `plano:` com arquivo existente em HEAD. Sem elas, ou com `gate1:` que não cobre, bloqueia: `agentic: BLOQUEADO — commit registra Gate 1 delegado sem gate1:/plano: no corpo (copie-os do agentic/auto-mode)`.
+- **Arquivo local, quando existe:** o `agentic/auto-mode` é lido da árvore principal do repositório (o diretório pai de `git rev-parse --git-common-dir`), também quando o verify roda num worktree; uma cópia dentro do worktree é ignorada. Com ele presente, o commit exige ainda `enabled: true` e `gate1:` cobrindo o `<nome>`, ou um Gate 1 humano do mesmo artefato registrado na branch, em qualquer posição (como hoje).
+- **Sem o arquivo na árvore principal** (o clone de outro dev, a CI): só a parte do arquivo local deixa de ser conferida; o script declara `delegação não verificável neste clone` para os commits cujo corpo está completo. A exigência do corpo continua valendo.
 - **Commit no formato antigo** (`Gate 1 delegado, D<n>`), numa branch aberta antes da atualização: conferido pela mesma regra do nome, e o `D<n>` é ignorado.
 
 ## 6. Migração
