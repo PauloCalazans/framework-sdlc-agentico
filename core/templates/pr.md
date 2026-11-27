@@ -9,7 +9,7 @@
 - GREEN: <sha>
 - `verify.sh`:
 ```
-<últimas linhas da saída, incluindo VERIFY: OK>
+<últimas linhas da saída, incluindo VERIFY: OK e, se houver, a seção "fora do git" logo antes dela>
 ```
 
 ## Tamanho e sensibilidade

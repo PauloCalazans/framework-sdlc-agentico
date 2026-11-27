@@ -258,6 +258,7 @@ tl_espera 1 "sem configuração local, sem a seção" grep -q "### Fora do git" 
 cat > "$r11/.claude/settings.local.json" <<'JSON'
 {
   "autoCompactWindow": 1000000,
+  "disableAllHooks": true,
   "env": { "hooks": "x", "model": "y" },
   "hooks": {
     "PreToolUse": [ { "matcher": "Bash", "hooks": [ { "type": "command", "command": "echo \"{ }\"" } ] } ]
@@ -276,7 +277,7 @@ printf 'local
 ' > "$r11/.claude/agents/extra/a.md"
 tl_espera 0 "status com configuração local sai com 0" sh -c "cd '$r11' && sh '$dir/status-projeto.sh'"
 tl_contem "### Fora do git" "seção de configuração fora do git"
-tl_contem "- .claude/settings.local.json: autoCompactWindow, hooks" "chaves de topo que mudam o processo, nesta ordem"
+tl_contem "- .claude/settings.local.json: autoCompactWindow, hooks, disableAllHooks" "chaves de topo que mudam o processo, nesta ordem, com disableAllHooks"
 tl_contem "- CLAUDE.local.md: não versionado" "CLAUDE.local.md"
 tl_contem "- .claude/CLAUDE.md: não versionado" ".claude/CLAUDE.md não versionado"
 tl_contem ".claude/skills/graph/" "skill local não versionada"
@@ -286,5 +287,9 @@ copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
 tl_espera 1 "chave aninhada ou dentro de string não conta" grep -qE "settings.local.json: .*(permissions|model|env)" "$copia_saida"
 tl_espera 1 "skill versionada não aparece" grep -q ".claude/skills/kit" "$copia_saida"
 tl_espera 1 "configuração local não é bloqueio" grep -q "BLOQUEIO: .*settings" "$copia_saida"
+git -C "$r11" worktree add -q "$r11/agentic/.estado/worktrees/w" -b w
+tl_espera 0 "status rodado no worktree sai com 0" sh -c "cd '$r11/agentic/.estado/worktrees/w' && sh '$dir/status-projeto.sh'"
+tl_contem "- CLAUDE.local.md: não versionado" "no worktree, lista a configuração local da árvore principal"
+tl_contem "disableAllHooks" "no worktree, lê o settings.local.json da árvore principal"
 
 tl_fim
