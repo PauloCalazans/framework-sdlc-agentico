@@ -342,4 +342,34 @@ printf 'TESTE_1_COMANDO="sh -x {}"\n' >> "$r/agentic/config"
 tl_espera 0 "prova do completo: mudar TESTE_1_COMANDO roda tudo de novo" refaz "$r"
 tl_espera 0 "prova do completo: a stack rodou nas três mudanças" contagem "$r" 3
 
+# Configuração fora do git sai também no verify (#37): a saída do verify vai para o PR e chega ao Gate 2.
+r=$(prepara)
+printf '.claude/settings.local.json
+CLAUDE.local.md
+agentic/.estado/
+' > "$r/.gitignore"
+# o .gitignore vai para a base (principal), não para a branch da task, que só pode tocar tests/*
+git -C "$r" checkout -q main; git -C "$r" add .gitignore; git -C "$r" commit -q -m "gitignore"
+git -C "$r" branch -q -f x/001 main; git -C "$r" checkout -q x/001
+tl_espera 0 "sem configuração local, verify OK" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_espera 1 "sem configuração local, sem a seção" grep -q "fora do git" "$TL_SAIDA"
+mkdir -p "$r/.claude"
+printf '{ "disableAllHooks": true, "autoCompactWindow": 1000000 }
+' > "$r/.claude/settings.local.json"
+printf 'regra local
+' > "$r/CLAUDE.local.md"
+tl_espera 0 "com configuração local, o verify não falha por ela" sh -c "cd '$r' && AGENTIC_VERIFY_SEM_CACHE=1 sh '$dir/verify.sh'"
+tl_contem "== fora do git" "o verify mostra a configuração fora do git"
+tl_contem "- .claude/settings.local.json: autoCompactWindow, disableAllHooks" "o verify lista as chaves do settings.local.json"
+tl_contem "- CLAUDE.local.md: não versionado" "o verify lista o CLAUDE.local.md"
+copia_v=$(mktemp); cp "$TL_SAIDA" "$copia_v"
+tl_espera 0 "a seção sai depois da última etapa e antes da linha VERIFY (o PR leva as últimas linhas)" \
+  awk '/^== fora do git/ { f = NR } /^-- / { e = NR } /^VERIFY/ { v = NR } END { exit (f > e && f < v) ? 0 : 1 }' "$copia_v"
+tl_espera 0 "prova reaproveitada" sh -c "cd '$r' && sh '$dir/verify.sh'"
+tl_contem "VERIFY: OK (já provado nesta árvore)" "a configuração ignorada não suja a árvore"
+tl_contem "== fora do git" "a seção sai também quando a prova é reaproveitada"
+git -C "$r" worktree add -q "$r/agentic/.estado/worktrees/w" -b x/002
+tl_espera 0 "verify no worktree" sh -c "cd '$r/agentic/.estado/worktrees/w' && sh '$dir/verify.sh'"
+tl_contem "- CLAUDE.local.md: não versionado" "no worktree, o verify lê a configuração da árvore principal"
+
 tl_fim

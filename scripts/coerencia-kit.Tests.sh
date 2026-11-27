@@ -629,5 +629,14 @@ tl_espera 0 "status-projeto: githooks desligados são BLOQUEIO" tem mecanismos/s
 tl_espera 0 "ciclo: falha do verify classificada só com prova da base" tem core/processo/ciclo.md 'Falha do verify é falha até prova em contrário'
 tl_espera 0 "brief: classifica falha do verify só com prova da base" tem core/templates/brief.md 'só com a saída da mesma etapa na base, colada'
 tl_espera 0 "brief: Antes de enviar confere classificação e BLOQUEIO" tem core/templates/brief.md 'só com a saída da mesma etapa na base colada, e nenhum `BLOQUEIO:`'
+# Configuração fora do git aparece no status e não entra no brief (#37).
+tl_espera 0 "status-projeto: seção Fora do git" tem mecanismos/scripts/status-projeto.sh 'echo "### Fora do git"'
+tl_espera 0 "verify: seção fora do git antes da linha final" tem mecanismos/scripts/verify.sh '== fora do git (configuração local que muda o processo do kit; não é etapa e não falha)'
+tl_espera 0 "ciclo: verify lista a configuração fora do git" tem core/processo/ciclo.md 'o verify lista a configuração fora do git que muda o processo'
+tl_espera 0 "pr: últimas linhas do verify com a seção fora do git" tem core/templates/pr.md 'a seção "fora do git" logo antes dela'
+tl_espera 0 "lib: disableAllHooks entre as chaves listadas" tem mecanismos/scripts/lib-agentic.sh 'hooks disableAllHooks model'
+tl_espera 0 "brief: só regra versionada" tem core/templates/brief.md 'Só regra versionada: instrução de configuração fora do git'
+tl_espera 0 "brief: Antes de enviar confere configuração fora do git" tem core/templates/brief.md 'nenhuma instrução vinda de configuração fora do git'
+tl_espera 0 "ciclo: brief sem instrução de configuração fora do git" tem core/processo/ciclo.md 'nenhuma instrução de configuração fora do git'
 
 tl_fim

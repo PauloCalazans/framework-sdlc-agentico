@@ -141,3 +141,49 @@ agentic_principal_ref() {
   done
   return 1
 }
+
+# agentic_fora_do_git: lista, uma por linha ("- ..."), a configuração fora do git que muda o processo do kit, lida da
+# árvore principal (os arquivos não versionados não vão para os worktrees, e a sessão da ferramenta roda na principal).
+# Vazio se não houver nada. Do .claude/settings.local.json, só as chaves de topo (o awk acompanha a profundidade fora
+# de strings): o local tem precedência sobre o .claude/settings.json versionado, ou soma a ele (hooks, permissions).
+# Limite: skills globais (~/.claude/skills), plugins do escopo do usuário e a memória da ferramenta não são lidos.
+agentic_fora_do_git() {
+  agentic_fg_raiz=$(git worktree list --porcelain 2>/dev/null | sed -n '1s/^worktree //p')
+  [ -n "$agentic_fg_raiz" ] && [ -d "$agentic_fg_raiz" ] || agentic_fg_raiz=$agentic_raiz
+  agentic_fg_local="$agentic_fg_raiz/.claude/settings.local.json"
+  if [ -f "$agentic_fg_local" ]; then
+    agentic_fg_chaves=$(tr -d '\r' < "$agentic_fg_local" | awk '
+      BEGIN { RS = "\001" }
+      {
+        n = length($0); prof = 0; str = 0; tok = ""; ultimo = ""
+        for (i = 1; i <= n; i++) {
+          c = substr($0, i, 1)
+          if (str) {
+            if (c == "\\") { tok = tok c substr($0, i + 1, 1); i++; continue }
+            if (c == "\"") { str = 0; ultimo = tok; continue }
+            tok = tok c; continue
+          }
+          if (c == "\"") { str = 1; tok = ""; continue }
+          if (c == "{" || c == "[") { prof++; ultimo = ""; continue }
+          if (c == "}" || c == "]") { prof--; ultimo = ""; continue }
+          if (c == ":") { if (prof == 1 && ultimo != "") chave[ultimo] = 1; ultimo = ""; continue }
+          if (c !~ /[ \t\n]/) ultimo = ""
+        }
+        k = split("autoCompactWindow permissions enabledPlugins hooks disableAllHooks model", ordem, " ")
+        for (j = 1; j <= k; j++) if (ordem[j] in chave) saida = saida (saida == "" ? "" : ", ") ordem[j]
+        print saida
+      }')
+    [ -n "$agentic_fg_chaves" ] && \
+      printf '%s\n' "- .claude/settings.local.json: $agentic_fg_chaves (precedência sobre o .claude/settings.json do kit, ou soma a ele)"
+  fi
+  for agentic_fg_f in CLAUDE.local.md .claude/CLAUDE.md; do
+    [ -f "$agentic_fg_raiz/$agentic_fg_f" ] || continue
+    git -C "$agentic_fg_raiz" ls-files --error-unmatch -- "$agentic_fg_f" >/dev/null 2>&1 && continue
+    printf '%s\n' "- $agentic_fg_f: não versionado, lido pela ferramenta em toda sessão"
+  done
+  agentic_fg_l=$(git -C "$agentic_fg_raiz" -c core.quotepath=off ls-files --others --directory \
+      -- .claude/skills .claude/agents .claude/commands .claude/hooks 2>/dev/null \
+    | awk '{ n++; if (n <= 8) l = l (n > 1 ? ", " : "") $0 } END { if (n) print l (n > 8 ? " e mais " (n - 8) : "") }')
+  [ -n "$agentic_fg_l" ] && printf '%s\n' "- não versionados em .claude/: $agentic_fg_l"
+  return 0
+}

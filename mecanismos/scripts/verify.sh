@@ -130,6 +130,15 @@ if [ -n "$prova_arq" ]; then
     "$BRANCH_PRINCIPAL" "$(git config core.hooksPath)" "$task" ${p_exec:+"$p_exec"} | git hash-object --stdin)
   [ -n "$p_arvore" ] && [ -n "$p_sig" ] || prova_arq=""
 fi
+# mostra_fora: a configuração fora do git que muda o processo (#37). Não é etapa e não falha. Sai logo antes da linha
+# final, nos dois caminhos (completo e prova reaproveitada), porque o PR leva as últimas linhas da saída do verify:
+# assim ela chega ao humano no Gate 2, e não só à sessão que a configurou.
+mostra_fora() {
+  m_fora=$(agentic_fora_do_git)
+  [ -n "$m_fora" ] || return 0
+  diz ""; diz "== fora do git (configuração local que muda o processo do kit; não é etapa e não falha)"
+  printf '%s\n' "$m_fora" | tee -a "$log"
+}
 if [ -n "$prova_arq" ] && [ -n "$(arvore_suja)" ]; then
   diz ""; diz "prova do completo: árvore com alterações não commitadas — roda tudo e não guarda prova"
   prova_arq=""
@@ -140,6 +149,7 @@ if [ -n "$prova_arq" ] && [ "${AGENTIC_VERIFY_SEM_CACHE:-}" != 1 ] && [ -f "$pro
     diz ""
     diz "prova do completo: esta árvore ($(printf '%.8s' "$p_arvore")), com esta base e esta config, já deu VERIFY: OK em $p_quando."
     diz "Nenhuma etapa rodou de novo. AGENTIC_VERIFY_SEM_CACHE=1 refaz tudo."
+    mostra_fora
     diz "log: $log"
     diz "VERIFY: OK (já provado nesta árvore)"
     exit 0
@@ -187,6 +197,7 @@ for t in "$lock/trechos/"*; do
   diz ""; diz "== $e_nome (falhou; últimas 40 linhas da etapa)"
   cat "$t" | tee -a "$log"; rm -f "$t"
 done
+mostra_fora
 diz ""
 diz "log: $log"
 if [ -z "$falhas" ]; then

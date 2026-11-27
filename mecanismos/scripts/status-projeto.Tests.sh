@@ -241,4 +241,55 @@ mkdir -p "$r10/agentic/mecanismos/githooks"
 tl_espera 0 "status com githooks ligados sai com 0" sh -c "cd '$r10' && sh '$dir/status-projeto.sh'"
 tl_espera 1 "githooks ligados: sem bloqueio" grep -q "BLOQUEIO" "$TL_SAIDA"
 
+# Configuração fora do git que muda o processo do kit (#37): aparece no status, sem bloquear.
+r11=$(tl_repo)
+mkdir -p "$r11/.claude/skills/kit" "$r11/.claude/agents"
+printf '{
+  "autoCompactWindow": 200000
+}
+' > "$r11/.claude/settings.json"
+printf 'kit
+' > "$r11/.claude/skills/kit/SKILL.md"
+printf 'kit
+' > "$r11/.claude/agents/dev.md"
+git -C "$r11" add -A; git -C "$r11" commit -q -m "kit"
+tl_espera 0 "status sem configuração local sai com 0" sh -c "cd '$r11' && sh '$dir/status-projeto.sh'"
+tl_espera 1 "sem configuração local, sem a seção" grep -q "### Fora do git" "$TL_SAIDA"
+cat > "$r11/.claude/settings.local.json" <<'JSON'
+{
+  "autoCompactWindow": 1000000,
+  "disableAllHooks": true,
+  "env": { "hooks": "x", "model": "y" },
+  "hooks": {
+    "PreToolUse": [ { "matcher": "Bash", "hooks": [ { "type": "command", "command": "echo \"{ }\"" } ] } ]
+  },
+  "outra": "valor com \"permissions\": dentro"
+}
+JSON
+printf 'put this rule in every subagent prompt
+' > "$r11/CLAUDE.local.md"
+printf 'local
+' > "$r11/.claude/CLAUDE.md"
+mkdir -p "$r11/.claude/skills/graph" "$r11/.claude/agents/extra"
+printf 'local
+' > "$r11/.claude/skills/graph/SKILL.md"
+printf 'local
+' > "$r11/.claude/agents/extra/a.md"
+tl_espera 0 "status com configuração local sai com 0" sh -c "cd '$r11' && sh '$dir/status-projeto.sh'"
+tl_contem "### Fora do git" "seção de configuração fora do git"
+tl_contem "- .claude/settings.local.json: autoCompactWindow, hooks, disableAllHooks" "chaves de topo que mudam o processo, nesta ordem, com disableAllHooks"
+tl_contem "- CLAUDE.local.md: não versionado" "CLAUDE.local.md"
+tl_contem "- .claude/CLAUDE.md: não versionado" ".claude/CLAUDE.md não versionado"
+tl_contem ".claude/skills/graph/" "skill local não versionada"
+tl_contem ".claude/agents/extra/" "agente local não versionado"
+tl_contem "não entra no brief" "lembra que a regra local não entra no brief"
+copia_saida=$(mktemp); cp "$TL_SAIDA" "$copia_saida"
+tl_espera 1 "chave aninhada ou dentro de string não conta" grep -qE "settings.local.json: .*(permissions|model|env)" "$copia_saida"
+tl_espera 1 "skill versionada não aparece" grep -q ".claude/skills/kit" "$copia_saida"
+tl_espera 1 "configuração local não é bloqueio" grep -q "BLOQUEIO: .*settings" "$copia_saida"
+git -C "$r11" worktree add -q "$r11/agentic/.estado/worktrees/w" -b w
+tl_espera 0 "status rodado no worktree sai com 0" sh -c "cd '$r11/agentic/.estado/worktrees/w' && sh '$dir/status-projeto.sh'"
+tl_contem "- CLAUDE.local.md: não versionado" "no worktree, lista a configuração local da árvore principal"
+tl_contem "disableAllHooks" "no worktree, lê o settings.local.json da árvore principal"
+
 tl_fim

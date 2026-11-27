@@ -81,6 +81,15 @@ if [ -n "$kit_commit" ]; then
   fi
 fi
 
+# Configuração fora do git que muda o processo do kit (#37): lida da árvore principal, onde a sessão roda. Não bloqueia.
+fora=$(agentic_fora_do_git)
+if [ -n "$fora" ]; then
+  echo
+  echo "### Fora do git"
+  printf '%s\n' "$fora"
+  echo "Regra que vem daqui não entra no brief: para valer para os papéis, vai versionada no perfil (agentic/projeto/papeis/) ou no AGENTS.md."
+fi
+
 echo
 echo "### Worktrees"
 git worktree list 2>/dev/null

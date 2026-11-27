@@ -7,7 +7,7 @@ Específico do Claude Code:
 - Comandos: `/intent`, `/nova-task`, `/mudanca`, `/verify`, `/status`, `/bootstrap`.
 - O estado do projeto é injetado no início da sessão por `agentic/mecanismos/scripts/status-projeto.sh`; não o reescreva aqui.
 - Plugins de processo (por exemplo, superpowers) ficam desligados: o processo deste projeto é `agentic/processo/ciclo.md`.
-- A sessão é compactada ao chegar a 200 mil tokens (`autoCompactWindow` em `.claude/settings.json`): o estado da execução vive no `progress.md`, não na conversa.
+- A sessão é compactada ao chegar a 200 mil tokens (`autoCompactWindow` em `.claude/settings.json`), salvo se o `.claude/settings.local.json` mudar a chave (o status a lista em "Fora do git"): o estado da execução vive no `progress.md`, não na conversa.
 
 # Compact instructions
 

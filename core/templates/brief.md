@@ -6,6 +6,9 @@ contrato linkado não chega ao papel: o brief é o texto que ele lê com atenç�
 - Meta: até ~40 linhas, sem contar o `## Impacto` colado nem os trechos que ele acrescenta a "Leia só isto". Brief maior vira um segundo contrato e traz o custo de volta.
 - Toda seção obrigatória aparece; quando não há nada a dizer, escreva `nenhum`.
 - Caminhos absolutos sempre, inclusive em rodada de correção. `Papel:` é o nome exato de um contrato de agentic/processo/papeis/.
+- Só regra versionada: instrução de configuração fora do git (CLAUDE.local.md, .claude/settings.local.json, skill ou memória
+  local da ferramenta; o status lista em "Fora do git") não entra no brief. Para valer para os papéis, o humano a versiona
+  no perfil (agentic/projeto/papeis/) ou no AGENTS.md.
 - Rodada de correção: copie para um arquivo novo o brief anterior do mesmo papel, inteiro; reescreva "O que fazer",
   acrescente "Desde a rodada anterior" e ajuste o resto só onde a rodada mudou. Nunca "mesmo contrato", "mesmo escopo
   do brief anterior" nem "continuação": o papel numa sessão nova não tem o brief anterior.
@@ -84,7 +87,8 @@ e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferênci
 - [ ] nenhuma linha decide algo sem origem citável;
 - [ ] mais de 60 linhas fora de ## Impacto e dos trechos que ele acrescenta: enxugue O que fazer e Já decidido antes de enviar;
 - [ ] "Casos a cobrir" igual no brief do autor e no do revisor;
-- [ ] falha do verify classificada (base, ambiente, intermitente) só com a saída da mesma etapa na base colada, e nenhum `BLOQUEIO:` no status.
+- [ ] falha do verify classificada (base, ambiente, intermitente) só com a saída da mesma etapa na base colada, e nenhum `BLOQUEIO:` no status;
+- [ ] nenhuma instrução vinda de configuração fora do git (status, "Fora do git").
 
 Ao receber (antes de passar a entrega adiante):
 - [ ] antes do revisor de spec, design ou mudanca, sempre (também quando o revisor é opcional na trilha enxuta), na árvore onde o autor escreveu (trilha enxuta: o worktree; trilha padrão: a principal): `cd <árvore> && sh agentic/mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` verde; com falha, o trabalho volta ao autor sem despachar o revisor;
