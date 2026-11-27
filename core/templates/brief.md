@@ -9,7 +9,8 @@ contrato linkado não chega ao papel: o brief é o texto que ele lê com atenç�
 - Rodada de correção: copie para um arquivo novo o brief anterior do mesmo papel, inteiro; reescreva "O que fazer",
   acrescente "Desde a rodada anterior" e ajuste o resto só onde a rodada mudou. Nunca "mesmo contrato", "mesmo escopo
   do brief anterior" nem "continuação": o papel numa sessão nova não tem o brief anterior.
-- Arquivos na pasta de execução agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/, pela ordem de despacho (NN = 01, 02, …):
+- Arquivos na pasta de execução <árvore principal>/agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/, nunca dentro do worktree
+  (o git worktree remove do Gate 2 a apagaria), pela ordem de despacho (NN = 01, 02, …):
   brief `NN-<papel>[-<modo>]-brief.md`; relatório `NN-<papel>[-<modo>]-relatorio.md`; revisor `NN-revisor-<modo>-parecer.md`
   (pelo template agentic/processo/templates/parecer.md).
 - Linha de retorno: `NN-<papel>: <FEITO|FEITO_COM_RESSALVAS|BLOQUEADO> | <campos do "Ao terminar" do contrato> | <arquivo de relatório>`;

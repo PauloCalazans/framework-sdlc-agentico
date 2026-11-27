@@ -210,4 +210,19 @@ ciclo "$r8" "no próximo commit do papel; não há commit só de Ruling." "RED p
 tl_espera 0 "status com atualização do kit sem commit sai com 0" sh -c "cd '$r8' && sh '$dir/status-projeto.sh'"
 tl_contem "- agentic/processo/ciclo.md tem mudança ainda sem commit. Releia antes de orquestrar: \"Regras de fluxo\" (Commits)." "sem commit: aponta o que difere do HEAD"
 
+# Registro de execução dentro de worktree: o git worktree remove do Gate 2 apaga os arquivos ignorados (#38).
+r9=$(tl_repo)
+printf 'agentic/.estado/\n' > "$r9/.gitignore"
+git -C "$r9" add .gitignore; git -C "$r9" commit -q -m "gitignore"
+mkdir -p "$r9/agentic/.estado/execucao/2026-11-26-na-principal"
+git -C "$r9" worktree add -q "$r9/agentic/.estado/worktrees/pedidos-001" -b pedidos/001
+tl_espera 0 "status com registro só na principal sai com 0" sh -c "cd '$r9' && sh '$dir/status-projeto.sh'"
+tl_espera 1 "registro na principal não gera aviso" grep -q "registro de execução dentro do worktree" "$TL_SAIDA"
+mkdir -p "$r9/agentic/.estado/worktrees/pedidos-001/agentic/.estado/execucao/2026-11-26-pedidos"
+tl_espera 0 "status com registro dentro do worktree sai com 0" sh -c "cd '$r9' && sh '$dir/status-projeto.sh'"
+tl_contem "pedidos-001: registro de execução dentro do worktree" "avisa o registro dentro do worktree"
+tl_contem "git worktree remove apaga" "diz que a remoção do worktree o apaga"
+tl_espera 0 "status rodado no worktree sai com 0" sh -c "cd '$r9/agentic/.estado/worktrees/pedidos-001' && sh '$dir/status-projeto.sh'"
+tl_contem "pedidos-001: registro de execução dentro do worktree" "avisa também quando roda no worktree"
+
 tl_fim

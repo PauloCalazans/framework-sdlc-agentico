@@ -611,5 +611,17 @@ tl_espera 0 "mudanca: Fonte delegado N<n>" tem core/templates/mudanca.md '\| del
 tl_espera 0 "promoção de Ruling não cita delegação" nenhum 'citando a delegação' core README.md
 tl_espera 0 "ciclo: promoção com Gate 1 delegado leva o gate1:/plano: no corpo" tem core/processo/ciclo.md 'traz no corpo o `gate1:` e o `plano:` do Gate 1 delegado'
 tl_espera 0 "README: branch antiga com ### D<n> nova converte para arquivo" tem README.md 'troque `D<n>` por `D:<slug>` nos artefatos da branch'
+# Registro de execução na árvore principal (#38): todo texto que manda criá-lo diz a árvore.
+tl_espera 0 "ciclo: registro de execução na árvore principal" tem core/processo/ciclo.md '`agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/` **da árvore principal**'
+tl_espera 0 "ciclo: confere o registro antes do git worktree remove" tem core/processo/ciclo.md 'antes, confere que não há `agentic/.estado/execucao` dentro dele'
+tl_espera 0 "brief: pasta de execução na árvore principal" tem core/templates/brief.md '<árvore principal>/agentic/.estado/execucao/'
+tl_espera 0 "parecer: pasta de execução na árvore principal" tem core/templates/parecer.md '<árvore principal>/agentic/.estado/execucao/'
+for f in intent mudanca nova-task; do
+  tl_espera 0 "comando $f: registro de execução na árvore principal" linha adapters/claude-code/commands/$f.md 'agentic/\.estado/execucao/<AAAA-MM-DD>-<nome>/.*árvore principal'
+done
+tl_espera 0 "nova-task: confere o registro antes do git worktree remove" tem adapters/claude-code/commands/nova-task.md 'confira que não há `agentic/.estado/execucao` dentro do worktree'
+tl_espera 0 "ciclo: logs do verify saem do worktree antes do remove" tem core/processo/ciclo.md 'move os logs do worktree (`agentic/.estado/verify.log`, `verify-rapido.log` e `verifica-red.log`)'
+tl_espera 0 "nova-task: logs do verify saem do worktree antes do remove" tem adapters/claude-code/commands/nova-task.md 'mova `agentic/.estado/verify.log`, `verify-rapido.log` e `verifica-red.log` do worktree'
+tl_espera 0 "status-projeto: avisa registro dentro do worktree" tem mecanismos/scripts/status-projeto.sh 'registro de execução dentro do worktree'
 
 tl_fim
