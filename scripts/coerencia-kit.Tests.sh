@@ -626,8 +626,8 @@ tl_espera 0 "status-projeto: avisa registro dentro do worktree" tem mecanismos/s
 # Githook desligado é bloqueio e falha do verify não é classificada no brief (#36).
 tl_espera 0 "ciclo: BLOQUEIO no status para o despacho" tem core/processo/ciclo.md 'Com `BLOQUEIO:` no status (githooks desligados neste clone'
 tl_espera 0 "status-projeto: githooks desligados são BLOQUEIO" tem mecanismos/scripts/status-projeto.sh 'BLOQUEIO: githooks desligados neste clone'
-tl_espera 0 "ciclo: orquestrador não classifica falha do verify" tem core/processo/ciclo.md 'Falha do verify é falha: o orquestrador não a classifica'
-tl_espera 0 "brief: não classifica falha do verify" tem core/templates/brief.md 'O brief não classifica falha do verify'
-tl_espera 0 "brief: Antes de enviar confere classificação e BLOQUEIO" tem core/templates/brief.md 'nenhuma falha do verify classificada'
+tl_espera 0 "ciclo: falha do verify classificada só com prova da base" tem core/processo/ciclo.md 'Falha do verify é falha até prova em contrário'
+tl_espera 0 "brief: classifica falha do verify só com prova da base" tem core/templates/brief.md 'só com a saída da mesma etapa na base, colada'
+tl_espera 0 "brief: Antes de enviar confere classificação e BLOQUEIO" tem core/templates/brief.md 'só com a saída da mesma etapa na base colada, e nenhum `BLOQUEIO:`'
 
 tl_fim
