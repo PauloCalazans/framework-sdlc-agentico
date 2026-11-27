@@ -623,5 +623,11 @@ tl_espera 0 "nova-task: confere o registro antes do git worktree remove" tem ada
 tl_espera 0 "ciclo: logs do verify saem do worktree antes do remove" tem core/processo/ciclo.md 'move os logs do worktree (`agentic/.estado/verify.log`, `verify-rapido.log` e `verifica-red.log`)'
 tl_espera 0 "nova-task: logs do verify saem do worktree antes do remove" tem adapters/claude-code/commands/nova-task.md 'mova `agentic/.estado/verify.log`, `verify-rapido.log` e `verifica-red.log` do worktree'
 tl_espera 0 "status-projeto: avisa registro dentro do worktree" tem mecanismos/scripts/status-projeto.sh 'registro de execução dentro do worktree'
+# Githook desligado é bloqueio e falha do verify não é classificada no brief (#36).
+tl_espera 0 "ciclo: BLOQUEIO no status para o despacho" tem core/processo/ciclo.md 'Com `BLOQUEIO:` no status (githooks desligados neste clone'
+tl_espera 0 "status-projeto: githooks desligados são BLOQUEIO" tem mecanismos/scripts/status-projeto.sh 'BLOQUEIO: githooks desligados neste clone'
+tl_espera 0 "ciclo: falha do verify classificada só com prova da base" tem core/processo/ciclo.md 'Falha do verify é falha até prova em contrário'
+tl_espera 0 "brief: classifica falha do verify só com prova da base" tem core/templates/brief.md 'só com a saída da mesma etapa na base, colada'
+tl_espera 0 "brief: Antes de enviar confere classificação e BLOQUEIO" tem core/templates/brief.md 'só com a saída da mesma etapa na base colada, e nenhum `BLOQUEIO:`'
 
 tl_fim
