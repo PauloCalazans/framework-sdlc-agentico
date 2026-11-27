@@ -1,6 +1,6 @@
 <!-- Template de parecer do revisor. O revisor preenche e apaga este comentário.
-- Onde: no caminho que o brief dá, agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/NN-revisor-<modo>-parecer.md, fora do
-  worktree revisado. O parecer é local (agentic/.estado/ não é versionado); o PR leva o veredito e os achados menores.
+- Onde: no caminho que o brief dá, <árvore principal>/agentic/.estado/execucao/<AAAA-MM-DD>-<nome>/NN-revisor-<modo>-parecer.md,
+  fora do worktree revisado. O parecer é local (agentic/.estado/ não é versionado); o PR leva o veredito e os achados menores.
   Sem plataforma de PR, o orquestrador copia o parecer final aprovado para agentic/projeto/specs/<nome>/pareceres/<NNN>-diff.md (NNN = número da task).
 - Escala do kit: Crítico e Importante bloqueiam; Menor não abre rodada: vai com a próxima correção ou, sem ela, no PR.
 - Rodada `<k>`: conta todos os pareceres do mesmo artefato (a spec, o design, o documento enxuto ou o diff da task), também os de ajuste reaberto por Ruling, decisão ou achado a jusante; nunca recomeça. O número e o parecer anterior vêm na linha da rodada em "O que fazer" do brief: quem conta é o orquestrador. Com parecer anterior, a rodada é de confirmação.
