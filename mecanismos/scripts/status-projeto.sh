@@ -81,6 +81,51 @@ if [ -n "$kit_commit" ]; then
   fi
 fi
 
+# Configuração fora do git que muda o processo do kit sem que o humano ou o revisor vejam (#37). Não bloqueia: mostra.
+# Do settings.local.json só as chaves de topo (o awk acompanha a profundidade fora de strings): o local tem precedência
+# sobre o .claude/settings.json versionado, ou soma a ele (hooks, permissions).
+nl_fora='
+'
+fora=""
+if [ -f .claude/settings.local.json ]; then
+  chaves=$(tr -d '\r' < .claude/settings.local.json | awk '
+    BEGIN { RS = "\001" }
+    {
+      n = length($0); prof = 0; str = 0; tok = ""; ultimo = ""
+      for (i = 1; i <= n; i++) {
+        c = substr($0, i, 1)
+        if (str) {
+          if (c == "\\") { tok = tok c substr($0, i + 1, 1); i++; continue }
+          if (c == "\"") { str = 0; ultimo = tok; continue }
+          tok = tok c; continue
+        }
+        if (c == "\"") { str = 1; tok = ""; continue }
+        if (c == "{" || c == "[") { prof++; ultimo = ""; continue }
+        if (c == "}" || c == "]") { prof--; ultimo = ""; continue }
+        if (c == ":") { if (prof == 1 && ultimo != "") chave[ultimo] = 1; ultimo = ""; continue }
+        if (c !~ /[ \t\n]/) ultimo = ""
+      }
+      split("autoCompactWindow permissions enabledPlugins hooks model", ordem, " ")
+      for (k = 1; k <= 5; k++) if (ordem[k] in chave) saida = saida (saida == "" ? "" : ", ") ordem[k]
+      print saida
+    }')
+  [ -n "$chaves" ] && fora="- .claude/settings.local.json: $chaves (precedência sobre o .claude/settings.json do kit, ou soma a ele)$nl_fora"
+fi
+for f in CLAUDE.local.md .claude/CLAUDE.md; do
+  [ -f "$f" ] || continue
+  git ls-files --error-unmatch -- "$f" >/dev/null 2>&1 && continue
+  fora="$fora- $f: não versionado, lido pela ferramenta em toda sessão$nl_fora"
+done
+locais=$(git -c core.quotepath=off ls-files --others --directory -- .claude/skills .claude/agents .claude/commands .claude/hooks 2>/dev/null \
+  | awk '{ n++; if (n <= 8) l = l (n > 1 ? ", " : "") $0 } END { if (n) print l (n > 8 ? " e mais " (n - 8) : "") }')
+[ -n "$locais" ] && fora="$fora- não versionados em .claude/: $locais$nl_fora"
+if [ -n "$fora" ]; then
+  echo
+  echo "### Fora do git"
+  printf '%s' "$fora"
+  echo "Regra que vem daqui não entra no brief: para valer para os papéis, vai versionada no perfil (agentic/projeto/papeis/) ou no AGENTS.md."
+fi
+
 echo
 echo "### Worktrees"
 git worktree list 2>/dev/null
