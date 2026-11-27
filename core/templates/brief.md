@@ -45,6 +45,7 @@ projeto" do perfil que se aplicam. Em forma de ação: "PARE e diga", nunca um l
 - <comando exato, com saída limitada e em primeiro plano>
 - Quem roda cada verificação longa: <você | o orquestrador>. Exceção: o brief nunca tira do `revisor` modo `diff` o
   `sh agentic/mecanismos/scripts/verify.sh` completo; ele o roda, em primeiro plano (nos modos `spec`, `design` e `mudanca` não há verify).
+  O brief não classifica falha do verify (ambiente, base, intermitente, conhecida): quem roda julga a saída que viu.
 - Proibido: <ex.: push, leitura de código de dependência, verificação que é do orquestrador>.
 
 ## Teto
@@ -81,7 +82,8 @@ e IDs dos achados) e o que mudou; o autor atualiza o Impacto e a autoconferênci
 - [ ] "Nunca faz" colado, não linkado;
 - [ ] nenhuma linha decide algo sem origem citável;
 - [ ] mais de 60 linhas fora de ## Impacto e dos trechos que ele acrescenta: enxugue O que fazer e Já decidido antes de enviar;
-- [ ] "Casos a cobrir" igual no brief do autor e no do revisor.
+- [ ] "Casos a cobrir" igual no brief do autor e no do revisor;
+- [ ] nenhuma falha do verify classificada (ambiente, base, intermitente, conhecida) e nenhum `BLOQUEIO:` no status.
 
 Ao receber (antes de passar a entrega adiante):
 - [ ] antes do revisor de spec, design ou mudanca, sempre (também quando o revisor é opcional na trilha enxuta), na árvore onde o autor escreveu (trilha enxuta: o worktree; trilha padrão: a principal): `cd <árvore> && sh agentic/mecanismos/scripts/verifica-artefato.sh <spec|design|mudanca> <caminho>` verde; com falha, o trabalho volta ao autor sem despachar o revisor;
