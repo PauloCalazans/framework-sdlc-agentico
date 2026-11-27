@@ -69,6 +69,14 @@ fi
 echo
 echo "### Worktrees"
 git worktree list 2>/dev/null
+# O registro de execução vive na árvore principal (ciclo.md, "Orquestração"): dentro de um worktree ele é ignorado
+# pelo git, e o git worktree remove do Gate 2 apaga os arquivos ignorados sem pedir --force.
+# A primeira linha "worktree" da lista é sempre a árvore principal.
+git worktree list --porcelain 2>/dev/null | sed -n 's/^worktree //p' | while IFS= read -r wt; do
+  [ -n "$principal" ] || { principal=$wt; continue; }
+  [ -d "$wt/agentic/.estado/execucao" ] || continue
+  echo "- aviso: $wt: registro de execução dentro do worktree (agentic/.estado/execucao). Mova-o para $principal/agentic/.estado/execucao antes do Gate 2: o git worktree remove apaga os arquivos ignorados."
+done
 
 echo
 echo "### Branch principal (remota conforme o último fetch)"
