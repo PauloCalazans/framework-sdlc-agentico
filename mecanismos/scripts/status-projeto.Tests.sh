@@ -225,4 +225,20 @@ tl_contem "git worktree remove apaga" "diz que a remoção do worktree o apaga"
 tl_espera 0 "status rodado no worktree sai com 0" sh -c "cd '$r9/agentic/.estado/worktrees/pedidos-001' && sh '$dir/status-projeto.sh'"
 tl_contem "pedidos-001: registro de execução dentro do worktree" "avisa também quando roda no worktree"
 
+# Githook desligado é bloqueio, não aviso (#36): sem ele não há proteção da principal nem gitleaks.
+r10=$(tl_repo)
+tl_espera 0 "status sem core.hooksPath sai com 0" sh -c "cd '$r10' && sh '$dir/status-projeto.sh'"
+tl_contem "BLOQUEIO: githooks desligados neste clone (core.hooksPath = '<vazio>')" "hooksPath vazio é bloqueio"
+tl_contem "Não despache nenhum papel" "o bloqueio diz que o orquestrador não despacha"
+tl_contem "git config core.hooksPath agentic/mecanismos/githooks" "o bloqueio diz a ação humana"
+git -C "$r10" config core.hooksPath scripts/validacao/githooks
+tl_espera 0 "status com hooksPath em outra pasta sai com 0" sh -c "cd '$r10' && sh '$dir/status-projeto.sh'"
+tl_contem "core.hooksPath = 'scripts/validacao/githooks'" "hooksPath em outra pasta é bloqueio"
+git -C "$r10" config core.hooksPath agentic/mecanismos/githooks
+tl_espera 0 "status com hooksPath certo e pasta ausente sai com 0" sh -c "cd '$r10' && sh '$dir/status-projeto.sh'"
+tl_contem "BLOQUEIO: githooks desligados neste clone (agentic/mecanismos/githooks não existe nesta árvore)" "pasta dos githooks ausente é bloqueio"
+mkdir -p "$r10/agentic/mecanismos/githooks"
+tl_espera 0 "status com githooks ligados sai com 0" sh -c "cd '$r10' && sh '$dir/status-projeto.sh'"
+tl_espera 1 "githooks ligados: sem bloqueio" grep -q "BLOQUEIO" "$TL_SAIDA"
+
 tl_fim

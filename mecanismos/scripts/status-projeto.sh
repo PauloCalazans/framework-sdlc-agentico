@@ -7,6 +7,21 @@ cd "$agentic_raiz" || exit 0
 echo "## Estado do projeto (derivado — não edite à mão)"
 echo "Branch atual: $(git symbolic-ref --short -q HEAD || echo '(detached)')"
 
+# Githooks desligados são bloqueio (ciclo.md, "Orquestração"): core.hooksPath é configuração local, e sem ele não há
+# proteção da principal nem gitleaks. O verify.sh também falha na etapa hooks; aqui o bloqueio aparece antes do despacho.
+hooks_atual=$(git config core.hooksPath)
+hooks_motivo=""
+if [ "$hooks_atual" != "agentic/mecanismos/githooks" ]; then
+  hooks_motivo="core.hooksPath = '${hooks_atual:-<vazio>}'"
+elif [ ! -d agentic/mecanismos/githooks ]; then
+  hooks_motivo="agentic/mecanismos/githooks não existe nesta árvore"
+fi
+if [ -n "$hooks_motivo" ]; then
+  echo
+  echo "BLOQUEIO: githooks desligados neste clone ($hooks_motivo). Não despache nenhum papel até o humano religar:"
+  echo "git config core.hooksPath agentic/mecanismos/githooks (ação humana; o agente não altera as próprias proteções)."
+fi
+
 # Kit: o que mudou no ciclo.md no último commit que o tocou (ou na árvore, se a atualização ainda não foi
 # commitada). Importar a atualização não entrega a regra nova: a sessão do orquestrador só relê o que este
 # status, injetado no início dela, apontar.
