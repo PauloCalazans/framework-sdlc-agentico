@@ -620,6 +620,8 @@ for f in intent mudanca nova-task; do
   tl_espera 0 "comando $f: registro de execução na árvore principal" linha adapters/claude-code/commands/$f.md 'agentic/\.estado/execucao/<AAAA-MM-DD>-<nome>/.*árvore principal'
 done
 tl_espera 0 "nova-task: confere o registro antes do git worktree remove" tem adapters/claude-code/commands/nova-task.md 'confira que não há `agentic/.estado/execucao` dentro do worktree'
+tl_espera 0 "ciclo: logs do verify saem do worktree antes do remove" tem core/processo/ciclo.md 'move os logs do worktree (`agentic/.estado/verify.log`, `verify-rapido.log` e `verifica-red.log`)'
+tl_espera 0 "nova-task: logs do verify saem do worktree antes do remove" tem adapters/claude-code/commands/nova-task.md 'mova `agentic/.estado/verify.log`, `verify-rapido.log` e `verifica-red.log` do worktree'
 tl_espera 0 "status-projeto: avisa registro dentro do worktree" tem mecanismos/scripts/status-projeto.sh 'registro de execução dentro do worktree'
 
 tl_fim
